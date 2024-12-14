@@ -193,7 +193,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* BOTTOM GRID */}
+      {/* MAJOR SCALE ROW */}
       <MajorScaleRow
         majorScaleNotes={majorScaleNotes}
         SQUARE_SIDE={SQUARE_SIDE}
