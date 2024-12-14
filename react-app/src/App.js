@@ -148,7 +148,7 @@ export default function NotesGrid() {
               border: lineBorder,
             }}
           >
-            {note}
+            {renderNote(note)}
           </div>
         ))}
       </div>
@@ -241,7 +241,7 @@ export default function NotesGrid() {
                 boxSizing: "border-box",
               }}
             >
-              {note}
+              {renderNote(note)}
             </div>
           ))}
         </div>
