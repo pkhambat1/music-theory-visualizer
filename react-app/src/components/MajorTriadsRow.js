@@ -1,9 +1,12 @@
 import React from "react";
 
-const MajorTriads = ({
+const MajorTriadsRow = ({
   SQUARE_SIDE,
   majorScaleNotes,
   setHoveredTriadIndex,
+  setTriadNotes,
+  notes,
+  baseScale,
 }) => {
   const triads = ["I", "II", "III", "IV", "V", "VI", "VII"];
 
@@ -48,15 +51,30 @@ const MajorTriads = ({
             onMouseEnter={() => {
               setHoveredTriadIndex(idx);
 
-              // Log the triad notes based on `majorScaleNotes` and intervals
-              const triadNotes = [0, 2, 4]
-                .map((offset) => majorScaleNotes[idx + offset]) // Fetch notes from majorScaleNotes
-                .filter(Boolean); // Ignore out-of-bounds indices
-              console.log(
-                `Hovered on ${triad} (index ${idx}): Notes = ${triadNotes.join(
-                  ", "
-                )}`
+              // Fetch triad notes
+              const triadNotes = [0, 2, 4].map(
+                (offset) => majorScaleNotes[idx + offset]
               );
+
+              // Calculate the relative indices in the top row
+              const rootNoteIndex = notes.indexOf(majorScaleNotes[idx]);
+              const triadIndices = triadNotes.map(
+                (note) => notes.indexOf(note) - rootNoteIndex
+              );
+
+              // Update `TriadScale` with notes at calculated indices
+              const triadScale = Array(baseScale.length).fill(null); // Empty array for the top row
+              triadIndices.forEach((relativeIndex, i) => {
+                if (relativeIndex >= 0 && relativeIndex < baseScale.length) {
+                  triadScale[relativeIndex] = triadNotes[i];
+                }
+              });
+
+              setTriadNotes(triadScale); // Pass calculated triad notes to `TriadScale`
+            }}
+            onMouseOut={() => {
+              setHoveredTriadIndex(null);
+              setTriadNotes([]);
             }}
           >
             {triad}
@@ -67,4 +85,4 @@ const MajorTriads = ({
   );
 };
 
-export default MajorTriads;
+export default MajorTriadsRow;

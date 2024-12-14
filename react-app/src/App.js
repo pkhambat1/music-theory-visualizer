@@ -59,6 +59,7 @@ export default function App() {
   });
 
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
+  const [triadNotes, setTriadNotes] = useState([]);
 
   const [sliderRef] = useKeenSlider({
     loop: false,
@@ -111,6 +112,7 @@ export default function App() {
         baseScale={baseScale}
         majorIntervals={majorIntervals}
         SQUARE_SIDE={SQUARE_SIDE}
+        triadNotes={triadNotes}
       />
 
       {/* TOP GRID */}
@@ -205,6 +207,9 @@ export default function App() {
         SQUARE_SIDE={SQUARE_SIDE}
         majorScaleNotes={majorScaleNotes}
         setHoveredTriadIndex={setHoveredTriadIndex}
+        setTriadNotes={setTriadNotes}
+        notes={notes}
+        baseScale={baseScale}
       />
     </div>
   );

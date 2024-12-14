@@ -1,6 +1,6 @@
 import React from "react";
 
-const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE }) => {
+const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE, triadNotes }) => {
   return (
     <div
       style={{
@@ -35,9 +35,11 @@ const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE }) => {
               fontWeight: "bold",
               boxSizing: "border-box",
               border: "1px solid #333",
-              position: "relative", // Needed for caption positioning
+              position: "relative",
             }}
           >
+            {/* Display triad notes in the first three cells */}
+            {triadNotes[idx] || ""}
             {/* Add captions for 1, 3, 5, 7th of major scale */}
             {[0, 2, 4, 6].includes(majorIntervals.indexOf(idx)) && (
               <div
