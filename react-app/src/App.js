@@ -18,6 +18,8 @@ const baseScale = [
 ];
 const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
 const SQUARE_SIDE = 70;
+const OVERFLOW_NOTES_COUNT = 6;
+
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 const borderWidth = 1; // Border width in pixels
@@ -56,7 +58,7 @@ export default function NotesGrid() {
     loop: false,
     centered: true,
     slides: {
-      perView: baseScale.length,
+      perView: baseScale.length + OVERFLOW_NOTES_COUNT,
     },
 
     slideChanged(s) {
@@ -184,11 +186,11 @@ export default function NotesGrid() {
       {/* TOP GRID */}
       <div
         style={{
-          width: `${SQUARE_SIDE * baseScale.length}px`,
+          width: `${SQUARE_SIDE * (baseScale.length + OVERFLOW_NOTES_COUNT)}px`,
           height: `${SQUARE_SIDE}px`,
           position: "relative",
           boxSizing: "content-box",
-          border: lineBorder,
+          // border: lineBorder,
         }}
       >
         {/* Colored boxes behind top notes */}
@@ -196,7 +198,7 @@ export default function NotesGrid() {
           style={{
             position: "absolute",
             top: 0,
-            left: 0,
+            left: (6 / 2) * SQUARE_SIDE,
             width: `${SQUARE_SIDE * baseScale.length}px`,
             height: `${SQUARE_SIDE}px`,
             zIndex: 1,
@@ -235,6 +237,9 @@ export default function NotesGrid() {
             cursor: "grab",
             position: "relative",
             zIndex: 2,
+            width: `${
+              SQUARE_SIDE * (baseScale.length + OVERFLOW_NOTES_COUNT)
+            }px`,
             height: "100%",
             display: "flex",
             alignItems: "center",
