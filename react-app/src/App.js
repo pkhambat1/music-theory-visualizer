@@ -52,6 +52,8 @@ export default function NotesGrid() {
     );
   });
 
+  const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
+
   const [sliderRef] = useKeenSlider({
     loop: false,
     centered: true,
@@ -71,6 +73,60 @@ export default function NotesGrid() {
       }
     },
   });
+
+  const HoverLines = ({ hoveredIndex }) => {
+    if (hoveredIndex === null) return null; // No lines to render when no cell is hovered
+
+    // Generate the positions of the lines for the hovered cell
+    const sourcePos = {
+      x:
+        hoveredIndex * SQUARE_SIDE +
+        SQUARE_SIDE / 2 +
+        borderWidth +
+        ((baseScale.length - majorIntervals.length) / 2) * SQUARE_SIDE,
+      y: SQUARE_SIDE * 4 + borderWidth * 5, // Bottom edge of MajorTriads row
+    };
+
+    const targetIndices = [hoveredIndex, hoveredIndex + 2, hoveredIndex + 4];
+    const bottomGridOffsetX = ((baseScale.length - 7) * SQUARE_SIDE) / 2;
+
+    return (
+      <svg
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+          zIndex: 2, // Ensure these lines are above the regular ones
+        }}
+      >
+        {targetIndices.map((targetIdx) => {
+          const targetPos = {
+            x:
+              targetIdx * SQUARE_SIDE +
+              SQUARE_SIDE / 2 +
+              bottomGridOffsetX +
+              borderWidth,
+            y: SQUARE_SIDE * 3 + borderWidth * 3, // Top edge of BottomRow
+          };
+
+          return (
+            <line
+              key={`hover-line-${hoveredIndex}-${targetIdx}`}
+              x1={sourcePos.x}
+              y1={sourcePos.y}
+              x2={targetPos.x}
+              y2={targetPos.y}
+              stroke="black"
+              strokeWidth="1"
+            />
+          );
+        })}
+      </svg>
+    );
+  };
 
   const Lines = () => {
     return (
@@ -169,6 +225,58 @@ export default function NotesGrid() {
     </div>
   );
 
+  const MajorTriads = () => {
+    const triads = ["I", "II", "III", "IV", "V", "VI", "VII"];
+
+    return (
+      <div
+        style={{
+          width: `${SQUARE_SIDE * 7}px`,
+          height: `${SQUARE_SIDE}px`,
+          margin: `${SQUARE_SIDE}px auto`,
+          position: "relative",
+          boxSizing: "content-box",
+          background: "#fff",
+          border: lineBorder,
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          {triads.map((triad, idx) => (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: `${SQUARE_SIDE}px`,
+                height: `${SQUARE_SIDE}px`,
+                fontSize: "16px",
+                fontWeight: "bold",
+                boxSizing: "border-box",
+                border: lineBorder,
+                background: "#fff",
+                transition: "background-color 0.2s",
+              }}
+              onMouseEnter={() => setHoveredTriadIndex(idx)}
+              // onMouseLeave={() => setHoveredTriadIndex(null)}
+            >
+              {triad}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       style={{
@@ -180,6 +288,9 @@ export default function NotesGrid() {
     >
       {/* Dynamic SVG Lines */}
       <Lines />
+
+      {/* Hover Lines */}
+      <HoverLines hoveredIndex={hoveredTriadIndex} />
 
       {/* TOP GRID */}
       <div
@@ -263,6 +374,9 @@ export default function NotesGrid() {
 
       {/* BOTTOM GRID */}
       <BottomRow />
+
+      {/* MAJOR TRIADS */}
+      <MajorTriads />
     </div>
   );
 }
