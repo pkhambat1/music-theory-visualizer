@@ -20,7 +20,7 @@ const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
 const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
-const borderWidth = 1; // Border width in pixels
+const borderWidth = 1;
 const lineBorder = `${borderWidth}px solid #333`;
 
 function generateOctaves(octaveCount) {
@@ -42,8 +42,9 @@ function renderNote(note) {
 }
 
 const notes = generateOctaves(4);
+console.log("notes are", notes);
 
-export default function NotesGrid() {
+export default function App() {
   const [bottomNotes, setBottomNotes] = useState(() => {
     const rootIndex = 0; // Default root index
 
@@ -84,7 +85,7 @@ export default function NotesGrid() {
         SQUARE_SIDE / 2 +
         borderWidth +
         ((baseScale.length - majorIntervals.length) / 2) * SQUARE_SIDE,
-      y: SQUARE_SIDE * 4 + borderWidth * 5, // Bottom edge of MajorTriads row
+      y: 6 * (SQUARE_SIDE + borderWidth) + borderWidth, // Bottom edge of MajorTriads row
     };
 
     const targetIndices = [hoveredIndex, hoveredIndex + 2, hoveredIndex + 4];
@@ -109,7 +110,7 @@ export default function NotesGrid() {
               SQUARE_SIDE / 2 +
               bottomGridOffsetX +
               borderWidth,
-            y: SQUARE_SIDE * 3 + borderWidth * 3, // Top edge of BottomRow
+            y: 5 * (SQUARE_SIDE + borderWidth), // Top edge of BottomRow
           };
 
           return (
@@ -128,6 +129,62 @@ export default function NotesGrid() {
     );
   };
 
+  const TriadScale = () => (
+    <div
+      style={{
+        width: `${SQUARE_SIDE * baseScale.length}px`,
+        height: `${SQUARE_SIDE}px`,
+        marginBottom: `${SQUARE_SIDE}px`,
+        position: "relative",
+        boxSizing: "content-box",
+        border: lineBorder,
+      }}
+    >
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        {Array.from({ length: baseScale.length }).map((_, idx) => (
+          <div
+            key={idx}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: `${SQUARE_SIDE}px`,
+              height: `${SQUARE_SIDE}px`,
+              fontSize: "16px",
+              fontWeight: "bold",
+              boxSizing: "border-box",
+              border: lineBorder,
+              position: "relative", // Needed for caption positioning
+            }}
+          >
+            {/* Add captions for 1, 3, 5, 7th of major scale */}
+            {[0, 2, 4, 6].includes(majorIntervals.indexOf(idx)) && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "5px",
+                  fontSize: "12px",
+                  color: "#666",
+                }}
+              >
+                {majorIntervals.indexOf(idx) + 1}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const Lines = () => {
     return (
       <svg
@@ -145,7 +202,7 @@ export default function NotesGrid() {
           const topPos = {
             x:
               majorIntervals[idx] * SQUARE_SIDE + SQUARE_SIDE / 2 + borderWidth, // Center of the top square horizontally
-            y: SQUARE_SIDE + borderWidth, // Bottom edge of the top square, adjusted for border
+            y: 3 * (SQUARE_SIDE + borderWidth), // Bottom edge of the top square, adjusted for border
           };
 
           const bottomGridOffsetX = ((baseScale.length - 7) * SQUARE_SIDE) / 2; // Adjust based on alignment
@@ -155,14 +212,16 @@ export default function NotesGrid() {
               SQUARE_SIDE / 2 +
               bottomGridOffsetX +
               borderWidth, // Center of the bottom square horizontally
-            y: SQUARE_SIDE * 2 + borderWidth * 3, // Top edge of the bottom square, adjusted for border
+            y: 4 * (SQUARE_SIDE + borderWidth) + borderWidth, // Top edge of the bottom square, adjusted for border
           };
 
           // Assertion: Ensure the vertical distance between y2 and y1 equals SQUARE_SIDE
           const verticalDistance = bottomPos.y - topPos.y;
           console.assert(
             verticalDistance === SQUARE_SIDE + 2 * borderWidth,
-            `Assertion failed: y2 - y1 = ${verticalDistance}, expected ${SQUARE_SIDE}`
+            `Assertion failed: y2 - y1 = ${verticalDistance}, expected ${
+              SQUARE_SIDE + 2 * borderWidth
+            }`
           );
 
           return (
@@ -266,7 +325,22 @@ export default function NotesGrid() {
                 background: "#fff",
                 transition: "background-color 0.2s",
               }}
-              onMouseEnter={() => setHoveredTriadIndex(idx)}
+              onMouseEnter={() => {
+                // Keep existing functionality
+                setHoveredTriadIndex(idx);
+
+                // Add triad note computation and logging
+                const triadNotes = [0, 2, 4]
+                  .map((offset) => bottomNotes[idx + offset]) // Get notes from bottomNotes
+                  .filter(Boolean); // Ignore out-of-bounds
+
+                console.log(
+                  `Hovered on ${triad} (index ${idx}): Notes = ${triadNotes.join(
+                    ", "
+                  )}`
+                );
+              }}
+
               // onMouseLeave={() => setHoveredTriadIndex(null)}
             >
               {triad}
@@ -291,6 +365,9 @@ export default function NotesGrid() {
 
       {/* Hover Lines */}
       <HoverLines hoveredIndex={hoveredTriadIndex} />
+
+      {/* TRIAD SCALE */}
+      <TriadScale />
 
       {/* TOP GRID */}
       <div
