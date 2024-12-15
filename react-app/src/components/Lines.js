@@ -19,7 +19,8 @@ const Lines = ({ majorIntervals, SQUARE_SIDE, borderWidth, baseScale }) => {
           y: 3 * (SQUARE_SIDE + borderWidth), // Bottom edge of the top square, adjusted for border
         };
 
-        const bottomGridOffsetX = ((baseScale.length - 7) * SQUARE_SIDE) / 2; // Adjust based on alignment
+        const bottomGridOffsetX =
+          ((baseScale.length - majorIntervals.length) * SQUARE_SIDE) / 2; // Adjust based on alignment
         const bottomPos = {
           x:
             idx * SQUARE_SIDE +

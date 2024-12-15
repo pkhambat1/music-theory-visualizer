@@ -1,5 +1,6 @@
 import React from "react";
 import { renderNote } from "../utils/helpers";
+import NoteCell from "./NoteCell";
 
 const MajorScaleRow = ({ majorScaleNotes, SQUARE_SIDE, lineBorder }) => (
   <div
@@ -24,22 +25,9 @@ const MajorScaleRow = ({ majorScaleNotes, SQUARE_SIDE, lineBorder }) => (
       }}
     >
       {majorScaleNotes.map((note, idx) => (
-        <div
-          key={idx}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: `${SQUARE_SIDE}px`,
-            height: `${SQUARE_SIDE}px`,
-            fontSize: "16px",
-            fontWeight: "bold",
-            boxSizing: "border-box",
-            border: lineBorder,
-          }}
-        >
+        <NoteCell SQUARE_SIDE={SQUARE_SIDE} idx={idx}>
           {renderNote(note)}
-        </div>
+        </NoteCell>
       ))}
     </div>
   </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import NoteCell from "./NoteCell";
 
 const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE, triadNotes }) => {
   return (
@@ -23,37 +24,17 @@ const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE, triadNotes }) => {
         }}
       >
         {Array.from({ length: baseScale.length }).map((_, idx) => (
-          <div
-            key={idx}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: `${SQUARE_SIDE}px`,
-              height: `${SQUARE_SIDE}px`,
-              fontSize: "16px",
-              fontWeight: "bold",
-              boxSizing: "border-box",
-              border: "1px solid #333",
-              position: "relative",
-            }}
+          <NoteCell
+            squareSide={SQUARE_SIDE}
+            idx={idx}
+            opt_caption={
+              [0, 2, 4, 6].includes(majorIntervals.indexOf(idx))
+                ? majorIntervals.indexOf(idx) + 1
+                : null
+            }
           >
-            {/* Display triad notes in the first three cells */}
             {triadNotes[idx] || ""}
-            {/* Add captions for 1, 3, 5, 7th of major scale */}
-            {[0, 2, 4, 6].includes(majorIntervals.indexOf(idx)) && (
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "5px",
-                  fontSize: "12px",
-                  color: "#666",
-                }}
-              >
-                {majorIntervals.indexOf(idx) + 1}
-              </div>
-            )}
-          </div>
+          </NoteCell>
         ))}
       </div>
     </div>

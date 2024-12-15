@@ -1,4 +1,5 @@
 import React from "react";
+import NoteCell from "./NoteCell";
 
 const MajorTriadsRow = ({
   SQUARE_SIDE,
@@ -33,21 +34,9 @@ const MajorTriadsRow = ({
         }}
       >
         {triads.map((triad, idx) => (
-          <div
-            key={idx}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: `${SQUARE_SIDE}px`,
-              height: `${SQUARE_SIDE}px`,
-              fontSize: "16px",
-              fontWeight: "bold",
-              boxSizing: "border-box",
-              border: "1px solid #333",
-              background: "#fff",
-              transition: "background-color 0.2s",
-            }}
+          <NoteCell
+            idx={idx}
+            SQUARE_SIDE={SQUARE_SIDE}
             onMouseEnter={() => {
               setHoveredTriadIndex(idx);
 
@@ -58,9 +47,12 @@ const MajorTriadsRow = ({
 
               // Calculate the relative indices in the top row
               const rootNoteIndex = notes.indexOf(majorScaleNotes[idx]);
-              const triadIndices = triadNotes.map(
-                (note) => notes.indexOf(note) - rootNoteIndex
-              );
+              const triadIndices = triadNotes.map((note) => {
+                const relativeIndex = notes.indexOf(note) - rootNoteIndex;
+                return (relativeIndex + baseScale.length) % baseScale.length; // Ensure positive index with wrap-around
+              });
+
+              console.log("triadIndices", triadIndices);
 
               // Update `TriadScale` with notes at calculated indices
               const triadScale = Array(baseScale.length).fill(null); // Empty array for the top row
@@ -78,7 +70,7 @@ const MajorTriadsRow = ({
             }}
           >
             {triad}
-          </div>
+          </NoteCell>
         ))}
       </div>
     </div>
