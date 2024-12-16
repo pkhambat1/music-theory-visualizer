@@ -6,6 +6,9 @@ import MajorTriadsRow from "./components/MajorTriadsRow";
 import MajorScaleRow from "./components/MajorScaleRow";
 import Lines from "./components/Lines";
 import HoverLines from "./components/HoverLines";
+import NoteCell from "./components/NoteCell";
+import { renderNote, generateOctaves } from "./utils/helpers";
+import NotesArray from "./components/NotesArray";
 
 const baseScale = [
   "C",
@@ -27,24 +30,6 @@ const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 const borderWidth = 1;
 const lineBorder = `${borderWidth}px solid #333`;
-
-function generateOctaves(octaveCount) {
-  return Array.from({ length: octaveCount }, (_, i) => i + 1).flatMap(
-    (octave) => baseScale.map((note) => (note === "C" ? note + octave : note))
-  );
-}
-
-function renderNote(note) {
-  if (note.startsWith("C") && note.length > 1 && !note.includes("#")) {
-    const octave = note.slice(1);
-    return (
-      <>
-        C<sub>{octave}</sub>
-      </>
-    );
-  }
-  return note;
-}
 
 const notes = generateOctaves(4);
 console.log("notes are", notes);
@@ -112,53 +97,31 @@ export default function App() {
         triadNotes={triadNotes}
       />
 
-      {/* TOP GRID */}
-      <div
-        style={{
-          width: `${SQUARE_SIDE * baseScale.length}px`,
-          height: `${SQUARE_SIDE}px`,
-          position: "relative",
-          boxSizing: "content-box",
-          border: lineBorder,
-        }}
-      >
-        {/* Colored boxes behind top notes */}
+      <NotesArray SQUARE_SIDE={SQUARE_SIDE} size={baseScale.length}>
         <div
           style={{
             position: "absolute",
-            top: 0,
-            left: 0,
-            width: `${SQUARE_SIDE * baseScale.length}px`,
-            height: `${SQUARE_SIDE}px`,
             zIndex: 1,
             display: "flex",
           }}
         >
-          {baseScale.map((_, i) => {
-            let background;
-            if (i === 0) {
+          {baseScale.map((_, idx) => {
+            let background = null;
+            if (idx === 0) {
               background = pinkColor;
-            } else if (majorIntervals.includes(i)) {
+            } else if (majorIntervals.includes(idx)) {
               background = greyColor;
-            } else {
-              background = "transparent";
             }
             return (
-              <div
-                key={i}
-                style={{
-                  width: `${SQUARE_SIDE}px`,
-                  height: `${SQUARE_SIDE}px`,
-                  background: background,
-                  boxSizing: "border-box",
-                  border: lineBorder,
-                }}
+              <NoteCell
+                key={idx}
+                SQUARE_SIDE={SQUARE_SIDE}
+                opt_background={background}
               />
             );
           })}
         </div>
 
-        {/* Top notes slider */}
         <div
           ref={sliderRef}
           className="keen-slider"
@@ -172,34 +135,25 @@ export default function App() {
           }}
         >
           {notes.map((note, idx) => (
-            <div
-              className="keen-slider__slide"
+            <NoteCell
               key={idx}
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: `${SQUARE_SIDE}px`,
-                height: `${SQUARE_SIDE}px`,
-                fontSize: "16px",
-                fontWeight: "bold",
-                boxSizing: "border-box",
-              }}
+              idx={idx}
+              SQUARE_SIDE={SQUARE_SIDE}
+              className="keen-slider__slide"
+              show_border={false}
             >
               {renderNote(note)}
-            </div>
+            </NoteCell>
           ))}
         </div>
-      </div>
+      </NotesArray>
 
-      {/* MAJOR SCALE ROW */}
       <MajorScaleRow
         majorScaleNotes={majorScaleNotes}
         SQUARE_SIDE={SQUARE_SIDE}
         lineBorder={lineBorder}
       />
 
-      {/* MAJOR TRIADS */}
       <MajorTriadsRow
         SQUARE_SIDE={SQUARE_SIDE}
         majorScaleNotes={majorScaleNotes}

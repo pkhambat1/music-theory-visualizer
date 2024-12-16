@@ -1,6 +1,14 @@
 import React from "react";
 
-const NoteCell = ({ SQUARE_SIDE, idx, children, opt_caption, ...props }) => {
+const NoteCell = ({
+  SQUARE_SIDE,
+  idx,
+  children,
+  opt_caption,
+  opt_background,
+  show_border = true,
+  ...props
+}) => {
   const Caption = ({ children }) => {
     return (
       <div
@@ -28,8 +36,9 @@ const NoteCell = ({ SQUARE_SIDE, idx, children, opt_caption, ...props }) => {
         fontSize: "16px",
         fontWeight: "bold",
         boxSizing: "border-box",
-        border: "1px solid #333",
+        border: show_border ? "1px solid #333" : null,
         position: "relative",
+        background: opt_background ? opt_background : null,
       }}
       {...props}
     >
