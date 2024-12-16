@@ -1,5 +1,5 @@
 import React from "react";
-import { lineBorder } from "../App";
+import { borderWidth, getLineBorder } from "../App";
 
 const NotesArray = ({ size, SQUARE_SIDE, children, show_border = true }) => (
   <div
@@ -10,7 +10,9 @@ const NotesArray = ({ size, SQUARE_SIDE, children, show_border = true }) => (
       position: "relative",
       boxSizing: "content-box",
       background: "#fff",
-      border: show_border ? lineBorder : null,
+      border: show_border
+        ? getLineBorder(borderWidth)
+        : `${borderWidth}px solid transparent`, // Transparent border when show_border is false
       display: "flex",
       alignItems: "center",
       zIndex: 2,

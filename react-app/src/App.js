@@ -29,8 +29,8 @@ const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 const baseScaleWithOverflowSize = baseScale.length + 8;
-const borderWidth = 8;
-export const lineBorder = `${borderWidth}px solid #333`;
+export const borderWidth = 8;
+export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
 const notes = generateOctaves(4);
 console.log("notes are", notes);
@@ -47,6 +47,7 @@ export default function App() {
   const [triadNotes, setTriadNotes] = useState([]);
 
   const [sliderRef] = useKeenSlider({
+    centered: true,
     slides: {
       perView: baseScaleWithOverflowSize,
     },
@@ -110,7 +111,7 @@ export default function App() {
               (((baseScaleWithOverflowSize - baseScale.length) / 2) * 100) /
               baseScale.length
             }%`,
-            // outline: "20px solid #333", // cause `border seems to break things`
+            outline: getLineBorder(borderWidth), // HACK: cause `border` seems to break things
           }}
         >
           {baseScale.map((_, idx) => {
@@ -159,7 +160,7 @@ export default function App() {
       <MajorScaleRow
         majorScaleNotes={majorScaleNotes}
         SQUARE_SIDE={SQUARE_SIDE}
-        lineBorder={lineBorder}
+        lineBorder={getLineBorder(borderWidth)}
       />
 
       <MajorTriadsRow
