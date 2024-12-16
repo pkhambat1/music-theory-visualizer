@@ -1,7 +1,7 @@
 import React from "react";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
-import { majorScaleLeftOverflowSize } from "../App";
+import { modeLeftOverflowSize } from "../App";
 import { playChords as playChord } from "../utils/helpers";
 
 const MajorTriadsRow = ({
@@ -28,7 +28,7 @@ const MajorTriadsRow = ({
             const triadNotes = [0, 2, 4].map(
               (offset) =>
                 majorScaleWithOverflowNotes[
-                  triadIdx + offset + majorScaleLeftOverflowSize
+                  triadIdx + offset + modeLeftOverflowSize
                 ]
             );
 
@@ -36,7 +36,7 @@ const MajorTriadsRow = ({
 
             // Calculate the relative indices in the top row
             const rootNoteIndex = notes.indexOf(
-              majorScaleWithOverflowNotes[majorScaleLeftOverflowSize + triadIdx]
+              majorScaleWithOverflowNotes[modeLeftOverflowSize + triadIdx]
             );
 
             console.log("rootNoteIndex", rootNoteIndex);
@@ -67,7 +67,7 @@ const MajorTriadsRow = ({
             const triadNotes = [0, 2, 4].map(
               (offset) =>
                 majorScaleWithOverflowNotes[
-                  triadIdx + offset + majorScaleLeftOverflowSize
+                  triadIdx + offset + modeLeftOverflowSize
                 ]
             );
 

@@ -3,7 +3,6 @@ import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import TriadScale from "./components/TriadScale";
 import MajorTriadsRow from "./components/MajorTriadsRow";
-import MajorScaleRow from "./components/MajorScaleRow";
 import Lines from "./components/Lines";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
@@ -54,7 +53,7 @@ export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 const notes = generateOctaves(6);
 console.log("notes are", notes);
 
-const majorScaleIntervalsWithOverflow = [
+const modeIntervalsWithOverflow = [
   ...[1, 2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
   ...modeIntervals,
   ...[0, 1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
@@ -62,18 +61,18 @@ const majorScaleIntervalsWithOverflow = [
 
 console.log(
   "majorScaleWithOverflow",
-  majorScaleIntervalsWithOverflow,
-  majorScaleIntervalsWithOverflow.map((i) => notes[i]),
+  modeIntervalsWithOverflow,
+  modeIntervalsWithOverflow.map((i) => notes[i]),
   notes.indexOf("C3")
 );
 
-export const majorScaleLeftOverflowSize =
-  (majorScaleIntervalsWithOverflow.length - modeIntervals.length) / 2;
+export const modeLeftOverflowSize =
+  (modeIntervalsWithOverflow.length - modeIntervals.length) / 2;
 
 export default function App() {
   const [majorScaleWithOverflowNotes, setMajorScaleWithOverflowNotes] =
     useState(() => {
-      return majorScaleIntervalsWithOverflow.map(
+      return modeIntervalsWithOverflow.map(
         (inter) => notes[inter + notes.indexOf(defaultRootNote)]
       );
     });
@@ -91,7 +90,7 @@ export default function App() {
     slideChanged(s) {
       const rootIndex = s.track.details.abs + baseScaleLeftOverflowSize;
       console.log(rootIndex, notes[rootIndex]);
-      const updatedNotes = majorScaleIntervalsWithOverflow.map(
+      const updatedNotes = modeIntervalsWithOverflow.map(
         (interval) => notes[rootIndex + interval]
       );
       setMajorScaleWithOverflowNotes(updatedNotes);
@@ -188,11 +187,44 @@ export default function App() {
         </div>
       </NotesArray>
 
-      <MajorScaleRow
-        majorScaleNotes={majorScaleWithOverflowNotes}
+      {/* Mode row row */}
+      <NotesArray
         SQUARE_SIDE={SQUARE_SIDE}
-        showBorder={false}
-      />
+        size={majorScaleWithOverflowNotes.length}
+        show_border={false}
+      >
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 3,
+            display: "flex",
+            translate: `${
+              (modeLeftOverflowSize * 100) / modeIntervals.length
+            }%`,
+            outline: getLineBorder(borderWidth), // HACK: cause `border` seems to break things
+          }}
+        >
+          {modeIntervals.map((_, idx) => {
+            console.log(
+              "modeLeftOverflowSize",
+              modeLeftOverflowSize,
+              modeIntervals.length
+            );
+            return <NoteCell key={idx} SQUARE_SIDE={SQUARE_SIDE} />;
+          })}
+        </div>
+
+        {majorScaleWithOverflowNotes.map((note, idx) => (
+          <NoteCell
+            SQUARE_SIDE={SQUARE_SIDE}
+            idx={idx}
+            key={idx}
+            show_border={false}
+          >
+            {renderNote(note)}
+          </NoteCell>
+        ))}
+      </NotesArray>
 
       <MajorTriadsRow
         SQUARE_SIDE={SQUARE_SIDE}
