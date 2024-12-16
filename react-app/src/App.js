@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import TriadScale from "./components/TriadScale";
-import DiatonicScaleDegreesRow from "./components/DiatonicScaleDegreesRow";
+import DiatonicScaleDegreesRowForTriads from "./components/DiatonicScaleDegreesRowForTriads";
 import Lines from "./components/Lines";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
 import { renderNote, generateOctaves } from "./utils/helpers";
 import NotesArray from "./components/NotesArray";
+import DiatonicScaleDegreesRowForSeventhChords from "./components/DiatonicScaleDegreesRowForSeventhChords";
 
 const baseScale = [
   "C",
@@ -78,6 +79,9 @@ export default function App() {
     });
 
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
+  const [hoveredSeventhChordIndex, setHoveredSeventhChordIndex] =
+    useState(null);
+
   const [triadNotes, setTriadNotes] = useState([]);
 
   const [sliderRef] = useKeenSlider({
@@ -119,6 +123,14 @@ export default function App() {
         borderWidth={borderWidth}
         baseScale={baseScale}
         majorIntervals={modeIntervals}
+      />
+      <HoverLines
+        hoveredIndex={hoveredSeventhChordIndex}
+        SQUARE_SIDE={SQUARE_SIDE}
+        borderWidth={borderWidth}
+        baseScale={baseScale}
+        majorIntervals={modeIntervals}
+        HACK_y_offset={SQUARE_SIDE * 2}
       />
 
       <TriadScale
@@ -226,10 +238,19 @@ export default function App() {
         ))}
       </NotesArray>
 
-      <DiatonicScaleDegreesRow
+      <DiatonicScaleDegreesRowForTriads
         SQUARE_SIDE={SQUARE_SIDE}
         modeIntervalNotes={modeIntervalWithOverflowNotes}
         setHoveredTriadIndex={setHoveredTriadIndex}
+        setTriadNotes={setTriadNotes}
+        notes={notes}
+        baseScale={baseScale}
+      />
+
+      <DiatonicScaleDegreesRowForSeventhChords
+        SQUARE_SIDE={SQUARE_SIDE}
+        modeIntervalNotes={modeIntervalWithOverflowNotes}
+        setHoveredSeventhChordIndex={setHoveredSeventhChordIndex}
         setTriadNotes={setTriadNotes}
         notes={notes}
         baseScale={baseScale}

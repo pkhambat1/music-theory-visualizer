@@ -7,6 +7,7 @@ const HoverLines = ({
   borderWidth,
   baseScale,
   majorIntervals,
+  HACK_y_offset = 0,
 }) => {
   if (hoveredIndex === null) return null; // No lines to render when no cell is hovered
 
@@ -18,10 +19,15 @@ const HoverLines = ({
       SQUARE_SIDE / 2 +
       borderWidth +
       ((baseScale.length - majorIntervals.length) / 2) * SQUARE_SIDE,
-    y: 6 * (SQUARE_SIDE + borderWidth) + borderWidth, // Bottom edge of MajorTriads row
+    y: HACK_y_offset + 6 * (SQUARE_SIDE + borderWidth) + borderWidth, // Bottom edge of MajorTriads row
   };
 
   const targetIndices = [hoveredIndex, hoveredIndex + 2, hoveredIndex + 4];
+
+  if (HACK_y_offset > 0) {
+    targetIndices.push(hoveredIndex + 6);
+  }
+
   const bottomGridOffsetX = ((baseScale.length - 7) * SQUARE_SIDE) / 2;
 
   return (
