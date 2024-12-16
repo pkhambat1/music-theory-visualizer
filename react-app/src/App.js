@@ -110,7 +110,7 @@ export default function App() {
               (((baseScaleWithOverflowSize - baseScale.length) / 2) * 100) /
               baseScale.length
             }%`,
-            border: "1px solid #333",
+            border: lineBorder,
           }}
         >
           {baseScale.map((_, idx) => {
