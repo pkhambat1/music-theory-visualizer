@@ -2,6 +2,7 @@ import React from "react";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
 import { renderNote } from "../utils/helpers";
+import { modes } from "../App";
 
 const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE, triadNotes }) => {
   return (
@@ -12,8 +13,8 @@ const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE, triadNotes }) => {
           key={idx}
           idx={idx}
           opt_caption={
-            [0, 2, 4, 6].includes(majorIntervals.indexOf(idx))
-              ? majorIntervals.indexOf(idx) + 1
+            [0, 2, 4, 6].includes(modes.Ionian.indexOf(idx))
+              ? modes.Ionian.indexOf(idx) + 1
               : null
           }
         >

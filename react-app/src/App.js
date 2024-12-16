@@ -24,38 +24,57 @@ const baseScale = [
   "A#",
   "B",
 ];
-const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
-// const majorIntervals = [0, 2, 3, 5, 7, 8, 10]; // actually minor
+
+export const modes = {
+  Ionian: [0, 2, 4, 5, 7, 9, 11], // Major scale
+  Dorian: [0, 2, 3, 5, 7, 9, 10],
+  Phrygian: [0, 1, 3, 5, 7, 8, 10],
+  Lydian: [0, 2, 4, 6, 7, 9, 11],
+  Mixolydian: [0, 2, 4, 5, 7, 9, 10],
+  Aeolian: [0, 2, 3, 5, 7, 8, 10], // Natural minor scale
+  Locrian: [0, 1, 3, 5, 6, 8, 10],
+  HarmonicMinor: [0, 2, 3, 5, 7, 8, 11],
+};
+
+const modeIntervals = modes.Ionian;
+// const majorIntervals = [0, 2, 4, 5, 7, 8, 10]; // actually minor
+// const majorIntervals = [0, 2, 4, 5, 7, 8, 10]; // actually minor
+
 const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 
-const defaultRootNote = "C2";
+const defaultRootNote = "C3";
 export const baseScaleWithOverflowSize = baseScale.length + 8;
 export const borderWidth = 1;
 export const baseScaleLeftOverflowSize =
   (baseScaleWithOverflowSize - baseScale.length) / 2;
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
-const notes = generateOctaves(5);
+const notes = generateOctaves(6);
 console.log("notes are", notes);
 
-const majorScaleWithOverflow = [
-  ...[1, 2, 3, 4, 5, 6].map((idx) => majorIntervals[idx]),
-  ...majorIntervals,
-  ...[0, 1, 2, 3, 4, 5].map((idx) => majorIntervals[idx]),
+const majorScaleIntervalsWithOverflow = [
+  ...[1, 2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
+  ...modeIntervals,
+  ...[0, 1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
 ];
 
+console.log(
+  "majorScaleWithOverflow",
+  majorScaleIntervalsWithOverflow,
+  majorScaleIntervalsWithOverflow.map((i) => notes[i]),
+  notes.indexOf("C3")
+);
+
 export const majorScaleLeftOverflowSize =
-  (majorScaleWithOverflow.length - majorIntervals.length) / 2;
+  (majorScaleIntervalsWithOverflow.length - modeIntervals.length) / 2;
 
 export default function App() {
   const [majorScaleWithOverflowNotes, setMajorScaleWithOverflowNotes] =
     useState(() => {
-      const rootIndex = notes.indexOf(defaultRootNote);
-
-      return majorScaleWithOverflow.map(
-        (interval) => notes[rootIndex + interval]
+      return majorScaleIntervalsWithOverflow.map(
+        (inter) => notes[inter + notes.indexOf(defaultRootNote)]
       );
     });
 
@@ -67,22 +86,15 @@ export default function App() {
     slides: {
       perView: baseScaleWithOverflowSize,
     },
-    initial:
-      notes.indexOf(defaultRootNote) -
-      (baseScaleWithOverflowSize - baseScale.length) / 2,
+    initial: notes.indexOf(defaultRootNote) - baseScaleLeftOverflowSize,
 
     slideChanged(s) {
-      const rootIndex =
-        s.track.details.abs +
-        (baseScaleWithOverflowSize - baseScale.length) / 2;
+      const rootIndex = s.track.details.abs + baseScaleLeftOverflowSize;
       console.log(rootIndex, notes[rootIndex]);
-
-      if (rootIndex !== undefined) {
-        const updatedNotes = majorScaleWithOverflow.map(
-          (interval) => notes[rootIndex + interval]
-        );
-        setMajorScaleWithOverflowNotes(updatedNotes);
-      }
+      const updatedNotes = majorScaleIntervalsWithOverflow.map(
+        (interval) => notes[rootIndex + interval]
+      );
+      setMajorScaleWithOverflowNotes(updatedNotes);
     },
   });
 
@@ -96,7 +108,7 @@ export default function App() {
       }}
     >
       <Lines
-        majorIntervals={majorIntervals}
+        majorIntervals={modeIntervals}
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
         baseScale={baseScale}
@@ -107,12 +119,12 @@ export default function App() {
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
         baseScale={baseScale}
-        majorIntervals={majorIntervals}
+        majorIntervals={modeIntervals}
       />
 
       <TriadScale
         baseScale={baseScale}
-        majorIntervals={majorIntervals}
+        majorIntervals={modeIntervals}
         SQUARE_SIDE={SQUARE_SIDE}
         triadNotes={triadNotes}
       />
@@ -137,7 +149,7 @@ export default function App() {
             let background = null;
             if (idx === 0) {
               background = pinkColor;
-            } else if (majorIntervals.includes(idx)) {
+            } else if (modeIntervals.includes(idx)) {
               background = greyColor;
             }
             return (

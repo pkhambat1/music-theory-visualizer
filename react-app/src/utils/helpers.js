@@ -80,11 +80,6 @@ const initializeSampler = () => {
 export async function playChords(notes) {
   console.log("notes", notes);
   initializeSampler();
-  if (!sampler) {
-    console.error("Sampler is not initialized.");
-    return;
-  }
-  // Play triads sequentially
   Tone.loaded().then(() => {
     sampler.triggerAttackRelease(notes, "1n", Tone.now()); // Adjust timing as needed
   });

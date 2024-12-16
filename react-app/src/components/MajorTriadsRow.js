@@ -2,7 +2,7 @@ import React from "react";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
 import { majorScaleLeftOverflowSize } from "../App";
-import { playChords } from "../utils/helpers";
+import { playChords as playChord } from "../utils/helpers";
 
 const MajorTriadsRow = ({
   SQUARE_SIDE,
@@ -73,7 +73,7 @@ const MajorTriadsRow = ({
 
             console.log("traad notes are ", triadNotes);
 
-            playChords(triadNotes);
+            playChord(triadNotes);
           }}
         >
           {triad}
