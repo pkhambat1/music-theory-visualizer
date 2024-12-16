@@ -75,7 +75,6 @@ export default function App() {
         position: "relative",
       }}
     >
-      {/* Dynamic SVG Lines */}
       <Lines
         majorIntervals={majorIntervals}
         SQUARE_SIDE={SQUARE_SIDE}
@@ -83,7 +82,6 @@ export default function App() {
         baseScale={baseScale}
       />
 
-      {/* Hover Lines */}
       <HoverLines
         hoveredIndex={hoveredTriadIndex}
         SQUARE_SIDE={SQUARE_SIDE}
@@ -92,7 +90,6 @@ export default function App() {
         majorIntervals={majorIntervals}
       />
 
-      {/* TRIAD SCALE */}
       <TriadScale
         baseScale={baseScale}
         majorIntervals={majorIntervals}
