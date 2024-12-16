@@ -1,4 +1,5 @@
 import React from "react";
+import { lineBorder } from "../App";
 
 const NoteCell = ({
   SQUARE_SIDE,
@@ -36,7 +37,7 @@ const NoteCell = ({
         fontSize: "16px",
         fontWeight: "bold",
         boxSizing: "border-box",
-        border: show_border ? "1px solid #333" : null,
+        border: show_border ? lineBorder : null,
         position: "relative",
         background: opt_background ? opt_background : null,
       }}
