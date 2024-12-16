@@ -30,6 +30,7 @@ const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 const borderWidth = 1;
 const lineBorder = `${borderWidth}px solid #333`;
+const baseScaleWithOverflowSize = baseScale.length + 6;
 
 const notes = generateOctaves(4);
 console.log("notes are", notes);
@@ -46,10 +47,8 @@ export default function App() {
   const [triadNotes, setTriadNotes] = useState([]);
 
   const [sliderRef] = useKeenSlider({
-    loop: false,
-    centered: true,
     slides: {
-      perView: baseScale.length,
+      perView: baseScaleWithOverflowSize,
     },
 
     slideChanged(s) {
@@ -97,12 +96,21 @@ export default function App() {
         triadNotes={triadNotes}
       />
 
-      <NotesArray SQUARE_SIDE={SQUARE_SIDE} size={baseScale.length}>
+      <NotesArray
+        SQUARE_SIDE={SQUARE_SIDE}
+        size={baseScaleWithOverflowSize}
+        show_border={false}
+      >
         <div
           style={{
             position: "absolute",
             zIndex: 1,
             display: "flex",
+            translate: `${
+              (((baseScaleWithOverflowSize - baseScale.length) / 2) * 100) /
+              baseScale.length
+            }%`,
+            border: "1px solid #333",
           }}
         >
           {baseScale.map((_, idx) => {
