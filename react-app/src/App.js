@@ -35,7 +35,7 @@ export const modes = {
   HarmonicMinor: [0, 2, 3, 5, 7, 8, 11],
 };
 
-const modeIntervals = modes.Aeolian;
+const modeIntervals = modes.Ionian;
 // const majorIntervals = [0, 2, 4, 5, 7, 8, 10]; // actually minor
 // const majorIntervals = [0, 2, 4, 5, 7, 8, 10]; // actually minor
 
@@ -221,7 +221,7 @@ export default function App() {
             key={idx}
             show_border={false}
           >
-            {renderNote(note)}
+            {note && renderNote(note)}
           </NoteCell>
         ))}
       </NotesArray>
