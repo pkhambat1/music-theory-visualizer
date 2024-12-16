@@ -110,7 +110,7 @@ export default function App() {
               (((baseScaleWithOverflowSize - baseScale.length) / 2) * 100) /
               baseScale.length
             }%`,
-            outline: lineBorder, // cause `border seems to break things`
+            // outline: "20px solid #333", // cause `border seems to break things`
           }}
         >
           {baseScale.map((_, idx) => {
