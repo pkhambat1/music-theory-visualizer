@@ -52,7 +52,6 @@ console.log("notes are", notes);
 export default function App() {
   const [majorScaleNotes, setMajorScaleNotes] = useState(() => {
     const rootIndex = 0; // Default root index
-
     return majorIntervals.map(
       (interval) => notes[(rootIndex + interval) % notes.length]
     );
@@ -70,12 +69,10 @@ export default function App() {
 
     slideChanged(s) {
       const rootIndex = s.track.details.abs;
-
       if (rootIndex !== undefined) {
         const updatedNotes = majorIntervals.map(
           (interval) => notes[(rootIndex + interval) % notes.length]
         );
-
         setMajorScaleNotes(updatedNotes);
       }
     },
