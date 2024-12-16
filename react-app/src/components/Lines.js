@@ -1,4 +1,5 @@
 import React from "react";
+import { baseScaleWithOverflowSize } from "../App";
 
 const Lines = ({ majorIntervals, SQUARE_SIDE, borderWidth, baseScale }) => {
   return (
@@ -15,7 +16,11 @@ const Lines = ({ majorIntervals, SQUARE_SIDE, borderWidth, baseScale }) => {
     >
       {Array.from({ length: 7 }).map((_, idx) => {
         const topPos = {
-          x: majorIntervals[idx] * SQUARE_SIDE + SQUARE_SIDE / 2 + borderWidth, // Center of the top square horizontally
+          x:
+            ((baseScaleWithOverflowSize - baseScale.length) / 2) * SQUARE_SIDE +
+            majorIntervals[idx] * SQUARE_SIDE +
+            SQUARE_SIDE / 2 +
+            borderWidth, // Center of the top square horizontally
           y: 3 * (SQUARE_SIDE + borderWidth), // Bottom edge of the top square, adjusted for border
         };
 
@@ -23,6 +28,7 @@ const Lines = ({ majorIntervals, SQUARE_SIDE, borderWidth, baseScale }) => {
           ((baseScale.length - majorIntervals.length) * SQUARE_SIDE) / 2; // Adjust based on alignment
         const bottomPos = {
           x:
+            ((baseScaleWithOverflowSize - baseScale.length) / 2) * SQUARE_SIDE +
             idx * SQUARE_SIDE +
             SQUARE_SIDE / 2 +
             bottomGridOffsetX +

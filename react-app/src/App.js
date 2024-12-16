@@ -28,7 +28,8 @@ const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
 const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
-const baseScaleWithOverflowSize = baseScale.length + 8;
+
+export const baseScaleWithOverflowSize = baseScale.length + 8;
 export const borderWidth = 8;
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
@@ -37,7 +38,7 @@ console.log("notes are", notes);
 
 export default function App() {
   const [majorScaleNotes, setMajorScaleNotes] = useState(() => {
-    const rootIndex = 0; // Default root index
+    const rootIndex = (baseScaleWithOverflowSize - baseScale.length) / 2;
     return majorIntervals.map(
       (interval) => notes[(rootIndex + interval) % notes.length]
     );
@@ -53,7 +54,9 @@ export default function App() {
     },
 
     slideChanged(s) {
-      const rootIndex = s.track.details.abs;
+      const rootIndex =
+        s.track.details.abs +
+        (baseScaleWithOverflowSize - baseScale.length) / 2;
       if (rootIndex !== undefined) {
         const updatedNotes = majorIntervals.map(
           (interval) => notes[(rootIndex + interval) % notes.length]

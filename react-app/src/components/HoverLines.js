@@ -1,4 +1,5 @@
 import React from "react";
+import { baseScaleWithOverflowSize } from "../App";
 
 const HoverLines = ({
   hoveredIndex,
@@ -12,6 +13,7 @@ const HoverLines = ({
   // Generate the positions of the lines for the hovered cell
   const sourcePos = {
     x:
+      ((baseScaleWithOverflowSize - baseScale.length) / 2) * SQUARE_SIDE +
       hoveredIndex * SQUARE_SIDE +
       SQUARE_SIDE / 2 +
       borderWidth +
@@ -37,6 +39,7 @@ const HoverLines = ({
       {targetIndices.map((targetIdx) => {
         const targetPos = {
           x:
+            ((baseScaleWithOverflowSize - baseScale.length) / 2) * SQUARE_SIDE +
             targetIdx * SQUARE_SIDE +
             SQUARE_SIDE / 2 +
             bottomGridOffsetX +
