@@ -28,9 +28,9 @@ const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
 const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
-const borderWidth = 1;
-const lineBorder = `${borderWidth}px solid #333`;
-const baseScaleWithOverflowSize = baseScale.length + 6;
+const baseScaleWithOverflowSize = baseScale.length + 0;
+const borderWidth = 5;
+export const lineBorder = `${borderWidth}px solid #333`;
 
 const notes = generateOctaves(4);
 console.log("notes are", notes);
@@ -106,11 +106,13 @@ export default function App() {
             position: "absolute",
             zIndex: 1,
             display: "flex",
-            translate: `${
-              (((baseScaleWithOverflowSize - baseScale.length) / 2) * 100) /
-              baseScale.length
-            }%`,
+            // translate: `${
+            //   (((baseScaleWithOverflowSize - baseScale.length) / 2) * 100) /
+            //   baseScale.length
+            // }%`,
+            // translate: "0%",
             border: lineBorder,
+            boxSizing: "content-box",
           }}
         >
           {baseScale.map((_, idx) => {

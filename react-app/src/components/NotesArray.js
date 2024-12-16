@@ -1,4 +1,5 @@
 import React from "react";
+import { lineBorder } from "../App";
 
 const NotesArray = ({ size, SQUARE_SIDE, children, show_border = true }) => (
   <div
@@ -9,10 +10,10 @@ const NotesArray = ({ size, SQUARE_SIDE, children, show_border = true }) => (
       position: "relative",
       boxSizing: "content-box",
       background: "#fff",
-      border: show_border ? "1px solid #333" : null,
+      border: show_border ? lineBorder : null,
       display: "flex",
-      alignItems: "center", // Centers the NoteCell vertically within the container
-      zIndex: 2, // Manages stacking context, although it might be less necessary without overlapping content
+      alignItems: "center",
+      zIndex: 2,
     }}
   >
     {children}
