@@ -1,6 +1,7 @@
 import React from "react";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
+import { majorScaleLeftOverflowSize } from "../App";
 
 const MajorTriadsRow = ({
   SQUARE_SIDE,
@@ -24,8 +25,11 @@ const MajorTriadsRow = ({
 
             // Fetch triad notes
             const triadNotes = [0, 2, 4].map(
-              (offset) => majorScaleNotes[idx + offset]
+              (offset) =>
+                majorScaleNotes[idx + offset + majorScaleLeftOverflowSize]
             );
+
+            console.log("traad notes are ", triadNotes);
 
             // Calculate the relative indices in the top row
             const rootNoteIndex = notes.indexOf(majorScaleNotes[idx]);

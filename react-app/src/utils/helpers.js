@@ -14,16 +14,17 @@ export function generateOctaves(octaveCount) {
     "B",
   ];
   return Array.from({ length: octaveCount }, (_, i) => i + 1).flatMap(
-    (octave) => baseScale.map((note) => (note === "C" ? note + octave : note))
+    (octave) => baseScale.map((note) => note + octave)
   );
 }
 
 export function renderNote(note) {
-  if (note.startsWith("C") && note.length > 1 && !note.includes("#")) {
-    const octave = note.slice(1);
+  if (!isNaN(parseInt(note.charAt(note.length - 1)))) {
+    const noteWithoutOctave = note.slice(0, -1);
     return (
       <>
-        C<sub>{octave}</sub>
+        {noteWithoutOctave}
+        {noteWithoutOctave === "C" && <sub>{note.slice(-1)}</sub>}
       </>
     );
   }

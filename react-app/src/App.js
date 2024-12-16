@@ -28,17 +28,32 @@ const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
 const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
-const borderWidth = 8;
-export const lineBorder = `${borderWidth}px solid #333`;
+
+const defaultRootNote = "C2";
+export const baseScaleWithOverflowSize = baseScale.length + 8;
+export const borderWidth = 8;
+export const baseScaleLeftOverflowSize =
+  (baseScaleWithOverflowSize - baseScale.length) / 2;
+export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
 const notes = generateOctaves(4);
 console.log("notes are", notes);
 
+const majorScaleWithOverflow = [
+  ...[1, 2, 3, 4, 5, 6].map((idx) => majorIntervals[idx]),
+  ...majorIntervals,
+  ...[0, 1, 2, 3, 4, 5].map((idx) => majorIntervals[idx]),
+];
+
+export const majorScaleLeftOverflowSize =
+  (majorScaleWithOverflow.length - majorIntervals.length) / 2;
+
 export default function App() {
   const [majorScaleNotes, setMajorScaleNotes] = useState(() => {
-    const rootIndex = 0; // Default root index
-    return majorIntervals.map(
-      (interval) => notes[(rootIndex + interval) % notes.length]
+    const rootIndex = notes.indexOf(defaultRootNote);
+
+    return majorScaleWithOverflow.map(
+      (interval) => notes[rootIndex + interval]
     );
   });
 
@@ -46,17 +61,23 @@ export default function App() {
   const [triadNotes, setTriadNotes] = useState([]);
 
   const [sliderRef] = useKeenSlider({
-    loop: false,
     centered: true,
     slides: {
-      perView: baseScale.length,
+      perView: baseScaleWithOverflowSize,
     },
+    initial:
+      notes.indexOf(defaultRootNote) -
+      (baseScaleWithOverflowSize - baseScale.length) / 2,
 
     slideChanged(s) {
-      const rootIndex = s.track.details.abs;
+      const rootIndex =
+        s.track.details.abs +
+        (baseScaleWithOverflowSize - baseScale.length) / 2;
+      console.log(rootIndex, notes[rootIndex]);
+
       if (rootIndex !== undefined) {
-        const updatedNotes = majorIntervals.map(
-          (interval) => notes[(rootIndex + interval) % notes.length]
+        const updatedNotes = majorScaleWithOverflow.map(
+          (interval) => notes[rootIndex + interval]
         );
         setMajorScaleNotes(updatedNotes);
       }
@@ -72,7 +93,6 @@ export default function App() {
         position: "relative",
       }}
     >
-      {/* Dynamic SVG Lines */}
       <Lines
         majorIntervals={majorIntervals}
         SQUARE_SIDE={SQUARE_SIDE}
@@ -80,7 +100,6 @@ export default function App() {
         baseScale={baseScale}
       />
 
-      {/* Hover Lines */}
       <HoverLines
         hoveredIndex={hoveredTriadIndex}
         SQUARE_SIDE={SQUARE_SIDE}
@@ -89,7 +108,6 @@ export default function App() {
         majorIntervals={majorIntervals}
       />
 
-      {/* TRIAD SCALE */}
       <TriadScale
         baseScale={baseScale}
         majorIntervals={majorIntervals}
@@ -97,12 +115,20 @@ export default function App() {
         triadNotes={triadNotes}
       />
 
-      <NotesArray SQUARE_SIDE={SQUARE_SIDE} size={baseScale.length}>
+      <NotesArray
+        SQUARE_SIDE={SQUARE_SIDE}
+        size={baseScaleWithOverflowSize}
+        show_border={false}
+      >
         <div
           style={{
             position: "absolute",
             zIndex: 1,
             display: "flex",
+            translate: `${
+              (baseScaleLeftOverflowSize * 100) / baseScale.length
+            }%`,
+            outline: getLineBorder(borderWidth), // HACK: cause `border` seems to break things
           }}
         >
           {baseScale.map((_, idx) => {
@@ -151,7 +177,7 @@ export default function App() {
       <MajorScaleRow
         majorScaleNotes={majorScaleNotes}
         SQUARE_SIDE={SQUARE_SIDE}
-        lineBorder={lineBorder}
+        showBorder={false}
       />
 
       <MajorTriadsRow

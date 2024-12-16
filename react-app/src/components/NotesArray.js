@@ -1,7 +1,7 @@
 import React from "react";
-import { lineBorder } from "../App";
+import { borderWidth, getLineBorder } from "../App";
 
-const NotesArray = ({ size, SQUARE_SIDE, children }) => (
+const NotesArray = ({ size, SQUARE_SIDE, children, show_border = true }) => (
   <div
     style={{
       width: `${SQUARE_SIDE * size}px`,
@@ -10,10 +10,12 @@ const NotesArray = ({ size, SQUARE_SIDE, children }) => (
       position: "relative",
       boxSizing: "content-box",
       background: "#fff",
-      border: lineBorder,
+      border: show_border
+        ? getLineBorder(borderWidth)
+        : `${borderWidth}px solid transparent`, // Transparent border when show_border is false
       display: "flex",
-      alignItems: "center", // Centers the NoteCell vertically within the container
-      zIndex: 2, // Manages stacking context, although it might be less necessary without overlapping content
+      alignItems: "center",
+      zIndex: 2,
     }}
   >
     {children}
