@@ -28,7 +28,7 @@ const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
 const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
-const borderWidth = 5;
+const borderWidth = 8;
 export const lineBorder = `${borderWidth}px solid #333`;
 
 const notes = generateOctaves(4);
