@@ -25,18 +25,19 @@ const baseScale = [
   "B",
 ];
 const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
+// const majorIntervals = [0, 2, 3, 5, 7, 8, 10]; // actually minor
 const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 
 const defaultRootNote = "C2";
 export const baseScaleWithOverflowSize = baseScale.length + 8;
-export const borderWidth = 8;
+export const borderWidth = 1;
 export const baseScaleLeftOverflowSize =
   (baseScaleWithOverflowSize - baseScale.length) / 2;
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
-const notes = generateOctaves(4);
+const notes = generateOctaves(5);
 console.log("notes are", notes);
 
 const majorScaleWithOverflow = [
@@ -49,13 +50,14 @@ export const majorScaleLeftOverflowSize =
   (majorScaleWithOverflow.length - majorIntervals.length) / 2;
 
 export default function App() {
-  const [majorScaleNotes, setMajorScaleNotes] = useState(() => {
-    const rootIndex = notes.indexOf(defaultRootNote);
+  const [majorScaleWithOverflowNotes, setMajorScaleWithOverflowNotes] =
+    useState(() => {
+      const rootIndex = notes.indexOf(defaultRootNote);
 
-    return majorScaleWithOverflow.map(
-      (interval) => notes[rootIndex + interval]
-    );
-  });
+      return majorScaleWithOverflow.map(
+        (interval) => notes[rootIndex + interval]
+      );
+    });
 
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
   const [triadNotes, setTriadNotes] = useState([]);
@@ -79,7 +81,7 @@ export default function App() {
         const updatedNotes = majorScaleWithOverflow.map(
           (interval) => notes[rootIndex + interval]
         );
-        setMajorScaleNotes(updatedNotes);
+        setMajorScaleWithOverflowNotes(updatedNotes);
       }
     },
   });
@@ -175,14 +177,14 @@ export default function App() {
       </NotesArray>
 
       <MajorScaleRow
-        majorScaleNotes={majorScaleNotes}
+        majorScaleNotes={majorScaleWithOverflowNotes}
         SQUARE_SIDE={SQUARE_SIDE}
         showBorder={false}
       />
 
       <MajorTriadsRow
         SQUARE_SIDE={SQUARE_SIDE}
-        majorScaleNotes={majorScaleNotes}
+        majorScaleNotes={majorScaleWithOverflowNotes}
         setHoveredTriadIndex={setHoveredTriadIndex}
         setTriadNotes={setTriadNotes}
         notes={notes}
