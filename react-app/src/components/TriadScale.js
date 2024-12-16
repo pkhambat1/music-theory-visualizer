@@ -1,6 +1,7 @@
 import React from "react";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
+import { renderNote } from "../utils/helpers";
 
 const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE, triadNotes }) => {
   return (
@@ -16,7 +17,7 @@ const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE, triadNotes }) => {
               : null
           }
         >
-          {triadNotes[idx] || ""}
+          {triadNotes[idx] && renderNote(triadNotes[idx])}
         </NoteCell>
       ))}
     </NotesArray>
