@@ -21,6 +21,7 @@ export function generateOctaves(octaveCount) {
 }
 
 export function renderNote(note) {
+  console.log(note);
   if (!isNaN(parseInt(note.charAt(note.length - 1)))) {
     const noteWithoutOctave = note.slice(0, -1);
     return (
@@ -77,7 +78,7 @@ const initializeSampler = () => {
   }
 };
 
-export async function playChords(notes) {
+export async function playChord(notes) {
   console.log("notes", notes);
   initializeSampler();
   Tone.loaded().then(() => {

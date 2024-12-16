@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import TriadScale from "./components/TriadScale";
-import MajorTriadsRow from "./components/MajorTriadsRow";
+import DiatonicScaleDegreesRow from "./components/DiatonicScaleDegreesRow";
 import Lines from "./components/Lines";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
@@ -35,7 +35,7 @@ export const modes = {
   HarmonicMinor: [0, 2, 3, 5, 7, 8, 11],
 };
 
-const modeIntervals = modes.Ionian;
+const modeIntervals = modes.Aeolian;
 // const majorIntervals = [0, 2, 4, 5, 7, 8, 10]; // actually minor
 // const majorIntervals = [0, 2, 4, 5, 7, 8, 10]; // actually minor
 
@@ -70,7 +70,7 @@ export const modeLeftOverflowSize =
   (modeIntervalsWithOverflow.length - modeIntervals.length) / 2;
 
 export default function App() {
-  const [majorScaleWithOverflowNotes, setMajorScaleWithOverflowNotes] =
+  const [modeIntervalWithOverflowNotes, setModeIntervalsWithOverflowNotes] =
     useState(() => {
       return modeIntervalsWithOverflow.map(
         (inter) => notes[inter + notes.indexOf(defaultRootNote)]
@@ -93,7 +93,7 @@ export default function App() {
       const updatedNotes = modeIntervalsWithOverflow.map(
         (interval) => notes[rootIndex + interval]
       );
-      setMajorScaleWithOverflowNotes(updatedNotes);
+      setModeIntervalsWithOverflowNotes(updatedNotes);
     },
   });
 
@@ -190,7 +190,7 @@ export default function App() {
       {/* Mode row row */}
       <NotesArray
         SQUARE_SIDE={SQUARE_SIDE}
-        size={majorScaleWithOverflowNotes.length}
+        size={modeIntervalWithOverflowNotes.length}
         show_border={false}
       >
         <div
@@ -214,7 +214,7 @@ export default function App() {
           })}
         </div>
 
-        {majorScaleWithOverflowNotes.map((note, idx) => (
+        {modeIntervalWithOverflowNotes.map((note, idx) => (
           <NoteCell
             SQUARE_SIDE={SQUARE_SIDE}
             idx={idx}
@@ -226,9 +226,9 @@ export default function App() {
         ))}
       </NotesArray>
 
-      <MajorTriadsRow
+      <DiatonicScaleDegreesRow
         SQUARE_SIDE={SQUARE_SIDE}
-        majorScaleNotes={majorScaleWithOverflowNotes}
+        modeIntervalNotes={modeIntervalWithOverflowNotes}
         setHoveredTriadIndex={setHoveredTriadIndex}
         setTriadNotes={setTriadNotes}
         notes={notes}
