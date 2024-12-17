@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import TriadScale from "./components/TriadScale";
@@ -9,6 +9,8 @@ import NoteCell from "./components/NoteCell";
 import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesArray from "./components/NotesArray";
 import DiatonicScaleDegreesRowForSeventhChords from "./components/DiatonicScaleDegreesRowForSeventhChords";
+import { DownOutlined } from "@ant-design/icons";
+import { Dropdown, Space } from "antd";
 
 const baseScale = [
   "C",
@@ -36,10 +38,6 @@ export const modes = {
   HarmonicMinor: [0, 2, 3, 5, 7, 8, 11],
 };
 
-const modeIntervals = modes.Ionian;
-// const majorIntervals = [0, 2, 4, 5, 7, 8, 10]; // actually minor
-// const majorIntervals = [0, 2, 4, 5, 7, 8, 10]; // actually minor
-
 const SQUARE_SIDE = 70;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
@@ -54,34 +52,40 @@ export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 export const notes = generateOctaves(6);
 console.log("notes are", notes);
 
-const modeIntervalsWithOverflow = [
-  ...[1, 2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
-  ...modeIntervals,
-  ...[0, 1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
-];
+export const modeLeftOverflowSize = 6; // HARDCODED
 
-console.log(
-  "majorScaleWithOverflow",
-  modeIntervalsWithOverflow,
-  modeIntervalsWithOverflow.map((i) => notes[i]),
-  notes.indexOf("C3")
-);
+function modeIntervalsToNotes(rootNote, intervals) {
+  return intervals.map((inter) => notes[inter + notes.indexOf(rootNote)]);
+}
 
-export const modeLeftOverflowSize =
-  (modeIntervalsWithOverflow.length - modeIntervals.length) / 2;
+function addOverflowToModeIntervals(modeIntervals) {
+  return [
+    ...[1, 2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
+    ...modeIntervals,
+    ...[0, 1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
+  ];
+}
 
 export default function App() {
-  const [modeIntervalWithOverflowNotes, setModeIntervalsWithOverflowNotes] =
-    useState(() => {
-      return modeIntervalsWithOverflow.map(
-        (inter) => notes[inter + notes.indexOf(defaultRootNote)]
-      );
-    });
-
+  const [selectedMode, setSelectedMode] = useState("Ionian");
+  const [rootNote, setRootNote] = useState(defaultRootNote);
+  const modeIntervals = modes[selectedMode];
+  const modeWithOverflowIntervalsRef = useRef(
+    addOverflowToModeIntervals(modeIntervals)
+  );
+  useEffect(() => {
+    modeWithOverflowIntervalsRef.current =
+      addOverflowToModeIntervals(modeIntervals);
+    setModeWithOverflowNotes(
+      modeIntervalsToNotes(rootNote, modeWithOverflowIntervalsRef.current)
+    );
+  }, [rootNote, modeIntervals]);
+  const [modeWithOverflowNotes, setModeWithOverflowNotes] = useState(() => {
+    return modeIntervalsToNotes(rootNote, modeWithOverflowIntervalsRef.current);
+  });
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
   const [hoveredSeventhChordIndex, setHoveredSeventhChordIndex] =
     useState(null);
-
   const [triadNotes, setTriadNotes] = useState([]);
 
   const [sliderRef] = useKeenSlider({
@@ -93,13 +97,14 @@ export default function App() {
 
     slideChanged(s) {
       const rootIndex = s.track.details.abs + baseScaleLeftOverflowSize;
-      console.log(rootIndex, notes[rootIndex]);
-      const updatedNotes = modeIntervalsWithOverflow.map(
-        (interval) => notes[rootIndex + interval]
-      );
-      setModeIntervalsWithOverflowNotes(updatedNotes);
+      setRootNote(notes[rootIndex]);
     },
   });
+
+  const items = Object.keys(modes).map((mode) => ({
+    key: mode,
+    label: mode,
+  }));
 
   return (
     <div
@@ -203,7 +208,7 @@ export default function App() {
       {/* Mode row */}
       <NotesArray
         SQUARE_SIDE={SQUARE_SIDE}
-        size={modeIntervalWithOverflowNotes.length}
+        size={modeWithOverflowNotes.length}
         show_border={false}
       >
         <div
@@ -222,7 +227,7 @@ export default function App() {
           })}
         </div>
 
-        {modeIntervalWithOverflowNotes.map((note, idx) => (
+        {modeWithOverflowNotes.map((note, idx) => (
           <NoteCell
             SQUARE_SIDE={SQUARE_SIDE}
             idx={idx}
@@ -237,7 +242,7 @@ export default function App() {
 
       <DiatonicScaleDegreesRowForTriads
         SQUARE_SIDE={SQUARE_SIDE}
-        modeIntervalNotes={modeIntervalWithOverflowNotes}
+        modeIntervalNotes={modeWithOverflowNotes}
         setHoveredTriadIndex={setHoveredTriadIndex}
         setTriadNotes={setTriadNotes}
         notes={notes}
@@ -246,12 +251,29 @@ export default function App() {
 
       <DiatonicScaleDegreesRowForSeventhChords
         SQUARE_SIDE={SQUARE_SIDE}
-        modeIntervalNotes={modeIntervalWithOverflowNotes}
+        modeIntervalNotes={modeWithOverflowNotes}
         setHoveredSeventhChordIndex={setHoveredSeventhChordIndex}
         setTriadNotes={setTriadNotes}
         notes={notes}
         baseScale={baseScale}
       />
+
+      <h1>
+        You're in Key of C mode{" "}
+        <Dropdown
+          menu={{
+            items,
+            onClick: ({ key }) => {
+              setSelectedMode(key);
+            },
+          }}
+          trigger={["click"]}
+        >
+          <Space>
+            {selectedMode} <DownOutlined />
+          </Space>
+        </Dropdown>
+      </h1>
     </div>
   );
 }

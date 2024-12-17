@@ -16,7 +16,7 @@ const DiatonicScaleDegreesRowForTriads = ({
 
   const getTriadDescriptor = (triadNotes) => {
     const triadNoteIndices = triadNotes.map((note) => notes.indexOf(note));
-    console.log("triadNoteIndices", triadNoteIndices);
+
     const thirdDeviation = triadNoteIndices[1] - triadNoteIndices[0] - 4;
     const fifthDeviation = triadNoteIndices[2] - triadNoteIndices[0] - 7;
 
