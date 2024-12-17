@@ -94,10 +94,3 @@ export async function playNote(note) {
     sampler.triggerAttackRelease(note, "1n"); // Adjust timing as needed
   });
 }
-
-export async function playNote(note) {
-  initializeSampler();
-  Tone.loaded().then(() => {
-    sampler.triggerAttackRelease(note, "1n", Tone.now()); // Adjust timing as needed
-  });
-}
