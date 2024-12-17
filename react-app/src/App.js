@@ -6,7 +6,7 @@ import DiatonicScaleDegreesRow from "./components/DiatonicScaleDegreesRow";
 import Lines from "./components/Lines";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
-import { renderNote, generateOctaves } from "./utils/helpers";
+import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesArray from "./components/NotesArray";
 
 const baseScale = [
@@ -50,7 +50,7 @@ export const baseScaleLeftOverflowSize =
   (baseScaleWithOverflowSize - baseScale.length) / 2;
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
-const notes = generateOctaves(6);
+export const notes = generateOctaves(6);
 console.log("notes are", notes);
 
 const modeIntervalsWithOverflow = [
@@ -180,6 +180,7 @@ export default function App() {
               SQUARE_SIDE={SQUARE_SIDE}
               className="keen-slider__slide"
               show_border={false}
+              onClick={() => playNote(note)}
             >
               {renderNote(note)}
             </NoteCell>
@@ -187,7 +188,7 @@ export default function App() {
         </div>
       </NotesArray>
 
-      {/* Mode row row */}
+      {/* Mode row */}
       <NotesArray
         SQUARE_SIDE={SQUARE_SIDE}
         size={modeIntervalWithOverflowNotes.length}
@@ -196,7 +197,7 @@ export default function App() {
         <div
           style={{
             position: "absolute",
-            zIndex: 3,
+            zIndex: 0,
             display: "flex",
             translate: `${
               (modeLeftOverflowSize * 100) / modeIntervals.length
@@ -205,12 +206,7 @@ export default function App() {
           }}
         >
           {modeIntervals.map((_, idx) => {
-            console.log(
-              "modeLeftOverflowSize",
-              modeLeftOverflowSize,
-              modeIntervals.length
-            );
-            return <NoteCell key={idx} SQUARE_SIDE={SQUARE_SIDE} />;
+            return <NoteCell key={idx} SQUARE_SIDE={SQUARE_SIDE} idx={idx} />;
           })}
         </div>
 
@@ -220,6 +216,7 @@ export default function App() {
             idx={idx}
             key={idx}
             show_border={false}
+            onClick={() => playNote(note)}
           >
             {note && renderNote(note)}
           </NoteCell>
