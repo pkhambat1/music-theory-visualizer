@@ -38,6 +38,7 @@ let sampler;
 
 const initializeSampler = () => {
   if (!sampler) {
+    console.log("initializing it");
     // Initialize Tone.js sampler only once
     sampler = new Tone.Sampler({
       urls: {
@@ -82,7 +83,15 @@ export async function playChord(notes) {
   console.log("notes", notes);
   initializeSampler();
   Tone.loaded().then(() => {
-    sampler.triggerAttackRelease(notes, "1n", Tone.now()); // Adjust timing as needed
+    sampler.triggerAttackRelease(notes, "1n"); // Adjust timing as needed
+  });
+}
+
+export async function playNote(note) {
+  console.log("note", note);
+  initializeSampler();
+  Tone.loaded().then(() => {
+    sampler.triggerAttackRelease(note, "1n"); // Adjust timing as needed
   });
 }
 
