@@ -8,9 +8,8 @@ import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
 import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesArray from "./components/NotesArray";
-import DiatonicScaleDegreesRowForSeventhChords from "./components/DiatonicScaleDegreesRowForSeventhChords";
 import { DownOutlined } from "@ant-design/icons";
-import { Dropdown, Space } from "antd";
+import { Dropdown, Space, Select } from "antd";
 
 const baseScale = [
   "C",
@@ -249,17 +248,26 @@ export default function App() {
         baseScale={baseScale}
       />
 
-      <DiatonicScaleDegreesRowForSeventhChords
-        SQUARE_SIDE={SQUARE_SIDE}
-        modeIntervalNotes={modeWithOverflowNotes}
-        setHoveredSeventhChordIndex={setHoveredSeventhChordIndex}
-        setTriadNotes={setTriadNotes}
-        notes={notes}
-        baseScale={baseScale}
-      />
+      <NotesArray size={modeIntervals.length} SQUARE_SIDE={SQUARE_SIDE}>
+        {Array.from({ length: modeIntervals.length }).map((_, i) => (
+          <NoteCell key={i} SQUARE_SIDE={SQUARE_SIDE} overflow="visible">
+            {/* Dummy Select Component */}
+            <Select
+              mode="multiple"
+              value={["Dummy Value"]} // Replace with state management logic if needed
+              placeholder="Select an option"
+              options={[
+                { value: "Option 1", label: "Option 1" },
+                { value: "Option 2", label: "Option 2" },
+                { value: "Option 3", label: "Option 3" },
+              ]}
+            />
+          </NoteCell>
+        ))}
+      </NotesArray>
 
       <h1>
-        You're in Key of C mode{" "}
+        You're in Key of {renderNote(rootNote)} mode{" "}
         <Dropdown
           menu={{
             items,
