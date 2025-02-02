@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import TriadScale from "./components/TriadScale";
-import DiatonicScaleDegreesRowForTriads from "./components/DiatonicScaleDegreesRowForTriads";
+import DiatonicScaleDegreesRow from "./components/DistonicScaleDegreesRow";
 import Lines from "./components/Lines";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
@@ -27,17 +27,18 @@ const baseScale = [
 ];
 
 export const modes = {
-  Ionian: [0, 2, 4, 5, 7, 9, 11], // Major scale
+  "Ionian (major)": [0, 2, 4, 5, 7, 9, 11],
   Dorian: [0, 2, 3, 5, 7, 9, 10],
   Phrygian: [0, 1, 3, 5, 7, 8, 10],
   Lydian: [0, 2, 4, 6, 7, 9, 11],
   Mixolydian: [0, 2, 4, 5, 7, 9, 10],
-  Aeolian: [0, 2, 3, 5, 7, 8, 10], // Natural minor scale
+  "Aeolian (natural minor)": [0, 2, 3, 5, 7, 8, 10],
   Locrian: [0, 1, 3, 5, 6, 8, 10],
-  HarmonicMinor: [0, 2, 3, 5, 7, 8, 11],
+  "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
+  "Melodic Minor": [0, 2, 3, 5, 7, 9, 11],
 };
 
-const SQUARE_SIDE = 70;
+const SQUARE_SIDE = 60;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 
@@ -66,7 +67,7 @@ function addOverflowToModeIntervals(modeIntervals) {
 }
 
 export default function App() {
-  const [selectedMode, setSelectedMode] = useState("Ionian");
+  const [selectedMode, setSelectedMode] = useState("Ionian (major)");
   const [rootNote, setRootNote] = useState(defaultRootNote);
   const modeIntervals = modes[selectedMode];
   const modeWithOverflowIntervalsRef = useRef(
@@ -239,13 +240,23 @@ export default function App() {
         ))}
       </NotesArray>
 
-      <DiatonicScaleDegreesRowForTriads
+      <DiatonicScaleDegreesRow
         SQUARE_SIDE={SQUARE_SIDE}
         modeIntervalNotes={modeWithOverflowNotes}
-        setHoveredTriadIndex={setHoveredTriadIndex}
-        setTriadNotes={setTriadNotes}
+        setHoveredChordIndex={setHoveredTriadIndex}
+        setChordNotes={setTriadNotes}
         notes={notes}
         baseScale={baseScale}
+        chordType="triads"
+      />
+      <DiatonicScaleDegreesRow
+        SQUARE_SIDE={SQUARE_SIDE}
+        modeIntervalNotes={modeWithOverflowNotes}
+        setHoveredChordIndex={setHoveredSeventhChordIndex}
+        setChordNotes={setTriadNotes}
+        notes={notes}
+        baseScale={baseScale}
+        chordType="seventhChords"
       />
 
       <NotesArray size={modeIntervals.length} SQUARE_SIDE={SQUARE_SIDE}>
@@ -254,12 +265,12 @@ export default function App() {
             {/* Dummy Select Component */}
             <Select
               mode="multiple"
-              value={["Dummy Value"]} // Replace with state management logic if needed
+              value={["Sel", "Sel2"]} // Replace with state management logic if needed
               placeholder="Select an option"
               options={[
-                { value: "Option 1", label: "Option 1" },
-                { value: "Option 2", label: "Option 2" },
-                { value: "Option 3", label: "Option 3" },
+                { value: "m", label: "m" },
+                { value: "add9", label: "add9" },
+                { value: "sus4", label: "sus4" },
               ]}
             />
           </NoteCell>
