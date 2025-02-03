@@ -106,6 +106,10 @@ export default function App() {
     label: mode,
   }));
 
+  const [selectedExtensions, setSelectedExtensions] = useState(
+    Array.from({ length: modeIntervals.length }, () => [])
+  );
+
   return (
     <div
       style={{
@@ -248,6 +252,7 @@ export default function App() {
         notes={notes}
         baseScale={baseScale}
         chordType="triads"
+        selectedExtensions={selectedExtensions}
       />
       <DiatonicScaleDegreesRow
         SQUARE_SIDE={SQUARE_SIDE}
@@ -257,21 +262,55 @@ export default function App() {
         notes={notes}
         baseScale={baseScale}
         chordType="seventhChords"
+        selectedExtensions={selectedExtensions}
       />
 
-      <NotesArray size={modeIntervals.length} SQUARE_SIDE={SQUARE_SIDE}>
+      <NotesArray size={modeIntervals.length} SQUARE_SIDE={SQUARE_SIDE * 2}>
         {Array.from({ length: modeIntervals.length }).map((_, i) => (
-          <NoteCell key={i} SQUARE_SIDE={SQUARE_SIDE} overflow="visible">
+          <NoteCell
+            key={i}
+            SQUARE_SIDE={SQUARE_SIDE * 2}
+            overflow="visible"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%", // Adjust the width as needed
+              minWidth: "100px", // Ensures a minimum width for smaller screens
+              padding: "10px",
+              boxSizing: "border-box",
+            }}
+          >
             {/* Dummy Select Component */}
             <Select
               mode="multiple"
-              value={["Sel", "Sel2"]} // Replace with state management logic if needed
               placeholder="Select an option"
               options={[
+                { value: "maj", label: "maj" },
                 { value: "m", label: "m" },
-                { value: "add9", label: "add9" },
+                { value: "dim", label: "dim" },
+                { value: "aug", label: "aug" },
+                { value: "sus2", label: "sus2" },
                 { value: "sus4", label: "sus4" },
+                { value: "7", label: "7" },
+                { value: "maj7", label: "maj7" },
               ]}
+              style={{
+                width: "100px",
+                height: "100px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onChange={(value) => {
+                setSelectedExtensions((prev) => {
+                  const newExtensions = [...prev];
+                  newExtensions[i] = value;
+                  return newExtensions;
+                });
+                console.log("selectedExtensions", selectedExtensions);
+              }}
+              maxCount={3}
             />
           </NoteCell>
         ))}
