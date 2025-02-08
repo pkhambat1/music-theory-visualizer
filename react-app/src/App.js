@@ -252,9 +252,20 @@ export default function App() {
         notes={notes}
         baseScale={baseScale}
         chordType="triads"
+      />
+
+      <DiatonicScaleDegreesRow
+        SQUARE_SIDE={SQUARE_SIDE}
+        modeIntervalNotes={modeWithOverflowNotes}
+        setHoveredChordIndex={setHoveredTriadIndex}
+        setChordNotes={setTriadNotes}
+        notes={notes}
+        baseScale={baseScale}
+        chordType="triads"
         selectedExtensions={selectedExtensions}
       />
-      <DiatonicScaleDegreesRow
+      {/* Seventh chords */}
+      {/* <DiatonicScaleDegreesRow
         SQUARE_SIDE={SQUARE_SIDE}
         modeIntervalNotes={modeWithOverflowNotes}
         setHoveredChordIndex={setHoveredSeventhChordIndex}
@@ -263,8 +274,9 @@ export default function App() {
         baseScale={baseScale}
         chordType="seventhChords"
         selectedExtensions={selectedExtensions}
-      />
+      /> */}
 
+      {/* Variation Controls */}
       <NotesArray size={modeIntervals.length} SQUARE_SIDE={SQUARE_SIDE * 2}>
         {Array.from({ length: modeIntervals.length }).map((_, i) => (
           <NoteCell
@@ -281,7 +293,6 @@ export default function App() {
               boxSizing: "border-box",
             }}
           >
-            {/* Dummy Select Component */}
             <Select
               mode="multiple"
               placeholder="Select an option"

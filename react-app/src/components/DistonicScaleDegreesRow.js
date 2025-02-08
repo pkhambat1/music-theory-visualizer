@@ -42,22 +42,24 @@ const DiatonicScaleDegreesRow = ({
   return (
     <NotesArray size={chords.length} SQUARE_SIDE={SQUARE_SIDE}>
       {chords.map((chord, chordIdx) => {
-        if (selectedExtensions[chordIdx].length !== 0)
-          console.log(
-            "selectedExtensions[chordIdx]",
-            chordIdx,
-            selectedExtensions[chordIdx]
-          );
+        if (selectedExtensions) {
+          if (selectedExtensions[chordIdx].length !== 0)
+            console.log(
+              "selectedExtensions[chordIdx]",
+              chordIdx,
+              selectedExtensions[chordIdx]
+            );
 
-        // hardcoded for demo
-        if (selectedExtensions[chordIdx].includes("sus4")) {
-          defaultOffsets[1] = 3;
-        }
-        if (selectedExtensions[chordIdx].includes("sus2")) {
-          defaultOffsets[1] = 1;
-        }
-        if (selectedExtensions[chordIdx].includes("maj7")) {
-          defaultOffsets = [...defaultOffsets, 6];
+          // hardcoded for demo
+          if (selectedExtensions[chordIdx].includes("sus4")) {
+            defaultOffsets[1] = 3;
+          }
+          if (selectedExtensions[chordIdx].includes("sus2")) {
+            defaultOffsets[1] = 1;
+          }
+          if (selectedExtensions[chordIdx].includes("maj7")) {
+            defaultOffsets = [...defaultOffsets, 6];
+          }
         }
 
         const chordNotes = defaultOffsets.map((offset) => {
