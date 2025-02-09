@@ -1,7 +1,13 @@
 import React from "react";
 import { baseScaleLeftOverflowSize } from "../App";
 
-const Lines = ({ majorIntervals, SQUARE_SIDE, borderWidth, baseScale }) => {
+const Lines = ({
+  modeIntervals,
+  SQUARE_SIDE,
+  borderWidth,
+  baseScale,
+  hackYOffset = 0,
+}) => {
   return (
     <svg
       style={{
@@ -18,14 +24,14 @@ const Lines = ({ majorIntervals, SQUARE_SIDE, borderWidth, baseScale }) => {
         const topPos = {
           x:
             baseScaleLeftOverflowSize * SQUARE_SIDE +
-            majorIntervals[idx] * SQUARE_SIDE +
+            modeIntervals[idx] * SQUARE_SIDE +
             SQUARE_SIDE / 2 +
             borderWidth, // Center of the top square horizontally
-          y: 3 * (SQUARE_SIDE + borderWidth), // Bottom edge of the top square, adjusted for border
+          y: (-1 + hackYOffset) * (SQUARE_SIDE + borderWidth), // Bottom edge of the top square, adjusted for border
         };
 
         const bottomGridOffsetX =
-          ((baseScale.length - majorIntervals.length) * SQUARE_SIDE) / 2; // Adjust based on alignment
+          ((baseScale.length - modeIntervals.length) * SQUARE_SIDE) / 2; // Adjust based on alignment
         const bottomPos = {
           x:
             baseScaleLeftOverflowSize * SQUARE_SIDE +
@@ -33,7 +39,7 @@ const Lines = ({ majorIntervals, SQUARE_SIDE, borderWidth, baseScale }) => {
             SQUARE_SIDE / 2 +
             bottomGridOffsetX +
             borderWidth, // Center of the bottom square horizontally
-          y: 4 * (SQUARE_SIDE + borderWidth) + borderWidth, // Top edge of the bottom square, adjusted for border
+          y: (0 + hackYOffset) * (SQUARE_SIDE + borderWidth) + borderWidth, // Top edge of the bottom square, adjusted for border
         };
 
         // Assertion: Ensure the vertical distance between y2 and y1 equals SQUARE_SIDE

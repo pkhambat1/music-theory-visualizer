@@ -84,9 +84,11 @@ export default function App() {
     return modeIntervalsToNotes(rootNote, modeWithOverflowIntervalsRef.current);
   });
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
-  const [hoveredSeventhChordIndex, setHoveredSeventhChordIndex] =
-    useState(null);
+  // const [hoveredSeventhChordIndex, setHoveredSeventhChordIndex] =
+  //   useState(null);
   const [triadNotes, setTriadNotes] = useState([]);
+  // Initializze to empty array size 7
+  const [majorScaleNotes, setMajorScaleNotes] = useState([...Array(7)]);
 
   const [sliderRef] = useKeenSlider({
     centered: true,
@@ -116,10 +118,18 @@ export default function App() {
       }}
     >
       <Lines
-        majorIntervals={modeIntervals}
+        modeIntervals={modeIntervals}
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
         baseScale={baseScale}
+        hackYOffset={6}
+      />
+      <Lines
+        modeIntervals={modes.Ionian}
+        SQUARE_SIDE={SQUARE_SIDE}
+        borderWidth={borderWidth}
+        baseScale={baseScale}
+        hackYOffset={2}
       />
 
       <HoverLines
@@ -128,15 +138,16 @@ export default function App() {
         borderWidth={borderWidth}
         baseScale={baseScale}
         majorIntervals={modeIntervals}
+        hackYOffset={SQUARE_SIDE * 2}
       />
-      <HoverLines
+      {/* <HoverLines
         hoveredIndex={hoveredSeventhChordIndex}
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
         baseScale={baseScale}
         majorIntervals={modeIntervals}
         HACK_y_offset={SQUARE_SIDE * 2}
-      />
+      /> */}
 
       <TriadScale
         baseScale={baseScale}
@@ -144,6 +155,15 @@ export default function App() {
         SQUARE_SIDE={SQUARE_SIDE}
         triadNotes={triadNotes}
       />
+
+      {/* Major scale row */}
+      <NotesArray SQUARE_SIDE={SQUARE_SIDE} size={7}>
+        {majorScaleNotes.map((note, idx) => (
+          <NoteCell SQUARE_SIDE={SQUARE_SIDE} idx={idx} key={idx}>
+            {note && renderNote(note)}
+          </NoteCell>
+        ))}
+      </NotesArray>
 
       <NotesArray
         SQUARE_SIDE={SQUARE_SIDE}
@@ -222,6 +242,7 @@ export default function App() {
             outline: getLineBorder(borderWidth), // HACK: cause `border` seems to break things
           }}
         >
+          {/* Just boxes */}
           {modeIntervals.map((_, idx) => {
             return <NoteCell key={idx} SQUARE_SIDE={SQUARE_SIDE} idx={idx} />;
           })}
@@ -247,16 +268,17 @@ export default function App() {
         setTriadNotes={setTriadNotes}
         notes={notes}
         baseScale={baseScale}
+        setMajorScaleNotes={setMajorScaleNotes}
       />
 
-      <DiatonicScaleDegreesRowForSeventhChords
+      {/* <DiatonicScaleDegreesRowForSeventhChords
         SQUARE_SIDE={SQUARE_SIDE}
         modeIntervalNotes={modeWithOverflowNotes}
         setHoveredSeventhChordIndex={setHoveredSeventhChordIndex}
         setTriadNotes={setTriadNotes}
         notes={notes}
         baseScale={baseScale}
-      />
+      /> */}
 
       <h1>
         You're in Key of C mode{" "}
