@@ -50,7 +50,6 @@ export const baseScaleLeftOverflowSize =
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
 export const notes = generateOctaves(6);
-console.log("notes are", notes);
 
 export const modeLeftOverflowSize = 6; // HARDCODED
 
@@ -267,7 +266,7 @@ export default function App() {
 
       <DiatonicScaleDegreesRow
         SQUARE_SIDE={SQUARE_SIDE}
-        modeIntervalNotes={modeWithOverflowNotes}
+        modeIntervalWithOverflowNotes={modeWithOverflowNotes}
         setHoveredChordIndex={setHoveredTriadIndex}
         setChordNotes={setTriadNotes}
         notes={notes}

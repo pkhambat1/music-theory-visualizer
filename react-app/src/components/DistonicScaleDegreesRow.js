@@ -7,7 +7,7 @@ import { modes } from "../App";
 
 const DiatonicScaleDegreesRow = ({
   SQUARE_SIDE,
-  modeIntervalNotes,
+  modeIntervalWithOverflowNotes,
   setHoveredChordIndex,
   setChordNotes,
   notes,
@@ -16,13 +16,15 @@ const DiatonicScaleDegreesRow = ({
   selectedExtensions,
   setMajorScaleNotes,
 }) => {
-  const chords = ["I", "II", "III", "IV", "V", "VI", "VII"];
-  let defaultOffsets = chordType === "triads" ? [0, 2, 4] : [0, 2, 4, 6];
+  console.log("modeIntervalWithOverflowNotes", modeIntervalWithOverflowNotes);
+  const chordNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"];
+  let alternatingOffsets = chordType === "triads" ? [0, 2, 4] : [0, 2, 4, 6];
 
-  const getChordDescriptor = (chordNotes) => {
-    const chordNoteIndices = chordNotes.map((note) => notes.indexOf(note));
-    const thirdDeviation = chordNoteIndices[1] - chordNoteIndices[0] - 4;
-    const fifthDeviation = chordNoteIndices[2] - chordNoteIndices[0] - 7;
+  const getChordDescriptor = (chordAbsoluteIndices) => {
+    const thirdDeviation =
+      chordAbsoluteIndices[1] - chordAbsoluteIndices[0] - 4;
+    const fifthDeviation =
+      chordAbsoluteIndices[2] - chordAbsoluteIndices[0] - 7;
 
     if (thirdDeviation === 0 && fifthDeviation === 0) {
       return null;
@@ -42,59 +44,95 @@ const DiatonicScaleDegreesRow = ({
   };
 
   return (
-    <NotesArray size={chords.length} SQUARE_SIDE={SQUARE_SIDE}>
-      {chords.map((chord, chordIdx) => {
-        console.log("selectedExtensions!!", selectedExtensions);
-        if (selectedExtensions) {
-          if (selectedExtensions[chordIdx].length !== 0)
-            console.log(
-              "selectedExtensions[chordIdx]",
-              chordIdx,
-              selectedExtensions[chordIdx]
-            );
+    <NotesArray size={chordNumerals.length} SQUARE_SIDE={SQUARE_SIDE}>
+      {chordNumerals.map((chordNumeral, chordNumeralIdx) => {
+        const rootNoteAbsoluteIndex = notes.indexOf(
+          modeIntervalWithOverflowNotes[modeLeftOverflowSize]
+        );
+        console.log(
+          "rootNoteAbsoluteIndex",
+          rootNoteAbsoluteIndex,
+          modeIntervalWithOverflowNotes[modeLeftOverflowSize]
+        );
 
-          // hardcoded for demo
-          if (selectedExtensions[chordIdx].includes("sus4")) {
-            defaultOffsets[1] = 3;
+        // The (modified or unmodified) 1, 3 and 5 for the chord
+        const chordNoteAbsoluteIndices = alternatingOffsets.map(
+          (alternatingOffset) => {
+            return notes.indexOf(
+              modeIntervalWithOverflowNotes[
+                alternatingOffset + chordNumeralIdx + modeLeftOverflowSize
+              ]
+            );
           }
-          if (selectedExtensions[chordIdx].includes("sus2")) {
-            defaultOffsets[1] = 1;
+        );
+        const chordRootAbsoluteIdx = chordNoteAbsoluteIndices[0];
+
+        // hardcoded for demo
+        if (selectedExtensions) {
+          if (selectedExtensions[chordNumeralIdx].includes("sus4")) {
+            chordNoteAbsoluteIndices[1] =
+              chordRootAbsoluteIdx + modes["Ionian (major)"][4 - 1];
           }
-          if (selectedExtensions[chordIdx].includes("maj7")) {
-            defaultOffsets = [...defaultOffsets, 6];
+          if (selectedExtensions[chordNumeralIdx].includes("sus2")) {
+            chordNoteAbsoluteIndices[1] =
+              chordRootAbsoluteIdx + modes["Ionian (major)"][2 - 1];
+          }
+          if (selectedExtensions[chordNumeralIdx].includes("maj7")) {
+            chordNoteAbsoluteIndices.push(
+              chordRootAbsoluteIdx + modes["Ionian (major)"][7 - 1]
+            );
+          }
+          if (selectedExtensions[chordNumeralIdx].includes("7")) {
+            chordNoteAbsoluteIndices.push(
+              chordRootAbsoluteIdx + modes["Ionian (major)"][7 - 1] - 1
+            );
+          }
+          if (selectedExtensions[chordNumeralIdx].includes("aug")) {
+            chordNoteAbsoluteIndices[2] =
+              chordRootAbsoluteIdx + modes["Ionian (major)"][5 - 1] + 1;
+          }
+          if (selectedExtensions[chordNumeralIdx].includes("dim")) {
+            chordNoteAbsoluteIndices[1] =
+              chordRootAbsoluteIdx + modes["Ionian (major)"][3 - 1] - 1;
+            chordNoteAbsoluteIndices[2] =
+              chordRootAbsoluteIdx + modes["Ionian (major)"][5 - 1] - 1;
           }
         }
+        console.log("chordNoteAbsoluteIndices", chordNoteAbsoluteIndices);
 
-        const chordNotes = defaultOffsets.map((offset) => {
-          return modeIntervalNotes[chordIdx + offset + modeLeftOverflowSize];
-        });
-
-        // hack - reset
-        defaultOffsets = chordType === "triads" ? [0, 2, 4] : [0, 2, 4, 6];
-
-        const chordDescriptor = getChordDescriptor(chordNotes);
+        const chordDescriptor = getChordDescriptor(chordNoteAbsoluteIndices);
 
         return (
           <NoteCell
-            idx={chordIdx}
-            key={chordIdx}
+            idx={chordNumeralIdx}
+            key={chordNumeralIdx}
             SQUARE_SIDE={SQUARE_SIDE}
             onMouseEnter={() => {
-              setHoveredChordIndex(chordIdx);
-              const rootNoteIndex = notes.indexOf(
-                modeIntervalNotes[modeLeftOverflowSize + chordIdx]
+              setHoveredChordIndex(chordNumeralIdx);
+
+              console.log("chordRootAbsoluteIdx", chordRootAbsoluteIdx);
+
+              const chordRelativeIndices = chordNoteAbsoluteIndices.map(
+                (chordNoteAbsoluteIdx) => {
+                  const relativeIndex =
+                    chordNoteAbsoluteIdx - chordRootAbsoluteIdx;
+                  console.log("relativeIndex", relativeIndex);
+                  console.assert(
+                    relativeIndex >= 0 && relativeIndex < baseScale.length
+                  );
+                  return relativeIndex;
+                }
               );
-              const chordIndices = chordNotes.map((chordNote) => {
-                const relativeIndex = notes.indexOf(chordNote) - rootNoteIndex;
-                return (relativeIndex + baseScale.length) % baseScale.length; // Ensure positive index with wrap-around
+              const chordNotes = Array(baseScale.length).fill(null);
+
+              chordRelativeIndices.forEach((relativeIndex, i) => {
+                chordNotes[relativeIndex] = notes[chordNoteAbsoluteIndices[i]];
               });
-              const chordScale = Array(baseScale.length).fill(null);
-              chordIndices.forEach((relativeIndex, i) => {
-                chordScale[relativeIndex] = chordNotes[i];
-              });
-              setChordNotes(chordScale);
+
+              setChordNotes(chordNotes);
+              console.log("chordNotes", chordNotes);
               const majorScaleNotes = modes["Ionian (major)"].map(
-                (inter) => notes[inter + rootNoteIndex]
+                (inter) => notes[inter + chordRootAbsoluteIdx]
               );
               console.log("major scale notes are ", majorScaleNotes);
               setMajorScaleNotes(majorScaleNotes);
@@ -105,10 +143,10 @@ const DiatonicScaleDegreesRow = ({
               setMajorScaleNotes([...Array(7)]);
             }}
             onClick={() => {
-              playChord(chordNotes);
+              playChord(chordNoteAbsoluteIndices.map((idx) => notes[idx]));
             }}
           >
-            {chord}
+            {chordNumeral}
             {chordDescriptor}
           </NoteCell>
         );
