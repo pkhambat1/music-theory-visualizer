@@ -3,6 +3,7 @@ import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
 import { modeLeftOverflowSize } from "../App";
 import { playChord } from "../utils/helpers";
+import { modes } from "../App";
 
 const DiatonicScaleDegreesRowForTriads = ({
   SQUARE_SIDE,
@@ -11,6 +12,7 @@ const DiatonicScaleDegreesRowForTriads = ({
   setTriadNotes,
   notes,
   baseScale,
+  setMajorScaleNotes,
 }) => {
   const triads = ["I", "II", "III", "IV", "V", "VI", "VII"];
 
@@ -49,7 +51,7 @@ const DiatonicScaleDegreesRowForTriads = ({
             onMouseEnter={() => {
               setHoveredTriadIndex(triadIdx);
 
-              console.log("traad notes are ", triadNotes);
+              console.log("triad notes are ", triadNotes);
 
               // Calculate the relative indices in the top row
               const rootNoteIndex = notes.indexOf(
@@ -69,10 +71,17 @@ const DiatonicScaleDegreesRowForTriads = ({
                 triadScale[relativeIndex] = triadNotes[i];
               });
               setTriadNotes(triadScale); // Pass calculated triad notes to `TriadScale`
+
+              const majorScaleNotes = modes.Ionian.map(
+                (inter) => notes[inter + rootNoteIndex]
+              );
+              console.log("major scale notes are ", majorScaleNotes);
+              setMajorScaleNotes(majorScaleNotes);
             }}
             onMouseLeave={() => {
               setHoveredTriadIndex(null);
               setTriadNotes([]);
+              setMajorScaleNotes([...Array(7)]);
             }}
             onClick={() => {
               console.log("traad notes are ", triadNotes);
