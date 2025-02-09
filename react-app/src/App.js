@@ -2,15 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import TriadScale from "./components/TriadScale";
-import DiatonicScaleDegreesRowForTriads from "./components/DiatonicScaleDegreesRowForTriads";
+import DiatonicScaleDegreesRow from "./components/DistonicScaleDegreesRow";
 import Lines from "./components/Lines";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
 import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesArray from "./components/NotesArray";
-import DiatonicScaleDegreesRowForSeventhChords from "./components/DiatonicScaleDegreesRowForSeventhChords";
 import { DownOutlined } from "@ant-design/icons";
-import { Dropdown, Space } from "antd";
+import { Dropdown, Space, Select } from "antd";
 
 const baseScale = [
   "C",
@@ -28,17 +27,18 @@ const baseScale = [
 ];
 
 export const modes = {
-  Ionian: [0, 2, 4, 5, 7, 9, 11], // Major scale
+  "Ionian (major)": [0, 2, 4, 5, 7, 9, 11],
   Dorian: [0, 2, 3, 5, 7, 9, 10],
   Phrygian: [0, 1, 3, 5, 7, 8, 10],
   Lydian: [0, 2, 4, 6, 7, 9, 11],
   Mixolydian: [0, 2, 4, 5, 7, 9, 10],
-  Aeolian: [0, 2, 3, 5, 7, 8, 10], // Natural minor scale
+  "Aeolian (natural minor)": [0, 2, 3, 5, 7, 8, 10],
   Locrian: [0, 1, 3, 5, 6, 8, 10],
-  HarmonicMinor: [0, 2, 3, 5, 7, 8, 11],
+  "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
+  "Melodic Minor": [0, 2, 3, 5, 7, 9, 11],
 };
 
-const SQUARE_SIDE = 70;
+const SQUARE_SIDE = 60;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 
@@ -67,7 +67,7 @@ function addOverflowToModeIntervals(modeIntervals) {
 }
 
 export default function App() {
-  const [selectedMode, setSelectedMode] = useState("Ionian");
+  const [selectedMode, setSelectedMode] = useState("Ionian (major)");
   const [rootNote, setRootNote] = useState(defaultRootNote);
   const modeIntervals = modes[selectedMode];
   const modeWithOverflowIntervalsRef = useRef(
@@ -108,6 +108,10 @@ export default function App() {
     label: mode,
   }));
 
+  const [selectedExtensions, setSelectedExtensions] = useState(
+    Array.from({ length: modeIntervals.length }, () => [])
+  );
+
   return (
     <div
       style={{
@@ -125,7 +129,7 @@ export default function App() {
         hackYOffset={6}
       />
       <Lines
-        modeIntervals={modes.Ionian}
+        modeIntervals={modes["Ionian (major)"]}
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
         baseScale={baseScale}
@@ -261,27 +265,83 @@ export default function App() {
         ))}
       </NotesArray>
 
-      <DiatonicScaleDegreesRowForTriads
+      <DiatonicScaleDegreesRow
         SQUARE_SIDE={SQUARE_SIDE}
         modeIntervalNotes={modeWithOverflowNotes}
-        setHoveredTriadIndex={setHoveredTriadIndex}
-        setTriadNotes={setTriadNotes}
+        setHoveredChordIndex={setHoveredTriadIndex}
+        setChordNotes={setTriadNotes}
         notes={notes}
         baseScale={baseScale}
+        chordType="triads"
         setMajorScaleNotes={setMajorScaleNotes}
+        selectedExtensions={selectedExtensions}
       />
 
-      {/* <DiatonicScaleDegreesRowForSeventhChords
+      {/* Seventh chords */}
+      {/* <DiatonicScaleDegreesRow
         SQUARE_SIDE={SQUARE_SIDE}
         modeIntervalNotes={modeWithOverflowNotes}
-        setHoveredSeventhChordIndex={setHoveredSeventhChordIndex}
-        setTriadNotes={setTriadNotes}
+        setHoveredChordIndex={setHoveredSeventhChordIndex}
+        setChordNotes={setTriadNotes}
         notes={notes}
         baseScale={baseScale}
+        chordType="seventhChords"
+        selectedExtensions={selectedExtensions}
       /> */}
 
+      {/* Variation Controls */}
+      <NotesArray size={modeIntervals.length} SQUARE_SIDE={SQUARE_SIDE * 2}>
+        {Array.from({ length: modeIntervals.length }).map((_, i) => (
+          <NoteCell
+            key={i}
+            SQUARE_SIDE={SQUARE_SIDE * 2}
+            overflow="visible"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%", // Adjust the width as needed
+              minWidth: "100px", // Ensures a minimum width for smaller screens
+              padding: "10px",
+              boxSizing: "border-box",
+            }}
+          >
+            <Select
+              mode="multiple"
+              placeholder="Select an option"
+              options={[
+                { value: "maj", label: "maj" },
+                { value: "m", label: "m" },
+                { value: "dim", label: "dim" },
+                { value: "aug", label: "aug" },
+                { value: "sus2", label: "sus2" },
+                { value: "sus4", label: "sus4" },
+                { value: "7", label: "7" },
+                { value: "maj7", label: "maj7" },
+              ]}
+              style={{
+                width: "100px",
+                height: "100px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onChange={(value) => {
+                setSelectedExtensions((prev) => {
+                  const newExtensions = [...prev];
+                  newExtensions[i] = value;
+                  return newExtensions;
+                });
+                console.log("selectedExtensions", selectedExtensions);
+              }}
+              maxCount={3}
+            />
+          </NoteCell>
+        ))}
+      </NotesArray>
+
       <h1>
-        You're in Key of C mode{" "}
+        You're in Key of {renderNote(rootNote)} mode{" "}
         <Dropdown
           menu={{
             items,

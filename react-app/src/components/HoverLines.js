@@ -50,9 +50,7 @@ const HoverLines = ({
             SQUARE_SIDE / 2 +
             bottomGridOffsetX +
             borderWidth,
-          y:
-            5 *
-            (SQUARE_SIDE + borderWidth + (hackYOffset - SQUARE_SIDE * 1.75)), // Top edge of MajorScaleRow
+          y: (5 + 2) * (SQUARE_SIDE + borderWidth), // Top edge of MajorScaleRow
         };
 
         return (

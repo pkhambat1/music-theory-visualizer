@@ -13,8 +13,8 @@ const TriadScale = ({ baseScale, majorIntervals, SQUARE_SIDE, triadNotes }) => {
           key={idx}
           idx={idx}
           opt_caption={
-            [0, 2, 4, 6].includes(modes.Ionian.indexOf(idx))
-              ? modes.Ionian.indexOf(idx) + 1
+            [0, 2, 4, 6].includes(modes["Ionian (major)"].indexOf(idx))
+              ? modes["Ionian (major)"].indexOf(idx) + 1
               : null
           }
         >
