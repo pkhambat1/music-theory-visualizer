@@ -3,6 +3,7 @@ import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
 import { modeLeftOverflowSize } from "../App";
 import { playChord } from "../utils/helpers";
+import { modes } from "../App";
 
 const DiatonicScaleDegreesRow = ({
   SQUARE_SIDE,
@@ -13,6 +14,7 @@ const DiatonicScaleDegreesRow = ({
   baseScale,
   chordType = "triads", // 'triads' or 'seventhChords'
   selectedExtensions,
+  setMajorScaleNotes,
 }) => {
   const chords = ["I", "II", "III", "IV", "V", "VI", "VII"];
   let defaultOffsets = chordType === "triads" ? [0, 2, 4] : [0, 2, 4, 6];
@@ -31,9 +33,9 @@ const DiatonicScaleDegreesRow = ({
     } else if (thirdDeviation === 0 && fifthDeviation === 1) {
       return "+";
     } else if (thirdDeviation === 1 && fifthDeviation === 0) {
-      return <sup>{"sus4"}</sup>;
+      return <sub>{"sus4"}</sub>;
     } else if (thirdDeviation === -2 && fifthDeviation === 0) {
-      return <sup>{"sus2"}</sup>;
+      return <sub>{"sus2"}</sub>;
     } else {
       return "?";
     }
@@ -42,6 +44,7 @@ const DiatonicScaleDegreesRow = ({
   return (
     <NotesArray size={chords.length} SQUARE_SIDE={SQUARE_SIDE}>
       {chords.map((chord, chordIdx) => {
+        console.log("selectedExtensions!!", selectedExtensions);
         if (selectedExtensions) {
           if (selectedExtensions[chordIdx].length !== 0)
             console.log(
@@ -90,10 +93,16 @@ const DiatonicScaleDegreesRow = ({
                 chordScale[relativeIndex] = chordNotes[i];
               });
               setChordNotes(chordScale);
+              const majorScaleNotes = modes["Ionian (major)"].map(
+                (inter) => notes[inter + rootNoteIndex]
+              );
+              console.log("major scale notes are ", majorScaleNotes);
+              setMajorScaleNotes(majorScaleNotes);
             }}
             onMouseLeave={() => {
               setHoveredChordIndex(null);
               setChordNotes([]);
+              setMajorScaleNotes([...Array(7)]);
             }}
             onClick={() => {
               playChord(chordNotes);
