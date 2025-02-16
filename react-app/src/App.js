@@ -47,9 +47,9 @@ function modeIntervalsToMode(rootNote, intervals) {
 
 function addOverflowToModeIntervals(modeIntervals) {
   return [
-    ...[2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
+    ...[1, 2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
     ...modeIntervals,
-    ...[1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
+    ...[0, 1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
   ];
 }
 
