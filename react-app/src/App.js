@@ -10,6 +10,7 @@ import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesArray from "./components/NotesArray";
 import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, Space, Select } from "antd";
+import NotesUtils from "./utils/NotesUtils";
 
 const baseScale = [
   "C",
@@ -26,18 +27,6 @@ const baseScale = [
   "B",
 ];
 
-export const modes = {
-  "Ionian (major)": [0, 2, 4, 5, 7, 9, 11],
-  Dorian: [0, 2, 3, 5, 7, 9, 10],
-  Phrygian: [0, 1, 3, 5, 7, 8, 10],
-  Lydian: [0, 2, 4, 6, 7, 9, 11],
-  Mixolydian: [0, 2, 4, 5, 7, 9, 10],
-  "Aeolian (natural minor)": [0, 2, 3, 5, 7, 8, 10],
-  Locrian: [0, 1, 3, 5, 6, 8, 10],
-  "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
-  "Melodic Minor": [0, 2, 3, 5, 7, 9, 11],
-};
-
 const SQUARE_SIDE = 60;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
@@ -51,43 +40,49 @@ export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
 export const notes = generateOctaves(6);
 
-export const modeLeftOverflowSize = 6; // HARDCODED
-
-function modeIntervalsToNotes(rootNote, intervals) {
-  return intervals.map((inter) => notes[inter + notes.indexOf(rootNote)]);
+function modeIntervalsToMode(rootNote, intervals) {
+  // return intervals.map((inter) => notes[inter + notes.indexOf(rootNote)]);
+  return intervals.map((inter) => inter + notes.indexOf(rootNote));
 }
 
 function addOverflowToModeIntervals(modeIntervals) {
   return [
-    ...[1, 2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
+    ...[2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
     ...modeIntervals,
-    ...[0, 1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
+    ...[1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
   ];
 }
+
+export const modeLeftOverflowSize =
+  (addOverflowToModeIntervals(NotesUtils.modes["Ionian (major)"]).length -
+    NotesUtils.modes["Ionian (major)"].length) /
+  2;
 
 export default function App() {
   const [selectedMode, setSelectedMode] = useState("Ionian (major)");
   const [rootNote, setRootNote] = useState(defaultRootNote);
-  const modeIntervals = modes[selectedMode];
+  const modeIntervals = NotesUtils.modes[selectedMode];
   const modeWithOverflowIntervalsRef = useRef(
     addOverflowToModeIntervals(modeIntervals)
   );
   useEffect(() => {
     modeWithOverflowIntervalsRef.current =
       addOverflowToModeIntervals(modeIntervals);
-    setModeWithOverflowNotes(
-      modeIntervalsToNotes(rootNote, modeWithOverflowIntervalsRef.current)
+    setModeNotesWithOverflow(
+      modeIntervalsToMode(rootNote, modeWithOverflowIntervalsRef.current)
     );
   }, [rootNote, modeIntervals]);
-  const [modeWithOverflowNotes, setModeWithOverflowNotes] = useState(() => {
-    return modeIntervalsToNotes(rootNote, modeWithOverflowIntervalsRef.current);
+  const [modeNotesWithOverflow, setModeNotesWithOverflow] = useState(() => {
+    return modeIntervalsToMode(rootNote, modeWithOverflowIntervalsRef.current);
   });
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
   // const [hoveredSeventhChordIndex, setHoveredSeventhChordIndex] =
   //   useState(null);
   const [triadNotes, setTriadNotes] = useState([]);
   // Initializze to empty array size 7
-  const [majorScaleNotes, setMajorScaleNotes] = useState([...Array(7)]);
+  const [majorScaleNotes, setMajorScaleNotes] = useState([
+    ...Array(NotesUtils.modes["Ionian (major)"].length),
+  ]);
 
   const [sliderRef] = useKeenSlider({
     centered: true,
@@ -102,7 +97,7 @@ export default function App() {
     },
   });
 
-  const items = Object.keys(modes).map((mode) => ({
+  const items = Object.keys(NotesUtils.modes).map((mode) => ({
     key: mode,
     label: mode,
   }));
@@ -128,7 +123,7 @@ export default function App() {
         hackYOffset={6}
       />
       <Lines
-        modeIntervals={modes["Ionian (major)"]}
+        modeIntervals={NotesUtils.modes["Ionian (major)"]}
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
         baseScale={baseScale}
@@ -154,13 +149,16 @@ export default function App() {
 
       <TriadScale
         baseScale={baseScale}
-        majorIntervals={modeIntervals}
         SQUARE_SIDE={SQUARE_SIDE}
         triadNotes={triadNotes}
+        notes={notes}
       />
 
       {/* Major scale row */}
-      <NotesArray SQUARE_SIDE={SQUARE_SIDE} size={7}>
+      <NotesArray
+        SQUARE_SIDE={SQUARE_SIDE}
+        size={NotesUtils.modes[selectedMode].length}
+      >
         {majorScaleNotes.map((note, idx) => (
           <NoteCell SQUARE_SIDE={SQUARE_SIDE} idx={idx} key={idx}>
             {note && renderNote(note)}
@@ -231,7 +229,7 @@ export default function App() {
       {/* Mode row */}
       <NotesArray
         SQUARE_SIDE={SQUARE_SIDE}
-        size={modeWithOverflowNotes.length}
+        size={modeNotesWithOverflow.length}
         show_border={false}
       >
         <div
@@ -251,26 +249,28 @@ export default function App() {
           })}
         </div>
 
-        {modeWithOverflowNotes.map((note, idx) => (
-          <NoteCell
-            SQUARE_SIDE={SQUARE_SIDE}
-            idx={idx}
-            key={idx}
-            show_border={false}
-            onClick={() => playNote(note)}
-          >
-            {note && renderNote(note)}
-          </NoteCell>
-        ))}
+        {modeNotesWithOverflow.map((note, idx) => {
+          const noteString = notes[note];
+          return (
+            <NoteCell
+              SQUARE_SIDE={SQUARE_SIDE}
+              idx={idx}
+              key={idx}
+              show_border={false}
+              onClick={() => playNote(noteString)}
+            >
+              {noteString && renderNote(noteString)}
+            </NoteCell>
+          );
+        })}
       </NotesArray>
 
       <DiatonicScaleDegreesRow
         SQUARE_SIDE={SQUARE_SIDE}
-        modeIntervalWithOverflowNotes={modeWithOverflowNotes}
+        modeNotesWithOverflow={modeNotesWithOverflow}
         setHoveredChordIndex={setHoveredTriadIndex}
         setChordNotes={setTriadNotes}
         notes={notes}
-        baseScale={baseScale}
         chordType="triads"
         setMajorScaleNotes={setMajorScaleNotes}
         selectedExtensions={selectedExtensions}
