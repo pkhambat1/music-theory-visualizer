@@ -100,12 +100,6 @@ export default class NotesUtils {
   static applyExtensionsToChordNotes(chordNotes, extensions) {
     const rootNote = chordNotes[0];
     const chordNotesWithExtensions = [...chordNotes];
-    console.log("chordNotesWithExtensions", chordNotesWithExtensions);
-    if (extensions.includes("sus4")) {
-      chordNotesWithExtensions[1] = this.#getFourth(rootNote);
-    } else {
-      console.log("extensions", extensions);
-    }
     if (extensions.includes("sus2")) {
       chordNotesWithExtensions[1] = this.#getSecond(rootNote);
     }
