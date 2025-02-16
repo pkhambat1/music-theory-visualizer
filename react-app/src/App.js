@@ -12,30 +12,15 @@ import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, Space, Select } from "antd";
 import NotesUtils from "./utils/NotesUtils";
 
-const baseScale = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
-];
-
 const SQUARE_SIDE = 60;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 
 const defaultRootNote = "C3";
-export const baseScaleWithOverflowSize = baseScale.length + 8;
+export const baseScaleWithOverflowSize = NotesUtils.chromaticScale.length + 8;
 export const borderWidth = 1;
 export const baseScaleLeftOverflowSize =
-  (baseScaleWithOverflowSize - baseScale.length) / 2;
+  (baseScaleWithOverflowSize - NotesUtils.chromaticScale.length) / 2;
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
 export const notes = generateOctaves(6);
@@ -47,9 +32,13 @@ function modeIntervalsToMode(rootNote, intervals) {
 
 function addOverflowToModeIntervals(modeIntervals) {
   return [
-    ...[1, 2, 3, 4, 5, 6].map((idx) => modeIntervals[idx] - baseScale.length),
+    ...[1, 2, 3, 4, 5, 6].map(
+      (idx) => modeIntervals[idx] - NotesUtils.chromaticScale.length
+    ),
     ...modeIntervals,
-    ...[0, 1, 2, 3, 4, 5].map((idx) => modeIntervals[idx] + baseScale.length),
+    ...[0, 1, 2, 3, 4, 5].map(
+      (idx) => modeIntervals[idx] + NotesUtils.chromaticScale.length
+    ),
   ];
 }
 
@@ -119,14 +108,14 @@ export default function App() {
         modeIntervals={modeIntervals}
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
-        baseScale={baseScale}
+        baseScale={NotesUtils.chromaticScale}
         hackYOffset={6}
       />
       <Lines
         modeIntervals={NotesUtils.modes["Ionian (major)"]}
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
-        baseScale={baseScale}
+        baseScale={NotesUtils.chromaticScale}
         hackYOffset={2}
       />
 
@@ -134,7 +123,7 @@ export default function App() {
         hoveredIndex={hoveredTriadIndex}
         SQUARE_SIDE={SQUARE_SIDE}
         borderWidth={borderWidth}
-        baseScale={baseScale}
+        baseScale={NotesUtils.chromaticScale}
         majorIntervals={modeIntervals}
         hackYOffset={SQUARE_SIDE * 2}
       />
@@ -148,7 +137,7 @@ export default function App() {
       /> */}
 
       <TriadScale
-        baseScale={baseScale}
+        baseScale={NotesUtils.chromaticScale}
         SQUARE_SIDE={SQUARE_SIDE}
         triadNotes={triadNotes}
         notes={notes}
@@ -177,12 +166,13 @@ export default function App() {
             zIndex: 1,
             display: "flex",
             translate: `${
-              (baseScaleLeftOverflowSize * 100) / baseScale.length
+              (baseScaleLeftOverflowSize * 100) /
+              NotesUtils.chromaticScale.length
             }%`,
             outline: getLineBorder(borderWidth), // HACK: cause `border` seems to break things
           }}
         >
-          {baseScale.map((_, idx) => {
+          {NotesUtils.chromaticScale.map((_, idx) => {
             let background = null;
             if (idx === 0) {
               background = pinkColor;

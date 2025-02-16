@@ -12,7 +12,6 @@ export default class NotesUtils {
     "A",
     "A#",
     "B",
-    "C",
   ];
 
   static modes = {
