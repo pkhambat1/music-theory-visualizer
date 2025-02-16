@@ -12,18 +12,19 @@ export default class NotesUtils {
     "A",
     "A#",
     "B",
+    "C",
   ];
 
   static modes = {
-    "Ionian (major)": [0, 2, 4, 5, 7, 9, 11],
-    Dorian: [0, 2, 3, 5, 7, 9, 10],
-    Phrygian: [0, 1, 3, 5, 7, 8, 10],
-    Lydian: [0, 2, 4, 6, 7, 9, 11],
-    Mixolydian: [0, 2, 4, 5, 7, 9, 10],
-    "Aeolian (natural minor)": [0, 2, 3, 5, 7, 8, 10],
-    Locrian: [0, 1, 3, 5, 6, 8, 10],
-    "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
-    "Melodic Minor": [0, 2, 3, 5, 7, 9, 11],
+    "Ionian (major)": [0, 2, 4, 5, 7, 9, 11, 12],
+    Dorian: [0, 2, 3, 5, 7, 9, 10, 12],
+    Phrygian: [0, 1, 3, 5, 7, 8, 10, 12],
+    Lydian: [0, 2, 4, 6, 7, 9, 11, 12],
+    Mixolydian: [0, 2, 4, 5, 7, 9, 10, 12],
+    "Aeolian (natural minor)": [0, 2, 3, 5, 7, 8, 10, 12],
+    Locrian: [0, 1, 3, 5, 6, 8, 10, 12],
+    "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11, 12],
+    "Melodic Minor": [0, 2, 3, 5, 7, 9, 11, 12],
   };
 
   static #getSecond(rootNote) {
@@ -44,6 +45,14 @@ export default class NotesUtils {
 
   static #getSeventh(rootNote) {
     return NotesUtils.modes["Ionian (major)"][7 - 1] + rootNote;
+  }
+
+  static #flattened(note) {
+    return note - 1;
+  }
+
+  static #sharpened(note) {
+    return note + 1;
   }
 
   static getChordDescriptor(chordNotes) {
@@ -103,18 +112,23 @@ export default class NotesUtils {
     if (extensions.includes("sus2")) {
       chordNotesWithExtensions[1] = this.#getSecond(rootNote);
     }
+    if (extensions.includes("sus4")) {
+      chordNotesWithExtensions[1] = this.#getFourth(rootNote);
+    }
     if (extensions.includes("maj7")) {
       chordNotesWithExtensions.push(this.#getSeventh(rootNote));
     }
     if (extensions.includes("7")) {
-      chordNotesWithExtensions.push(this.#getSeventh(rootNote) - 1);
+      chordNotesWithExtensions.push(
+        this.#flattened(this.#getSeventh(rootNote))
+      );
     }
     if (extensions.includes("aug")) {
-      chordNotesWithExtensions[2] = this.#getFifth(rootNote) + 1;
+      chordNotesWithExtensions[2] = this.#sharpened(this.#getFifth(rootNote));
     }
     if (extensions.includes("dim")) {
-      chordNotesWithExtensions[1] = this.#getThird(rootNote) - 1;
-      chordNotesWithExtensions[2] = this.#getFifth(rootNote) - 1;
+      chordNotesWithExtensions[1] = this.#flattened(this.#getThird(rootNote));
+      chordNotesWithExtensions[2] = this.#flattened(this.#getFifth(rootNote));
     }
 
     return chordNotesWithExtensions;

@@ -32,12 +32,12 @@ function modeIntervalsToMode(rootNote, intervals) {
 
 function addOverflowToModeIntervals(modeIntervals) {
   return [
-    ...[1, 2, 3, 4, 5, 6].map(
-      (idx) => modeIntervals[idx] - NotesUtils.chromaticScale.length
+    ...[2, 3, 4, 5, 6].map(
+      (idx) => modeIntervals[idx] - (NotesUtils.chromaticScale.length - 1)
     ),
     ...modeIntervals,
-    ...[0, 1, 2, 3, 4, 5].map(
-      (idx) => modeIntervals[idx] + NotesUtils.chromaticScale.length
+    ...[1, 2, 3, 4, 5].map(
+      (idx) => modeIntervals[idx] + NotesUtils.chromaticScale.length - 1
     ),
   ];
 }
