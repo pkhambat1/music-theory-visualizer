@@ -130,6 +130,12 @@ export default class NotesUtils {
       chordNotesWithExtensions[1] = this.#flattened(this.#getThird(rootNote));
       chordNotesWithExtensions[2] = this.#flattened(this.#getFifth(rootNote));
     }
+    if (extensions.includes("m")) {
+      chordNotesWithExtensions[1] = this.#flattened(this.#getThird(rootNote));
+    }
+    if (extensions.includes("maj")) {
+      chordNotesWithExtensions[1] = this.#getThird(rootNote);
+    }
 
     return chordNotesWithExtensions;
   }
