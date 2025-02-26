@@ -1,13 +1,43 @@
 import React from "react";
-import { baseScaleLeftOverflowSize } from "../App";
+import {
+  addOverflowToModeIntervals,
+  baseScaleLeftOverflow,
+  baseScaleWithOverflowSize,
+} from "../App";
 
-const Lines = ({
-  modeIntervals,
-  SQUARE_SIDE,
+const LineGroup = ({
+  aboveRowIntervals,
+  square_side_px,
   borderWidth,
-  baseScale,
-  hackYOffset = 0,
+  belowRow,
+  aboveRowIndex,
+  belowRowSquareSidePx,
 }) => {
+  const maxRowWidth = baseScaleWithOverflowSize;
+
+  const numCellsInAboveRow =
+    aboveRowIntervals[aboveRowIntervals.length - 1] + 1;
+
+  const aboveRowLeftOverflow = (maxRowWidth - numCellsInAboveRow) / 2;
+
+  console.log("aboveRowLeftOverflow", aboveRowLeftOverflow);
+
+  const belowRowLeftOverflow =
+    (addOverflowToModeIntervals(belowRow).length - belowRow.length) / 2;
+
+  console.log(
+    "aboveRowIndex",
+    aboveRowIndex,
+    "maxRowWidth",
+    maxRowWidth,
+    "numCellsInAboveRow",
+    numCellsInAboveRow,
+    "aboveRowLeftOverflow",
+    aboveRowLeftOverflow,
+    "belowRowLeftOverflow",
+    belowRowLeftOverflow
+  );
+
   return (
     <svg
       style={{
@@ -20,36 +50,31 @@ const Lines = ({
         zIndex: 1,
       }}
     >
-      {Array.from({ length: 7 }).map((_, idx) => {
+      {[...Array(aboveRowIntervals.length)].map((_, idx) => {
         const topPos = {
           x:
-            baseScaleLeftOverflowSize * SQUARE_SIDE +
-            modeIntervals[idx] * SQUARE_SIDE +
-            SQUARE_SIDE / 2 +
+            aboveRowLeftOverflow * square_side_px +
+            aboveRowIntervals[idx] * square_side_px +
+            square_side_px / 2 +
             borderWidth, // Center of the top square horizontally
-          y: (-1 + hackYOffset) * (SQUARE_SIDE + borderWidth), // Bottom edge of the top square, adjusted for border
+          y: (1 + aboveRowIndex * 2) * (square_side_px + borderWidth), // Bottom edge of the top square, adjusted for border
         };
 
         const bottomGridOffsetX =
-          ((baseScale.length - modeIntervals.length) * SQUARE_SIDE) / 2; // Adjust based on alignment
+          ((belowRow.length - aboveRowIntervals.length) *
+            belowRowSquareSidePx) /
+          2; // Adjust based on alignment
         const bottomPos = {
           x:
-            baseScaleLeftOverflowSize * SQUARE_SIDE +
-            idx * SQUARE_SIDE +
-            SQUARE_SIDE / 2 +
+            belowRowLeftOverflow * belowRowSquareSidePx +
+            idx * belowRowSquareSidePx +
+            belowRowSquareSidePx / 2 +
             bottomGridOffsetX +
             borderWidth, // Center of the bottom square horizontally
-          y: (0 + hackYOffset) * (SQUARE_SIDE + borderWidth) + borderWidth, // Top edge of the bottom square, adjusted for border
+          y:
+            (2 + aboveRowIndex * 2) * (square_side_px + borderWidth) +
+            borderWidth, // Top edge of the bottom square, adjusted for border
         };
-
-        // Assertion: Ensure the vertical distance between y2 and y1 equals SQUARE_SIDE
-        const verticalDistance = bottomPos.y - topPos.y;
-        console.assert(
-          verticalDistance === SQUARE_SIDE + 2 * borderWidth,
-          `Assertion failed: y2 - y1 = ${verticalDistance}, expected ${
-            SQUARE_SIDE + 2 * borderWidth
-          }`
-        );
 
         return (
           <line
@@ -67,4 +92,4 @@ const Lines = ({
   );
 };
 
-export default Lines;
+export default LineGroup;

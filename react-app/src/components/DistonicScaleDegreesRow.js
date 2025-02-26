@@ -27,7 +27,11 @@ const DiatonicScaleDegreesRow = ({
   );
 
   return (
-    <NotesArray size={chordNumerals.length} SQUARE_SIDE={SQUARE_SIDE}>
+    <NotesArray
+      size={chordNumerals.length}
+      squareSidePx={SQUARE_SIDE}
+      marginPx={SQUARE_SIDE / 2}
+    >
       {chordNumerals.map((chordNumeral, chordNumeralIdx) => {
         // The (modified or unmodified) 1, 3 and 5 for the chord
         let chordNotes = NotesUtils.getChordNotes(
