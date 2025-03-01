@@ -28,6 +28,7 @@ export default class NotesUtils {
   };
 
   static #getSecond(rootNote) {
+    console.log("getSecond");
     return NotesUtils.modes["Ionian (major)"][2 - 1] + rootNote;
   }
 
@@ -45,6 +46,20 @@ export default class NotesUtils {
 
   static #getSeventh(rootNote) {
     return NotesUtils.modes["Ionian (major)"][7 - 1] + rootNote;
+  }
+
+  static #getNinth(rootNote) {
+    console.log(
+      "ninth is ",
+      NotesUtils.modes["Ionian (major)"][2 - 1] +
+        rootNote +
+        (this.chromaticScale.length - 1)
+    );
+    return (
+      NotesUtils.modes["Ionian (major)"][2 - 1] +
+      rootNote +
+      (this.chromaticScale.length - 1)
+    );
   }
 
   static #flattened(note) {
@@ -91,7 +106,7 @@ export default class NotesUtils {
       chordType === "triads" ? [0, 2, 4] : [0, 2, 4, 6];
 
     return alternatingOffsets.map((alternatingOffset) => {
-      return modeNotes[alternatingOffset + chordNumeralIdx];
+      return modeNotes[chordNumeralIdx + alternatingOffset];
     });
   }
 
@@ -107,6 +122,7 @@ export default class NotesUtils {
   }
 
   static applyExtensionsToChordNotes(chordNotes, extensions) {
+    console.log(extensions, "extensions");
     const rootNote = chordNotes[0];
     const chordNotesWithExtensions = [...chordNotes];
     if (extensions.includes("sus2")) {
@@ -135,6 +151,14 @@ export default class NotesUtils {
     }
     if (extensions.includes("maj")) {
       chordNotesWithExtensions[1] = this.#getThird(rootNote);
+    }
+    if (extensions.includes("add9")) {
+      chordNotesWithExtensions.push(this.#getNinth(rootNote));
+    }
+    if (extensions.includes("9")) {
+      console.log("9  ");
+      chordNotesWithExtensions.push(this.#getSeventh(rootNote));
+      chordNotesWithExtensions.push(this.#getNinth(rootNote));
     }
 
     return chordNotesWithExtensions;

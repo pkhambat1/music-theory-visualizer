@@ -1,8 +1,8 @@
 import React from "react";
-import { getLineBorder, borderWidth } from "../App";
+import { getLineBorder, borderPx } from "../App";
 
 const NoteCell = ({
-  SQUARE_SIDE,
+  squareSidePx,
   idx,
   children,
   opt_caption,
@@ -32,12 +32,12 @@ const NoteCell = ({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        width: `${SQUARE_SIDE}px`,
-        height: `${SQUARE_SIDE}px`,
+        width: `${squareSidePx}px`,
+        height: `${squareSidePx}px`,
         fontSize: "16px",
         fontWeight: "bold",
         boxSizing: "border-box",
-        border: show_border ? getLineBorder(borderWidth) : null,
+        border: show_border ? getLineBorder(borderPx) : null,
         position: "relative",
         background: opt_background ? opt_background : null,
       }}

@@ -3,7 +3,7 @@ import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import TriadScale from "./components/TriadScale";
 import DiatonicScaleDegreesRow from "./components/DistonicScaleDegreesRow";
-import Lines from "./components/Lines";
+import LineGroup from "./components/LineGroup";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
 import { renderNote, generateOctaves, playNote } from "./utils/helpers";
@@ -12,13 +12,15 @@ import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, Space, Select } from "antd";
 import NotesUtils from "./utils/NotesUtils";
 
-const SQUARE_SIDE = 60;
+const squareSidePx = 60;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 
 const defaultRootNote = "C3";
-export const baseScaleWithOverflowSize = NotesUtils.chromaticScale.length + 8;
-export const borderWidth = 1;
+export const baseScaleLeftOverflow = 5;
+export const baseScaleWithOverflowSize =
+  NotesUtils.chromaticScale.length + 2 * baseScaleLeftOverflow;
+export const borderPx = 1;
 export const baseScaleLeftOverflowSize =
   (baseScaleWithOverflowSize - NotesUtils.chromaticScale.length) / 2;
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
@@ -30,7 +32,7 @@ function modeIntervalsToMode(rootNote, intervals) {
   return intervals.map((inter) => inter + notes.indexOf(rootNote));
 }
 
-function addOverflowToModeIntervals(modeIntervals) {
+export function addOverflowToModeIntervals(modeIntervals) {
   return [
     ...[2, 3, 4, 5, 6].map(
       (idx) => modeIntervals[idx] - (NotesUtils.chromaticScale.length - 1)
@@ -104,28 +106,41 @@ export default function App() {
         position: "relative",
       }}
     >
-      <Lines
-        modeIntervals={modeIntervals}
-        SQUARE_SIDE={SQUARE_SIDE}
-        borderWidth={borderWidth}
-        baseScale={NotesUtils.chromaticScale}
-        hackYOffset={6}
+      <LineGroup
+        aboveRowIntervals={NotesUtils.modes["Ionian (major)"]}
+        aboveRowSquareSidePx={squareSidePx}
+        borderWidth={borderPx}
+        belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
+        aboveRowIndex={0}
+        belowRowSquareSidePx={squareSidePx}
+        isBelowRowModeInterval={true}
       />
-      <Lines
-        modeIntervals={NotesUtils.modes["Ionian (major)"]}
-        SQUARE_SIDE={SQUARE_SIDE}
-        borderWidth={borderWidth}
-        baseScale={NotesUtils.chromaticScale}
-        hackYOffset={2}
+      <LineGroup
+        aboveRowIntervals={modeIntervals}
+        aboveRowSquareSidePx={squareSidePx}
+        borderWidth={borderPx}
+        belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
+        aboveRowIndex={2}
+        belowRowSquareSidePx={squareSidePx}
+        isBelowRowModeInterval={true}
+      />
+      <LineGroup
+        aboveRowIntervals={[0, 1, 2, 3, 4, 5, 6, 7]}
+        aboveRowSquareSidePx={squareSidePx}
+        borderWidth={borderPx}
+        belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
+        aboveRowIndex={4}
+        belowRowSquareSidePx={squareSidePx * 2}
+        isBelowRowModeInterval={false}
       />
 
       <HoverLines
         hoveredIndex={hoveredTriadIndex}
-        SQUARE_SIDE={SQUARE_SIDE}
-        borderWidth={borderWidth}
+        SQUARE_SIDE={squareSidePx}
+        borderWidth={borderPx}
         baseScale={NotesUtils.chromaticScale}
         majorIntervals={modeIntervals}
-        hackYOffset={SQUARE_SIDE * 2}
+        hackYOffset={squareSidePx * 2}
       />
       {/* <HoverLines
         hoveredIndex={hoveredSeventhChordIndex}
@@ -138,25 +153,27 @@ export default function App() {
 
       <TriadScale
         baseScale={NotesUtils.chromaticScale}
-        SQUARE_SIDE={SQUARE_SIDE}
+        squareSidePx={squareSidePx}
         triadNotes={triadNotes}
         notes={notes}
       />
 
       {/* Major scale row */}
       <NotesArray
-        SQUARE_SIDE={SQUARE_SIDE}
+        squareSidePx={squareSidePx}
+        marginPx={squareSidePx}
         size={NotesUtils.modes[selectedMode].length}
       >
         {majorScaleNotes.map((note, idx) => (
-          <NoteCell SQUARE_SIDE={SQUARE_SIDE} idx={idx} key={idx}>
+          <NoteCell squareSidePx={squareSidePx} idx={idx} key={idx}>
             {note && renderNote(note)}
           </NoteCell>
         ))}
       </NotesArray>
 
       <NotesArray
-        SQUARE_SIDE={SQUARE_SIDE}
+        squareSidePx={squareSidePx}
+        marginPx={squareSidePx}
         size={baseScaleWithOverflowSize}
         show_border={false}
       >
@@ -169,7 +186,7 @@ export default function App() {
               (baseScaleLeftOverflowSize * 100) /
               NotesUtils.chromaticScale.length
             }%`,
-            outline: getLineBorder(borderWidth), // HACK: cause `border` seems to break things
+            outline: getLineBorder(borderPx), // HACK: cause `border` seems to break things
           }}
         >
           {NotesUtils.chromaticScale.map((_, idx) => {
@@ -182,7 +199,7 @@ export default function App() {
             return (
               <NoteCell
                 key={idx}
-                SQUARE_SIDE={SQUARE_SIDE}
+                squareSidePx={squareSidePx}
                 opt_background={background}
               />
             );
@@ -205,7 +222,7 @@ export default function App() {
             <NoteCell
               key={idx}
               idx={idx}
-              SQUARE_SIDE={SQUARE_SIDE}
+              squareSidePx={squareSidePx}
               className="keen-slider__slide"
               show_border={false}
               onClick={() => playNote(note)}
@@ -218,8 +235,9 @@ export default function App() {
 
       {/* Mode row */}
       <NotesArray
-        SQUARE_SIDE={SQUARE_SIDE}
+        squareSidePx={squareSidePx}
         size={modeNotesWithOverflow.length}
+        marginPx={squareSidePx}
         show_border={false}
       >
         <div
@@ -230,12 +248,12 @@ export default function App() {
             translate: `${
               (modeLeftOverflowSize * 100) / modeIntervals.length
             }%`,
-            outline: getLineBorder(borderWidth), // HACK: cause `border` seems to break things
+            outline: getLineBorder(borderPx), // HACK: cause `border` seems to break things
           }}
         >
           {/* Just boxes */}
           {modeIntervals.map((_, idx) => {
-            return <NoteCell key={idx} SQUARE_SIDE={SQUARE_SIDE} idx={idx} />;
+            return <NoteCell key={idx} squareSidePx={squareSidePx} idx={idx} />;
           })}
         </div>
 
@@ -243,7 +261,7 @@ export default function App() {
           const noteString = notes[note];
           return (
             <NoteCell
-              SQUARE_SIDE={SQUARE_SIDE}
+              squareSidePx={squareSidePx}
               idx={idx}
               key={idx}
               show_border={false}
@@ -256,7 +274,7 @@ export default function App() {
       </NotesArray>
 
       <DiatonicScaleDegreesRow
-        SQUARE_SIDE={SQUARE_SIDE}
+        SQUARE_SIDE={squareSidePx}
         modeNotesWithOverflow={modeNotesWithOverflow}
         setHoveredChordIndex={setHoveredTriadIndex}
         setChordNotes={setTriadNotes}
@@ -279,11 +297,15 @@ export default function App() {
       /> */}
 
       {/* Variation Controls */}
-      <NotesArray size={modeIntervals.length} SQUARE_SIDE={SQUARE_SIDE * 2}>
+      <NotesArray
+        size={modeIntervals.length}
+        squareSidePx={squareSidePx * 2}
+        marginPx={squareSidePx}
+      >
         {Array.from({ length: modeIntervals.length }).map((_, i) => (
           <NoteCell
             key={i}
-            SQUARE_SIDE={SQUARE_SIDE * 2}
+            squareSidePx={squareSidePx * 2}
             overflow="visible"
             style={{
               display: "flex",
@@ -307,6 +329,8 @@ export default function App() {
                 { value: "sus4", label: "sus4" },
                 { value: "7", label: "7" },
                 { value: "maj7", label: "maj7" },
+                { value: "add9", label: "add9" },
+                { value: "9", label: "9" },
               ]}
               style={{
                 width: "100px",
@@ -319,9 +343,9 @@ export default function App() {
                 setSelectedExtensions((prev) => {
                   const newExtensions = [...prev];
                   newExtensions[i] = value;
+                  console.log("selectedExtensions", newExtensions);
                   return newExtensions;
                 });
-                console.log("selectedExtensions", selectedExtensions);
               }}
               maxCount={3}
             />

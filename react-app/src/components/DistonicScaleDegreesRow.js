@@ -27,17 +27,15 @@ const DiatonicScaleDegreesRow = ({
   );
 
   return (
-    <NotesArray size={chordNumerals.length} SQUARE_SIDE={SQUARE_SIDE}>
+    <NotesArray
+      size={chordNumerals.length}
+      squareSidePx={SQUARE_SIDE}
+      marginPx={SQUARE_SIDE / 2}
+    >
       {chordNumerals.map((chordNumeral, chordNumeralIdx) => {
         // The (modified or unmodified) 1, 3 and 5 for the chord
-        let chordNotes = NotesUtils.getChordNotes(
-          modeNotes,
-          chordNumeralIdx,
-          chordType
-        );
-
-        chordNotes = NotesUtils.applyExtensionsToChordNotes(
-          chordNotes,
+        const chordNotes = NotesUtils.applyExtensionsToChordNotes(
+          NotesUtils.getChordNotes(modeNotes, chordNumeralIdx, chordType),
           selectedExtensions[chordNumeralIdx]
         );
 
@@ -47,7 +45,7 @@ const DiatonicScaleDegreesRow = ({
           <NoteCell
             idx={chordNumeralIdx}
             key={chordNumeralIdx}
-            SQUARE_SIDE={SQUARE_SIDE}
+            squareSidePx={SQUARE_SIDE}
             onMouseEnter={() => {
               setHoveredChordIndex(chordNumeralIdx);
               const chordNotesInChromaticScale =
@@ -59,7 +57,7 @@ const DiatonicScaleDegreesRow = ({
               const majorScaleNotes = NotesUtils.modes["Ionian (major)"].map(
                 (inter) => notes[inter + chordRoot]
               );
-              console.log("major scale notes are ", majorScaleNotes);
+
               setMajorScaleNotes(majorScaleNotes);
             }}
             onMouseLeave={() => {

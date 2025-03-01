@@ -4,13 +4,16 @@ import NotesArray from "./NotesArray";
 import { renderNote } from "../utils/helpers";
 import NotesUtils from "../utils/NotesUtils";
 
-const TriadScale = ({ baseScale, SQUARE_SIDE, triadNotes, notes }) => {
-  console.log("triadNotes", triadNotes);
+const TriadScale = ({ baseScale, squareSidePx, triadNotes, notes }) => {
   return (
-    <NotesArray SQUARE_SIDE={SQUARE_SIDE} size={baseScale.length}>
-      {Array.from({ length: baseScale.length }).map((_, idx) => (
+    <NotesArray
+      squareSidePx={squareSidePx}
+      size={baseScale.length}
+      marginPx={squareSidePx}
+    >
+      {[...Array(baseScale.length)].map((_, idx) => (
         <NoteCell
-          SQUARE_SIDE={SQUARE_SIDE}
+          squareSidePx={squareSidePx}
           key={idx}
           idx={idx}
           opt_caption={
