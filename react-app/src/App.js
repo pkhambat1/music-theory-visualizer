@@ -3,7 +3,7 @@ import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import TriadScale from "./components/TriadScale";
 import DiatonicScaleDegreesRow from "./components/DistonicScaleDegreesRow";
-import LineGroup from "./components/Lines";
+import LineGroup from "./components/LineGroup";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
 import { renderNote, generateOctaves, playNote } from "./utils/helpers";
@@ -108,27 +108,30 @@ export default function App() {
     >
       <LineGroup
         aboveRowIntervals={NotesUtils.modes["Ionian (major)"]}
-        square_side_px={squareSidePx}
+        aboveRowSquareSidePx={squareSidePx}
         borderWidth={borderPx}
-        belowRow={NotesUtils.chromaticScale}
+        belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
         aboveRowIndex={0}
         belowRowSquareSidePx={squareSidePx}
+        isBelowRowModeInterval={true}
       />
       <LineGroup
         aboveRowIntervals={modeIntervals}
-        square_side_px={squareSidePx}
+        aboveRowSquareSidePx={squareSidePx}
         borderWidth={borderPx}
-        belowRow={NotesUtils.chromaticScale}
+        belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
         aboveRowIndex={2}
         belowRowSquareSidePx={squareSidePx}
+        isBelowRowModeInterval={true}
       />
       <LineGroup
         aboveRowIntervals={[0, 1, 2, 3, 4, 5, 6, 7]}
-        square_side_px={squareSidePx}
+        aboveRowSquareSidePx={squareSidePx}
         borderWidth={borderPx}
-        belowRow={NotesUtils.chromaticScale}
+        belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
         aboveRowIndex={4}
         belowRowSquareSidePx={squareSidePx * 2}
+        isBelowRowModeInterval={false}
       />
 
       <HoverLines
@@ -162,7 +165,7 @@ export default function App() {
         size={NotesUtils.modes[selectedMode].length}
       >
         {majorScaleNotes.map((note, idx) => (
-          <NoteCell SQUARE_SIDE={squareSidePx} idx={idx} key={idx}>
+          <NoteCell squareSidePx={squareSidePx} idx={idx} key={idx}>
             {note && renderNote(note)}
           </NoteCell>
         ))}
@@ -196,7 +199,7 @@ export default function App() {
             return (
               <NoteCell
                 key={idx}
-                SQUARE_SIDE={squareSidePx}
+                squareSidePx={squareSidePx}
                 opt_background={background}
               />
             );
@@ -219,7 +222,7 @@ export default function App() {
             <NoteCell
               key={idx}
               idx={idx}
-              SQUARE_SIDE={squareSidePx}
+              squareSidePx={squareSidePx}
               className="keen-slider__slide"
               show_border={false}
               onClick={() => playNote(note)}
@@ -250,7 +253,7 @@ export default function App() {
         >
           {/* Just boxes */}
           {modeIntervals.map((_, idx) => {
-            return <NoteCell key={idx} SQUARE_SIDE={squareSidePx} idx={idx} />;
+            return <NoteCell key={idx} squareSidePx={squareSidePx} idx={idx} />;
           })}
         </div>
 
@@ -258,7 +261,7 @@ export default function App() {
           const noteString = notes[note];
           return (
             <NoteCell
-              SQUARE_SIDE={squareSidePx}
+              squareSidePx={squareSidePx}
               idx={idx}
               key={idx}
               show_border={false}
@@ -302,7 +305,7 @@ export default function App() {
         {Array.from({ length: modeIntervals.length }).map((_, i) => (
           <NoteCell
             key={i}
-            SQUARE_SIDE={squareSidePx * 2}
+            squareSidePx={squareSidePx * 2}
             overflow="visible"
             style={{
               display: "flex",
@@ -326,6 +329,8 @@ export default function App() {
                 { value: "sus4", label: "sus4" },
                 { value: "7", label: "7" },
                 { value: "maj7", label: "maj7" },
+                { value: "add9", label: "add9" },
+                { value: "9", label: "9" },
               ]}
               style={{
                 width: "100px",
@@ -338,9 +343,9 @@ export default function App() {
                 setSelectedExtensions((prev) => {
                   const newExtensions = [...prev];
                   newExtensions[i] = value;
+                  console.log("selectedExtensions", newExtensions);
                   return newExtensions;
                 });
-                console.log("selectedExtensions", selectedExtensions);
               }}
               maxCount={3}
             />

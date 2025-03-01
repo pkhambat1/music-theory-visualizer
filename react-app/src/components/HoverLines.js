@@ -28,7 +28,7 @@ const HoverLines = ({
   //   targetIndices.push(hoveredIndex + 6);
   // }
 
-  const bottomGridOffsetX = ((baseScale.length - 7) * SQUARE_SIDE) / 2;
+  const bottomRowOffsetX = ((baseScale.length - 7) * SQUARE_SIDE) / 2;
 
   return (
     <svg
@@ -48,7 +48,7 @@ const HoverLines = ({
             baseScaleLeftOverflowSize * SQUARE_SIDE +
             targetIdx * SQUARE_SIDE +
             SQUARE_SIDE / 2 +
-            bottomGridOffsetX +
+            bottomRowOffsetX +
             borderWidth,
           y: (5 + 2) * (SQUARE_SIDE + borderWidth), // Top edge of MajorScaleRow
         };
