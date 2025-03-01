@@ -20,7 +20,7 @@ const defaultRootNote = "C3";
 export const baseScaleLeftOverflow = 5;
 export const baseScaleWithOverflowSize =
   NotesUtils.chromaticScale.length + 2 * baseScaleLeftOverflow;
-export const borderPx = 1;
+export const borderPx = 1.5;
 export const baseScaleLeftOverflowSize =
   (baseScaleWithOverflowSize - NotesUtils.chromaticScale.length) / 2;
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
@@ -106,12 +106,31 @@ export default function App() {
         position: "relative",
       }}
     >
+      <NotesArray squareSidePx={squareSidePx} show_border={false}>
+        <h1>
+          You're in Key of {renderNote(rootNote)} mode{" "}
+          <Dropdown
+            menu={{
+              items,
+              onClick: ({ key }) => {
+                setSelectedMode(key);
+              },
+            }}
+            trigger={["click"]}
+          >
+            <Space>
+              {selectedMode} <DownOutlined />
+            </Space>
+          </Dropdown>
+        </h1>
+      </NotesArray>
+
       <LineGroup
         aboveRowIntervals={NotesUtils.modes["Ionian (major)"]}
         aboveRowSquareSidePx={squareSidePx}
         borderWidth={borderPx}
         belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
-        aboveRowIndex={0}
+        aboveRowIndex={1}
         belowRowSquareSidePx={squareSidePx}
         isBelowRowModeInterval={true}
       />
@@ -120,7 +139,7 @@ export default function App() {
         aboveRowSquareSidePx={squareSidePx}
         borderWidth={borderPx}
         belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
-        aboveRowIndex={2}
+        aboveRowIndex={3}
         belowRowSquareSidePx={squareSidePx}
         isBelowRowModeInterval={true}
       />
@@ -129,7 +148,7 @@ export default function App() {
         aboveRowSquareSidePx={squareSidePx}
         borderWidth={borderPx}
         belowRow={[0, 1, 2, 3, 4, 5, 6, 7]}
-        aboveRowIndex={4}
+        aboveRowIndex={5}
         belowRowSquareSidePx={squareSidePx * 2}
         isBelowRowModeInterval={false}
       />
@@ -140,16 +159,8 @@ export default function App() {
         borderWidth={borderPx}
         baseScale={NotesUtils.chromaticScale}
         majorIntervals={modeIntervals}
-        hackYOffset={squareSidePx * 2}
+        belowRowIndex={5}
       />
-      {/* <HoverLines
-        hoveredIndex={hoveredSeventhChordIndex}
-        SQUARE_SIDE={SQUARE_SIDE}
-        borderWidth={borderWidth}
-        baseScale={baseScale}
-        majorIntervals={modeIntervals}
-        HACK_y_offset={SQUARE_SIDE * 2}
-      /> */}
 
       <TriadScale
         baseScale={NotesUtils.chromaticScale}
@@ -352,23 +363,6 @@ export default function App() {
           </NoteCell>
         ))}
       </NotesArray>
-
-      <h1>
-        You're in Key of {renderNote(rootNote)} mode{" "}
-        <Dropdown
-          menu={{
-            items,
-            onClick: ({ key }) => {
-              setSelectedMode(key);
-            },
-          }}
-          trigger={["click"]}
-        >
-          <Space>
-            {selectedMode} <DownOutlined />
-          </Space>
-        </Dropdown>
-      </h1>
     </div>
   );
 }

@@ -7,28 +7,26 @@ const HoverLines = ({
   borderWidth,
   baseScale,
   majorIntervals,
-  hackYOffset = 0,
+  belowRowIndex,
 }) => {
   if (hoveredIndex === null) return null; // No lines to render when no cell is hovered
 
-  // Generate the positions of the lines for the hovered cell
+  const sourceX =
+    SQUARE_SIDE *
+    (baseScaleLeftOverflowSize +
+      hoveredIndex +
+      0.5 +
+      (baseScale.length - majorIntervals.length) / 2);
   const sourcePos = {
-    x:
-      baseScaleLeftOverflowSize * SQUARE_SIDE +
-      hoveredIndex * SQUARE_SIDE +
-      SQUARE_SIDE / 2 +
-      borderWidth +
-      ((baseScale.length - majorIntervals.length) / 2) * SQUARE_SIDE,
-    y: hackYOffset + 6 * (SQUARE_SIDE + borderWidth) + borderWidth, // Bottom edge of MajorTriads row
+    x: sourceX,
+
+    y: belowRowIndex * 2 * (SQUARE_SIDE + borderWidth), // Bottom edge of MajorTriads row
   };
 
-  const targetIndices = [hoveredIndex, hoveredIndex + 2, hoveredIndex + 4];
+  const targetOffsets = [0, 2, 4];
 
-  // if (hackYOffset > 0) {
-  //   targetIndices.push(hoveredIndex + 6);
-  // }
-
-  const bottomRowOffsetX = ((baseScale.length - 7) * SQUARE_SIDE) / 2;
+  const bottomRowOffsetX = (baseScale.length - 8) / 2;
+  console.log("bottomRowOffsetX", bottomRowOffsetX);
 
   return (
     <svg
@@ -42,15 +40,10 @@ const HoverLines = ({
         zIndex: 2, // Ensure these lines are above the regular ones
       }}
     >
-      {targetIndices.map((targetIdx) => {
+      {targetOffsets.map((targetIdx) => {
         const targetPos = {
-          x:
-            baseScaleLeftOverflowSize * SQUARE_SIDE +
-            targetIdx * SQUARE_SIDE +
-            SQUARE_SIDE / 2 +
-            bottomRowOffsetX +
-            borderWidth,
-          y: (5 + 2) * (SQUARE_SIDE + borderWidth), // Top edge of MajorScaleRow
+          x: sourceX + SQUARE_SIDE * targetIdx,
+          y: (belowRowIndex * 2 - 1) * (SQUARE_SIDE + borderWidth),
         };
 
         return (
@@ -61,7 +54,7 @@ const HoverLines = ({
             x2={targetPos.x}
             y2={targetPos.y}
             stroke="black"
-            strokeWidth="1"
+            strokeWidth=".5"
           />
         );
       })}
