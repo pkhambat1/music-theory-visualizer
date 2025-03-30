@@ -7,6 +7,7 @@ const NoteCell = ({
   children,
   opt_caption,
   opt_background,
+  opt_flexDirection,
   show_border = true,
   ...props
 }) => {
@@ -40,6 +41,7 @@ const NoteCell = ({
         border: show_border ? getLineBorder(borderPx) : null,
         position: "relative",
         background: opt_background ? opt_background : null,
+        flexDirection: opt_flexDirection
       }}
       {...props}
     >

@@ -25,9 +25,6 @@ const HoverLines = ({
 
   const targetOffsets = [0, 2, 4];
 
-  const bottomRowOffsetX = (baseScale.length - 8) / 2;
-  console.log("bottomRowOffsetX", bottomRowOffsetX);
-
   return (
     <svg
       style={{

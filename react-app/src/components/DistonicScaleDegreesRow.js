@@ -15,7 +15,7 @@ const DiatonicScaleDegreesRow = ({
   selectedExtensions,
   setMajorScaleNotes,
 }) => {
-  const chordNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "I"];
+  const chordNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 
   const getChordDescriptor = (chordAbsoluteIndices) => {
     return NotesUtils.getChordDescriptor(chordAbsoluteIndices);

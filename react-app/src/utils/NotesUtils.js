@@ -122,7 +122,6 @@ export default class NotesUtils {
   }
 
   static applyExtensionsToChordNotes(chordNotes, extensions) {
-    console.log(extensions, "extensions");
     const rootNote = chordNotes[0];
     const chordNotesWithExtensions = [...chordNotes];
     if (extensions.includes("sus2")) {

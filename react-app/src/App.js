@@ -6,10 +6,10 @@ import DiatonicScaleDegreesRow from "./components/DistonicScaleDegreesRow";
 import LineGroup from "./components/LineGroup";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
-import { renderNote, generateOctaves, playNote } from "./utils/helpers";
+import { renderNote, generateOctaves, playNote, playChord } from "./utils/helpers";
 import NotesArray from "./components/NotesArray";
 import { DownOutlined } from "@ant-design/icons";
-import { Dropdown, Space, Select } from "antd";
+import { Dropdown, Space, Select, Button } from "antd";
 import NotesUtils from "./utils/NotesUtils";
 
 const squareSidePx = 60;
@@ -26,6 +26,22 @@ export const baseScaleLeftOverflowSize =
 export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
 
 export const notes = generateOctaves(6);
+
+export const extensionOptions = [
+  { value: "maj", label: "maj" },
+  { value: "m", label: "m" },
+  { value: "dim", label: "dim" },
+  { value: "aug", label: "aug" },
+  { value: "sus2", label: "sus2" },
+  { value: "sus4", label: "sus4" },
+  { value: "7", label: "7" },
+  { value: "maj7", label: "maj7" },
+  { value: "add9", label: "add9" },
+  { value: "9", label: "9" }
+];
+
+const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+
 
 function modeIntervalsToMode(rootNote, intervals) {
   // return intervals.map((inter) => notes[inter + notes.indexOf(rootNote)]);
@@ -96,6 +112,67 @@ export default function App() {
   const [selectedExtensions, setSelectedExtensions] = useState(
     Array.from({ length: modeIntervals.length }, () => [])
   );
+
+  const [chordProgression, setChordProgression] = useState([
+    { numeral: 'I', extensions: [] },
+    { numeral: 'IV', extensions: [] },
+    { numeral: 'V', extensions: [] },
+    { numeral: 'I', extensions: [] }
+  ]);
+
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const currentChordRef = useRef(0);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (isPlaying) {
+      const playNextChord = () => {
+        if (currentChordRef.current >= chordProgression.length) {
+          setIsPlaying(false);
+          currentChordRef.current = 0;
+          return;
+        }
+
+        const chord = chordProgression[currentChordRef.current];
+        console.log('Current chord:', chord);
+        console.log('Current index:', currentChordRef.current);
+        
+        playSingleChord(chord, currentChordRef.current);
+
+        currentChordRef.current += 1;
+        timerRef.current = setTimeout(playNextChord, 1000);
+      };
+
+      playNextChord();
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [isPlaying, chordProgression, modeNotesWithOverflow, rootNote]);
+
+  const playChordProgression = () => {
+    currentChordRef.current = 0;
+    setIsPlaying(true);
+  };
+
+  const playSingleChord = (chord, index) => {
+    const chordNumeralIdx = romanNumerals.indexOf(chord.numeral);
+
+    const modeNotes = NotesUtils.leftTrimOverflowNotes(modeNotesWithOverflow, modeLeftOverflowSize);
+
+    
+    const chordNotes = NotesUtils.getChordNotes(modeNotes, chordNumeralIdx);
+    console.log('chordNotes', chordNotes);
+    
+    const notesWithExtensions = NotesUtils.applyExtensionsToChordNotes(chordNotes, chord.extensions);
+    console.log('notesWithExtensions', notesWithExtensions);
+
+    playChord(notesWithExtensions.map(note => notes[note]));
+  };
 
   return (
     <div
@@ -331,18 +408,7 @@ export default function App() {
             <Select
               mode="multiple"
               placeholder="Select an option"
-              options={[
-                { value: "maj", label: "maj" },
-                { value: "m", label: "m" },
-                { value: "dim", label: "dim" },
-                { value: "aug", label: "aug" },
-                { value: "sus2", label: "sus2" },
-                { value: "sus4", label: "sus4" },
-                { value: "7", label: "7" },
-                { value: "maj7", label: "maj7" },
-                { value: "add9", label: "add9" },
-                { value: "9", label: "9" },
-              ]}
+              options={extensionOptions}
               style={{
                 width: "100px",
                 height: "100px",
@@ -363,6 +429,71 @@ export default function App() {
           </NoteCell>
         ))}
       </NotesArray>
+
+      {/* Chord Progression Row */}
+      <NotesArray
+        squareSidePx={squareSidePx * 2}
+        size={4}
+        marginPx={squareSidePx}
+      >
+        {chordProgression.map((chord, index) => (
+          <NoteCell
+            key={index}
+            squareSidePx={squareSidePx * 2}
+            opt_flexDirection='column'
+          >
+            <Select
+              value={chord.numeral}
+              style={{ width: "70px" }}
+              onChange={(value) => {
+                const newProgression = [...chordProgression];
+                newProgression[index] = { ...chord, numeral: value };
+                setChordProgression(newProgression);
+              }}
+              options={romanNumerals.map(num => ({ value: num, label: num }))}
+            />
+            <Select
+              mode="multiple"
+              placeholder="Extensions"
+              value={chord.extensions}
+              style={{ 
+                width: "100px",
+               }}
+              onChange={(value) => {
+                const newProgression = [...chordProgression];
+                newProgression[index] = { ...chord, extensions: value };
+                setChordProgression(newProgression);
+              }}
+              options={extensionOptions}
+              maxCount={3}
+            />
+            <Button 
+              type="primary" 
+              onClick={() => playSingleChord(chord, index)}
+              style={{ marginTop: "5px" }}
+            >
+              Play
+            </Button>
+          </NoteCell>
+        ))}
+      </NotesArray>
+        <NoteCell
+          squareSidePx={squareSidePx * 2}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          show_border={false}
+        >
+          <Button 
+            type="primary" 
+            onClick={playChordProgression}
+            style={{ height: "40px" }}
+          >
+            Play All
+          </Button>
+        </NoteCell>
     </div>
   );
 }
