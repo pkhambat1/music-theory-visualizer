@@ -122,7 +122,6 @@ export default class NotesUtils {
   }
 
   static applyExtensionsToChordNotes(chordNotes, extensions) {
-    console.log(extensions, "extensions");
     const rootNote = chordNotes[0];
     const chordNotesWithExtensions = [...chordNotes];
     if (extensions.includes("sus2")) {
@@ -156,7 +155,6 @@ export default class NotesUtils {
       chordNotesWithExtensions.push(this.#getNinth(rootNote));
     }
     if (extensions.includes("9")) {
-      console.log("9  ");
       chordNotesWithExtensions.push(this.#getSeventh(rootNote));
       chordNotesWithExtensions.push(this.#getNinth(rootNote));
     }
