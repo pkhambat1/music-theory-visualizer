@@ -1,27 +1,39 @@
-import React from "react";
-import { baseScaleWithOverflowSize } from "../lib/music/scale";
+import React, { useLayoutEffect, useState } from "react";
 
-const LineGroup = ({
-  aboveRowIntervals,
-  aboveRowSquareSidePx,
-  borderWidth,
-  belowRow,
-  aboveRowIndex,
-  belowRowSquareSidePx,
-  isBelowRowModeInterval = true,
-}) => {
-  const maxRowWidth = baseScaleWithOverflowSize; // 23
-  const scaleUpFactor = belowRowSquareSidePx / aboveRowSquareSidePx; // 1 or 2
-  const numCellsInAboveRow =
-    aboveRowIntervals[aboveRowIntervals.length - 1] + 1;
-  const aboveRowLeftOverflow = (maxRowWidth - numCellsInAboveRow) / 2;
-  const unitSizedCellSpacesLeftOfBottomRow =
-    (maxRowWidth -
-      belowRow.length * (belowRowSquareSidePx / aboveRowSquareSidePx)) /
-    2;
-  const topY = (1 + aboveRowIndex * 2) * (aboveRowSquareSidePx + borderWidth);
-  const bottomY =
-    (2 + aboveRowIndex * 2) * (aboveRowSquareSidePx + borderWidth) + borderWidth;
+/**
+ * Draws connector lines between specific cells (by row/id) measured in the DOM.
+ */
+const LineGroup = ({ containerRef, connections = [], depKey = "" }) => {
+  const [lines, setLines] = useState([]);
+
+  useLayoutEffect(() => {
+    const container = containerRef?.current;
+    if (!container) return;
+    const containerRect = container.getBoundingClientRect();
+    const nextLines = [];
+
+    connections.forEach(({ fromRow, fromIdx, toRow, toIdx }) => {
+      const fromEl = container.querySelector(
+        `[data-row="${fromRow}"][data-idx="${fromIdx}"]`
+      );
+      const toEl = container.querySelector(
+        `[data-row="${toRow}"][data-idx="${toIdx}"]`
+      );
+      if (!fromEl || !toEl) return;
+      const fromRect = fromEl.getBoundingClientRect();
+      const toRect = toEl.getBoundingClientRect();
+      nextLines.push({
+        x1: fromRect.left - containerRect.left + fromRect.width / 2,
+        y1: fromRect.bottom - containerRect.top, // bottom center of from cell
+        x2: toRect.left - containerRect.left + toRect.width / 2,
+        y2: toRect.top - containerRect.top, // top center of to cell
+      });
+    });
+
+    setLines(nextLines);
+  }, [containerRef, depKey, connections]);
+
+  if (!lines.length) return null;
 
   return (
     <svg
@@ -35,39 +47,19 @@ const LineGroup = ({
         zIndex: 1,
       }}
     >
-      {[...Array(aboveRowIntervals.length)].map((_, idx) => {
-        const topX =
-          aboveRowSquareSidePx *
-            (aboveRowLeftOverflow + aboveRowIntervals[idx] + 0.5) +
-          borderWidth;
-
-        const topPos = {
-          x: topX,
-          y: topY,
-        };
-
-        const bottomPos = {
-          x:
-            aboveRowSquareSidePx *
-              (unitSizedCellSpacesLeftOfBottomRow + 0.5 * scaleUpFactor) + // base position
-            idx * scaleUpFactor * aboveRowSquareSidePx,
-          y: bottomY,
-        };
-
-        return (
-          <line
-            key={idx}
-            x1={topPos.x}
-            y1={topPos.y}
-            x2={bottomPos.x}
-            y2={bottomPos.y}
-            stroke="black"
-            strokeWidth=".5"
-          />
-        );
-      })}
+      {lines.map((line, idx) => (
+        <line
+          key={idx}
+          x1={line.x1}
+          y1={line.y1}
+          x2={line.x2}
+          y2={line.y2}
+          stroke="black"
+          strokeWidth=".5"
+        />
+      ))}
     </svg>
   );
 };
 
-export default LineGroup; 
+export default LineGroup;

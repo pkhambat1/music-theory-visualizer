@@ -14,6 +14,7 @@ const DiatonicScaleDegreesRow = ({
   selectedExtensions,
   setMajorScaleNotes,
   modeLeftOverflowSize,
+  dataRow = "diatonic-row",
 }) => {
   const chordNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "I"];
 
@@ -46,6 +47,8 @@ const DiatonicScaleDegreesRow = ({
             idx={chordNumeralIdx}
             key={chordNumeralIdx}
             squareSidePx={SQUARE_SIDE}
+            dataRow={dataRow}
+            dataIdx={chordNumeralIdx}
             onMouseEnter={() => {
               setHoveredChordIndex(chordNumeralIdx);
               const chordNotesInChromaticScale =

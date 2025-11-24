@@ -4,7 +4,13 @@ import NotesArray from "./NotesArray";
 import { renderNote } from "../utils/helpers";
 import NotesUtils from "../utils/NotesUtils";
 
-const TriadScale = ({ baseScale, squareSidePx, triadNotes, notes }) => {
+const TriadScale = ({
+  baseScale,
+  squareSidePx,
+  triadNotes,
+  notes,
+  dataRow = "triad-row",
+}) => {
   return (
     <NotesArray
       squareSidePx={squareSidePx}
@@ -16,6 +22,8 @@ const TriadScale = ({ baseScale, squareSidePx, triadNotes, notes }) => {
           squareSidePx={squareSidePx}
           key={idx}
           idx={idx}
+          dataRow={dataRow}
+          dataIdx={idx}
           opt_caption={
             [0, 2, 4, 6].includes(
               NotesUtils.modes["Ionian (major)"].indexOf(idx)

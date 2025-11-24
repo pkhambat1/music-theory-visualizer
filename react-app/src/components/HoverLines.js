@@ -1,32 +1,69 @@
-import React from "react";
-import { baseScaleLeftOverflowSize } from "../lib/music/scale";
+import React, { useLayoutEffect, useState } from "react";
+import NotesUtils from "../utils/NotesUtils";
 
+/**
+ * Draw tapered lines from the hovered diatonic (Roman numeral) cell
+ * to its triad notes in the mode row.
+ */
 const HoverLines = ({
+  containerRef,
   hoveredIndex,
-  SQUARE_SIDE,
-  borderWidth,
-  baseScale,
-  majorIntervals,
-  belowRowIndex,
+  modeNotesWithOverflow,
+  modeLeftOverflowSize,
 }) => {
-  if (hoveredIndex === null) return null; // No lines to render when no cell is hovered
+  const [lines, setLines] = useState([]);
 
-  const sourceX =
-    SQUARE_SIDE *
-    (baseScaleLeftOverflowSize +
-      hoveredIndex +
-      0.5 +
-      (baseScale.length - majorIntervals.length) / 2);
-  const sourcePos = {
-    x: sourceX,
+  useLayoutEffect(() => {
+    if (hoveredIndex === null) {
+      setLines([]);
+      return;
+    }
 
-    y: belowRowIndex * 2 * (SQUARE_SIDE + borderWidth), // Bottom edge of MajorTriads row
-  };
+    const container = containerRef?.current;
+    if (!container) return;
+    const containerRect = container.getBoundingClientRect();
 
-  const targetOffsets = [0, 2, 4];
+    const modeNotes = NotesUtils.leftTrimOverflowNotes(
+      modeNotesWithOverflow,
+      modeLeftOverflowSize
+    );
+    const chordNotes = NotesUtils.getChordNotes(modeNotes, hoveredIndex, "triads");
+    const targetIdxs = chordNotes
+      .map((note) => modeNotesWithOverflow.indexOf(note))
+      .filter((idx) => idx >= 0);
 
-  const bottomRowOffsetX = (baseScale.length - 8) / 2;
-  console.log("bottomRowOffsetX", bottomRowOffsetX);
+    const sourceEl = container.querySelector(
+      `[data-row="diatonic-row"][data-idx="${hoveredIndex}"]`
+    );
+    if (!sourceEl || !targetIdxs.length) {
+      setLines([]);
+      return;
+    }
+    const sourceRect = sourceEl.getBoundingClientRect();
+    const sourceX =
+      sourceRect.left - containerRect.left + sourceRect.width / 2;
+    const sourceY = sourceRect.top - containerRect.top; // top center of source
+
+    const nextLines = targetIdxs
+      .map((tIdx) => {
+        const targetEl = container.querySelector(
+          `[data-row="mode-row"][data-idx="${tIdx}"]`
+        );
+        if (!targetEl) return null;
+        const targetRect = targetEl.getBoundingClientRect();
+        return {
+          x1: sourceX,
+          y1: sourceY,
+          x2: targetRect.left - containerRect.left + targetRect.width / 2,
+          y2: targetRect.bottom - containerRect.top, // bottom center of target
+        };
+      })
+      .filter(Boolean);
+
+    setLines(nextLines);
+  }, [containerRef, hoveredIndex, modeNotesWithOverflow, modeLeftOverflowSize]);
+
+  if (!lines.length) return null;
 
   return (
     <svg
@@ -37,27 +74,20 @@ const HoverLines = ({
         width: "100%",
         height: "100%",
         pointerEvents: "none",
-        zIndex: 2, // Ensure these lines are above the regular ones
+        zIndex: 2,
       }}
     >
-      {targetOffsets.map((targetIdx) => {
-        const targetPos = {
-          x: sourceX + SQUARE_SIDE * targetIdx,
-          y: (belowRowIndex * 2 - 1) * (SQUARE_SIDE + borderWidth),
-        };
-
-        return (
-          <line
-            key={`hover-line-${hoveredIndex}-${targetIdx}`}
-            x1={sourcePos.x}
-            y1={sourcePos.y}
-            x2={targetPos.x}
-            y2={targetPos.y}
-            stroke="black"
-            strokeWidth=".5"
-          />
-        );
-      })}
+      {lines.map((line, idx) => (
+        <line
+          key={idx}
+          x1={line.x1}
+          y1={line.y1}
+          x2={line.x2}
+          y2={line.y2}
+          stroke="black"
+          strokeWidth=".5"
+        />
+      ))}
     </svg>
   );
 };
