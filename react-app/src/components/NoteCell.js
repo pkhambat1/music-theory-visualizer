@@ -1,5 +1,5 @@
 import React from "react";
-import { getLineBorder, borderPx } from "../App";
+import { getLineBorder, borderPx } from "../lib/music/scale";
 
 const NoteCell = ({
   squareSidePx,

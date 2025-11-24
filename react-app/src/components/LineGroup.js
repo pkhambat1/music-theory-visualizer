@@ -1,5 +1,5 @@
 import React from "react";
-import { baseScaleWithOverflowSize } from "../App";
+import { baseScaleWithOverflowSize } from "../lib/music/scale";
 
 const LineGroup = ({
   aboveRowIntervals,

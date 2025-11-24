@@ -1,5 +1,5 @@
 import React from "react";
-import { baseScaleLeftOverflowSize } from "../App";
+import { baseScaleLeftOverflowSize } from "../lib/music/scale";
 
 const HoverLines = ({
   hoveredIndex,

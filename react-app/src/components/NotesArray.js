@@ -1,5 +1,5 @@
 import React from "react";
-import { borderPx, getLineBorder } from "../App";
+import { borderPx, getLineBorder } from "../lib/music/scale";
 
 const NotesArray = ({
   size,

@@ -1,7 +1,6 @@
 import React from "react";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
-import { modeLeftOverflowSize } from "../App";
 import { playChord } from "../utils/helpers";
 import NotesUtils from "../utils/NotesUtils";
 
@@ -14,6 +13,7 @@ const DiatonicScaleDegreesRow = ({
   chordType = "triads", // 'triads' or 'seventhChords'
   selectedExtensions,
   setMajorScaleNotes,
+  modeLeftOverflowSize,
 }) => {
   const chordNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "I"];
 

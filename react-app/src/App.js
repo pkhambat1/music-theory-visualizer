@@ -1,53 +1,34 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
+import { DownOutlined } from "@ant-design/icons";
+import { Dropdown, Space, Select } from "antd";
 import TriadScale from "./components/TriadScale";
 import DiatonicScaleDegreesRow from "./components/DistonicScaleDegreesRow";
 import LineGroup from "./components/LineGroup";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
-import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesArray from "./components/NotesArray";
-import { DownOutlined, UserOutlined, RobotOutlined } from "@ant-design/icons";
-import { Dropdown, Space, Select, List, Avatar, Input } from "antd";
+import ChatPanel from "./components/ChatPanel";
+import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesUtils from "./utils/NotesUtils";
+import {
+  addOverflowToModeIntervals,
+  baseScaleLeftOverflowSize,
+  baseScaleWithOverflowSize,
+  buildModeNotesWithOverflow,
+  borderPx,
+  getLineBorder,
+  getModeLeftOverflowSize,
+  modeIntervalsToMode,
+} from "./lib/music/scale";
 
 const squareSidePx = 60;
 const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 
 const defaultRootNote = "C3";
-export const baseScaleLeftOverflow = 5;
-export const baseScaleWithOverflowSize =
-  NotesUtils.chromaticScale.length + 2 * baseScaleLeftOverflow;
-export const borderPx = 1.5;
-export const baseScaleLeftOverflowSize =
-  (baseScaleWithOverflowSize - NotesUtils.chromaticScale.length) / 2;
-export const getLineBorder = (borderWidth) => `${borderWidth}px solid #333`;
-
 export const notes = generateOctaves(6);
-
-function modeIntervalsToMode(rootNote, intervals) {
-  // return intervals.map((inter) => notes[inter + notes.indexOf(rootNote)]);
-  return intervals.map((inter) => inter + notes.indexOf(rootNote));
-}
-
-export function addOverflowToModeIntervals(modeIntervals) {
-  return [
-    ...[2, 3, 4, 5, 6].map(
-      (idx) => modeIntervals[idx] - (NotesUtils.chromaticScale.length - 1)
-    ),
-    ...modeIntervals,
-    ...[1, 2, 3, 4, 5].map(
-      (idx) => modeIntervals[idx] + NotesUtils.chromaticScale.length - 1
-    ),
-  ];
-}
-
-export const modeLeftOverflowSize =
-  (addOverflowToModeIntervals(NotesUtils.modes["Ionian (major)"]).length -
-    NotesUtils.modes["Ionian (major)"].length) /
-  2;
 
 export default function App() {
   const [selectedMode, setSelectedMode] = useState("Ionian (major)");
@@ -56,16 +37,17 @@ export default function App() {
   const modeWithOverflowIntervalsRef = useRef(
     addOverflowToModeIntervals(modeIntervals)
   );
+  const modeLeftOverflowSize = getModeLeftOverflowSize(modeIntervals);
 
   useEffect(() => {
     modeWithOverflowIntervalsRef.current =
       addOverflowToModeIntervals(modeIntervals);
     setModeNotesWithOverflow(
-      modeIntervalsToMode(rootNote, modeWithOverflowIntervalsRef.current)
+      modeIntervalsToMode(rootNote, modeWithOverflowIntervalsRef.current, notes)
     );
   }, [rootNote, modeIntervals]);
   const [modeNotesWithOverflow, setModeNotesWithOverflow] = useState(() => {
-    return modeIntervalsToMode(rootNote, modeWithOverflowIntervalsRef.current);
+    return buildModeNotesWithOverflow(rootNote, modeIntervals, notes);
   });
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
   // const [hoveredSeventhChordIndex, setHoveredSeventhChordIndex] =
@@ -103,214 +85,20 @@ export default function App() {
     Array.from({ length: modeIntervals.length }, () => [])
   );
 
-  // Add these new state variables for the chat after the existing state variables
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [isChatLoading, setIsChatLoading] = useState(false);
-
-  // Replace the existing useEffect with a simpler one that just logs the key
-  useEffect(() => {
-    console.log("API Key:", process.env.REACT_APP_OPENAI_API_KEY);
-  }, []);
-
-  // Add this ref for the message container
-  const messagesContainerRef = useRef(null);
-
-  // Add useEffect for auto-scrolling
-  useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop =
-        messagesContainerRef.current.scrollHeight;
+  const handleKeyChangeFromChat = async (newKey) => {
+    const targetNoteIndex = notes.indexOf(newKey);
+    if (targetNoteIndex === -1) {
+      return false;
     }
-  }, [messages]); // Re-run whenever messages change
 
-  // Simplify handleSendMessage
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-
-    // Add user message to chat
-    const newUserMessage = { type: "user", content: inputValue };
-    setMessages((prev) => [...prev, newUserMessage]);
-    setInputValue("");
-    setIsChatLoading(true);
-
-    try {
-      // Define function for changing key
-      const functions = [
-        {
-          name: "set_key",
-          description: "Set the root note/key of the musical scale",
-          parameters: {
-            type: "object",
-            properties: {
-              new_key: {
-                type: "string",
-                description: "The new root note, like C3, F#4, etc.",
-              },
-            },
-            required: ["new_key"],
-          },
-        },
-      ];
-
-      // Enhanced system message to recognize more variants
-      const systemMessage = {
-        role: "system",
-        content: `You are a music assistant. Your primary job is to help users set their musical key when requested.
-
-IMPORTANT: When the user asks to change the key in ANY way, ALWAYS use the set_key function.
-
-NEVER respond with plain text for key changes. If you see ANY of these patterns (or similar):
-- "set key to X"
-- "set to X"
-- "change key to X"
-- "change to X"
-- "make the key X"
-
-You MUST respond with a function call to set_key with the new_key parameter.
-
-If the user doesn't specify an octave (like just saying "G" instead of "G3"), use octave 3 as default.
-
-IMPORTANT: The set_key function is the ONLY way to change keys. TEXT RESPONSES CANNOT CHANGE KEYS.
-
-Current key: ${rootNote}
-Current mode: ${selectedMode}`,
-      };
-
-      // Build API messages - just the necessary context
-      const apiMessages = [
-        systemMessage,
-        // Convert only true conversation messages (user/ai) for the API context
-        ...messages
-          .slice(-5)
-          .filter(
-            (msg) =>
-              msg.type === "user" ||
-              (msg.type === "ai" && !msg.content.includes("Key"))
-          )
-          .map((msg) => ({
-            role: msg.type === "user" ? "user" : "assistant",
-            content: msg.content,
-          })),
-        // Add the new user message
-        { role: "user", content: inputValue },
-      ];
-
-      // Log exactly what we're sending to the API
-      console.log("Sending to API:", JSON.stringify(apiMessages, null, 2));
-
-      // Make API call
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: apiMessages,
-            functions: functions,
-            function_call: "auto",
-          }),
-        }
-      );
-
-      const data = await response.json();
-      console.log("Raw AI response:", JSON.stringify(data, null, 2));
-
-      if (!data.choices?.[0]?.message) {
-        throw new Error("Invalid API response");
-      }
-
-      const responseMessage = data.choices[0].message;
-      console.log(
-        "Response message:",
-        JSON.stringify(responseMessage, null, 2)
-      );
-
-      // Handle function call for setting key
-      if (responseMessage.function_call?.name === "set_key") {
-        try {
-          const functionArgs = JSON.parse(
-            responseMessage.function_call.arguments
-          );
-
-          if (functionArgs.new_key) {
-            // Add AI response to chat if provided (usually null for function calls)
-            if (responseMessage.content) {
-              setMessages((prev) => [
-                ...prev,
-                {
-                  type: "ai",
-                  content: responseMessage.content,
-                },
-              ]);
-            }
-
-            // Try to move slider to set the key
-            const targetNoteIndex = notes.indexOf(functionArgs.new_key);
-
-            if (
-              targetNoteIndex !== -1 &&
-              sliderInstanceRef.current?.moveToIdx
-            ) {
-              const targetPosition =
-                targetNoteIndex - baseScaleLeftOverflowSize;
-              sliderInstanceRef.current.moveToIdx(targetPosition);
-
-              // Add confirmation that clearly indicates it's a UI message, not from the AI
-              setMessages((prev) => [
-                ...prev,
-                {
-                  type: "system", // Changed from "ai" to "system"
-                  content: `✓ Key changed to ${functionArgs.new_key}`,
-                },
-              ]);
-            } else {
-              // Handle failure
-              setMessages((prev) => [
-                ...prev,
-                {
-                  type: "system", // Changed from "ai" to "system"
-                  content: `⚠️ Couldn't set key to ${functionArgs.new_key}`,
-                },
-              ]);
-            }
-          }
-        } catch (e) {
-          console.error("Error handling function call:", e);
-          setMessages((prev) => [
-            ...prev,
-            {
-              type: "system", // Changed from "ai" to "system"
-              content: "⚠️ Error processing key change",
-            },
-          ]);
-        }
-      } else {
-        // For regular responses, just add the message
-        setMessages((prev) => [
-          ...prev,
-          {
-            type: "ai",
-            content: responseMessage.content || "I'm not sure how to respond.",
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error("API error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: "ai",
-          content: "Sorry, I encountered an error.",
-        },
-      ]);
-    } finally {
-      setIsChatLoading(false);
+    if (sliderInstanceRef.current?.moveToIdx) {
+      const targetPosition = targetNoteIndex - baseScaleLeftOverflowSize;
+      sliderInstanceRef.current.moveToIdx(targetPosition);
+      return true;
     }
+
+    setRootNote(newKey);
+    return true;
   };
 
   return (
@@ -509,6 +297,7 @@ Current mode: ${selectedMode}`,
         chordType="triads"
         setMajorScaleNotes={setMajorScaleNotes}
         selectedExtensions={selectedExtensions}
+        modeLeftOverflowSize={modeLeftOverflowSize}
       />
 
       {/* Seventh chords */}
@@ -580,106 +369,13 @@ Current mode: ${selectedMode}`,
         ))}
       </NotesArray>
 
-      {/* Add the chat interface at the bottom, after all existing components */}
-      <div style={{ marginTop: "100px", width: "100%" }}>
-        <NotesArray
-          squareSidePx={squareSidePx * 2}
-          size={4}
-          marginPx={squareSidePx}
-          show_border={false}
-        >
-          <div
-            style={{
-              width: "100%",
-              height: "400px",
-              display: "flex",
-              flexDirection: "column",
-              border: "1px solid #e8e8e8",
-              borderRadius: "4px",
-              background: "#ffffff",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            }}
-          >
-            <div
-              style={{
-                padding: "10px",
-                borderBottom: "1px solid #f0f0f0",
-                background: "#f9f9f9",
-              }}
-            >
-              <h3 style={{ margin: 0 }}>AI Music Assistant</h3>
-            </div>
-            <div
-              style={{ flex: 1, overflowY: "auto", padding: "16px" }}
-              ref={messagesContainerRef}
-            >
-              <List
-                dataSource={messages}
-                renderItem={(msg) => (
-                  <List.Item
-                    style={{
-                      justifyContent:
-                        msg.type === "user" ? "flex-end" : "flex-start",
-                      padding: "8px 0",
-                      borderBottom: "none",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "8px",
-                        maxWidth: "80%",
-                        flexDirection:
-                          msg.type === "user" ? "row-reverse" : "row",
-                      }}
-                    >
-                      {msg.type !== "system" && (
-                        <Avatar
-                          icon={
-                            msg.type === "user" ? (
-                              <UserOutlined />
-                            ) : (
-                              <RobotOutlined />
-                            )
-                          }
-                        />
-                      )}
-                      <div
-                        style={{
-                          background:
-                            msg.type === "user"
-                              ? "#e6f7ff"
-                              : msg.type === "system"
-                              ? "#f6ffed" // Light green for system messages
-                              : "#f0f0f0", // Gray for AI
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-                          wordBreak: "break-word",
-                          fontStyle:
-                            msg.type === "system" ? "italic" : "normal",
-                        }}
-                      >
-                        {msg.content}
-                      </div>
-                    </div>
-                  </List.Item>
-                )}
-              />
-            </div>
-            <div style={{ padding: "16px", borderTop: "1px solid #f0f0f0" }}>
-              <Input.Search
-                placeholder="Ask about music theory or set key..."
-                enterButton="Send"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onSearch={handleSendMessage}
-                loading={isChatLoading}
-              />
-            </div>
-          </div>
-        </NotesArray>
-      </div>
+      {/* <div style={{ marginTop: "100px", width: "100%" }}>
+        <ChatPanel
+          rootNote={rootNote}
+          selectedMode={selectedMode}
+          onKeyChange={handleKeyChangeFromChat}
+        />
+      </div> */}
     </div>
   );
 }
