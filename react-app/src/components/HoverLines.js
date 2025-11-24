@@ -20,47 +20,73 @@ const HoverLines = ({
     }
 
     const container = containerRef?.current;
-    if (!container) return;
-    const containerRect = container.getBoundingClientRect();
+    const measure = () => {
+      if (!container) return;
+      const containerRect = container.getBoundingClientRect();
 
-    const modeNotes = NotesUtils.leftTrimOverflowNotes(
-      modeNotesWithOverflow,
-      modeLeftOverflowSize
-    );
-    const chordNotes = NotesUtils.getChordNotes(modeNotes, hoveredIndex, "triads");
-    const targetIdxs = chordNotes
-      .map((note) => modeNotesWithOverflow.indexOf(note))
-      .filter((idx) => idx >= 0);
+      const modeNotes = NotesUtils.leftTrimOverflowNotes(
+        modeNotesWithOverflow,
+        modeLeftOverflowSize
+      );
+      const chordNotes = NotesUtils.getChordNotes(
+        modeNotes,
+        hoveredIndex,
+        "triads"
+      );
+      const targetIdxs = chordNotes
+        .map((note) => modeNotesWithOverflow.indexOf(note))
+        .filter((idx) => idx >= 0);
 
-    const sourceEl = container.querySelector(
-      `[data-row="diatonic-row"][data-idx="${hoveredIndex}"]`
-    );
-    if (!sourceEl || !targetIdxs.length) {
-      setLines([]);
-      return;
+      const sourceEl = container.querySelector(
+        `[data-row="diatonic-row"][data-idx="${hoveredIndex}"]`
+      );
+      if (!sourceEl || !targetIdxs.length) {
+        setLines([]);
+        return;
+      }
+      const sourceRect = sourceEl.getBoundingClientRect();
+      const sourceX =
+        sourceRect.left - containerRect.left + sourceRect.width / 2;
+      const sourceY = sourceRect.top - containerRect.top; // top center of source
+
+      const nextLines = targetIdxs
+        .map((tIdx) => {
+          const targetEl = container.querySelector(
+            `[data-row="mode-row"][data-idx="${tIdx}"]`
+          );
+          if (!targetEl) return null;
+          const targetRect = targetEl.getBoundingClientRect();
+          return {
+            x1: sourceX,
+            y1: sourceY,
+            x2: targetRect.left - containerRect.left + targetRect.width / 2,
+            y2: targetRect.bottom - containerRect.top, // bottom center of target
+          };
+        })
+        .filter(Boolean);
+
+      setLines(nextLines);
+    };
+
+    measure();
+
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => measure())
+        : null;
+    if (ro && container) {
+      ro.observe(container);
     }
-    const sourceRect = sourceEl.getBoundingClientRect();
-    const sourceX =
-      sourceRect.left - containerRect.left + sourceRect.width / 2;
-    const sourceY = sourceRect.top - containerRect.top; // top center of source
+    const onResize = () => measure();
+    window.addEventListener("resize", onResize);
 
-    const nextLines = targetIdxs
-      .map((tIdx) => {
-        const targetEl = container.querySelector(
-          `[data-row="mode-row"][data-idx="${tIdx}"]`
-        );
-        if (!targetEl) return null;
-        const targetRect = targetEl.getBoundingClientRect();
-        return {
-          x1: sourceX,
-          y1: sourceY,
-          x2: targetRect.left - containerRect.left + targetRect.width / 2,
-          y2: targetRect.bottom - containerRect.top, // bottom center of target
-        };
-      })
-      .filter(Boolean);
-
-    setLines(nextLines);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (ro && container) {
+        ro.unobserve(container);
+        ro.disconnect();
+      }
+    };
   }, [containerRef, hoveredIndex, modeNotesWithOverflow, modeLeftOverflowSize]);
 
   if (!lines.length) return null;

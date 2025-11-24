@@ -11,21 +11,31 @@ const NotesArray = ({
   return (
     <div
       style={{
-        width: `${squareSidePx * size}px`,
-        height: `${squareSidePx}px`,
-        margin: `${marginPx}px auto`,
-        position: "relative",
-        boxSizing: "content-box",
-        background: "#fff",
-        border: show_border
-          ? getLineBorder(borderPx)
-          : `${borderPx}px solid transparent`, // Transparent border when show_border is false
+        width: "100%",
         display: "flex",
-        alignItems: "center",
-        zIndex: 2,
+        justifyContent: "center",
+        margin: `${marginPx}px auto`,
+        overflow: "hidden",
+        position: "relative",
       }}
     >
-      {children}
+      <div
+        style={{
+          width: `${squareSidePx * size}px`,
+          height: `${squareSidePx}px`,
+          position: "relative",
+          boxSizing: "content-box",
+          background: "#fff",
+          border: show_border
+            ? getLineBorder(borderPx)
+            : `${borderPx}px solid transparent`,
+          display: "flex",
+          alignItems: "center",
+          zIndex: 2,
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 };

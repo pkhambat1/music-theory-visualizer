@@ -144,14 +144,17 @@ export default function App() {
 
         <Card
           style={{ maxWidth: 1200, width: "100%", margin: "0 auto" }}
-          bodyStyle={{ padding: 24 }}
+          bodyStyle={{ padding: 24, display: "flex", justifyContent: "center" }}
         >
           <div
             ref={diagramRef}
             style={{
               position: "relative",
-              width: "fit-content",
-              margin: "0 auto",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              overflow: "hidden",
             }}
           >
             <LineGroup
