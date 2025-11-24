@@ -50,6 +50,18 @@ export default function App() {
   const [modeNotesWithOverflow, setModeNotesWithOverflow] = useState(() => {
     return buildModeNotesWithOverflow(rootNote, modeIntervals, notes);
   });
+  const extensionOptions = [
+    { value: "maj", label: "maj" },
+    { value: "m", label: "m" },
+    { value: "dim", label: "dim" },
+    { value: "aug", label: "aug" },
+    { value: "sus2", label: "sus2" },
+    { value: "sus4", label: "sus4" },
+    { value: "7", label: "7" },
+    { value: "maj7", label: "maj7" },
+    { value: "add9", label: "add9" },
+    { value: "9", label: "9" },
+  ];
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState(null);
   // const [hoveredSeventhChordIndex, setHoveredSeventhChordIndex] =
   //   useState(null);
@@ -107,7 +119,15 @@ export default function App() {
             <Divider style={{ margin: "12px 0" }} />
             <Space size="middle" wrap>
               <Text strong>Key:</Text>
-              <Tag color="blue" style={{ fontSize: 16, padding: "6px 10px" }}>
+              <Tag
+                color="#ffffff"
+                style={{
+                  fontSize: 16,
+                  padding: "6px 10px",
+                  border: "1px solid #d9d9d9",
+                  color: "#333",
+                }}
+              >
                 {renderNote(rootNote)}
               </Tag>
               <Text strong>Mode:</Text>
@@ -120,14 +140,7 @@ export default function App() {
                 }}
                 trigger={["click"]}
               >
-                <Tag
-                  color="geekblue"
-                  style={{
-                    fontSize: 16,
-                    padding: "6px 10px",
-                    cursor: "pointer",
-                  }}
-                >
+                <Tag color="#ffffff" style={{ border: "1px solid #d9d9d9", color: "#333", cursor: "pointer" }}>
                   {selectedMode} <DownOutlined />
                 </Tag>
               </Dropdown>
@@ -144,7 +157,9 @@ export default function App() {
 
         <Card
           style={{ maxWidth: 1200, width: "100%", margin: "0 auto" }}
-          bodyStyle={{ padding: 24, display: "flex", justifyContent: "center" }}
+          styles={{
+            body: { padding: 24, display: "flex", justifyContent: "center" },
+          }}
         >
           <div
             ref={diagramRef}
@@ -313,61 +328,57 @@ export default function App() {
             />
 
             {/* Variation Controls */}
-            <NotesArray
-              size={modeIntervals.length}
-              squareSidePx={squareSidePx * 2}
-              marginPx={squareSidePx}
+            <Card
+              size="small"
+              style={{ width: "100%", marginTop: 24 }}
+              title="Chord extensions per degree"
+              styles={{ body: { padding: 16 } }}
             >
-              {Array.from({ length: modeIntervals.length }).map((_, i) => (
-                <NoteCell
-                  key={i}
-                  squareSidePx={squareSidePx * 2}
-                  overflow="visible"
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "100%", // Adjust the width as needed
-                    minWidth: "100px", // Ensures a minimum width for smaller screens
-                    padding: "10px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <Select
-                    mode="multiple"
-                    placeholder="Select an option"
-                    options={[
-                      { value: "maj", label: "maj" },
-                      { value: "m", label: "m" },
-                      { value: "dim", label: "dim" },
-                      { value: "aug", label: "aug" },
-                      { value: "sus2", label: "sus2" },
-                      { value: "sus4", label: "sus4" },
-                      { value: "7", label: "7" },
-                      { value: "maj7", label: "maj7" },
-                      { value: "add9", label: "add9" },
-                      { value: "9", label: "9" },
-                    ]}
+              <Space
+                wrap
+                size="middle"
+                style={{ width: "100%", justifyContent: "center" }}
+              >
+                {Array.from({ length: modeIntervals.length }).map((_, i) => (
+                  <Space
+                    key={i}
+                    direction="vertical"
+                    size={8}
+                    align="center"
                     style={{
-                      width: "100px",
-                      height: "100px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      padding: "10px 12px",
+                      border: "1px solid #e5e5e5",
+                      borderRadius: 8,
+                      minWidth: 140,
+                      background: "#fafafa",
                     }}
-                    onChange={(value) => {
-                      setSelectedExtensions((prev) => {
-                        const newExtensions = [...prev];
-                        newExtensions[i] = value;
-                        console.log("selectedExtensions", newExtensions);
-                        return newExtensions;
-                      });
-                    }}
-                    maxCount={3}
-                  />
-                </NoteCell>
-              ))}
-            </NotesArray>
+                  >
+                    <Text strong>
+                      {["I", "II", "III", "IV", "V", "VI", "VII", "I"][i] ||
+                        `Deg ${i + 1}`}
+                    </Text>
+                    <Select
+                      mode="multiple"
+                      allowClear
+                      size="small"
+                      placeholder="Extensions"
+                      options={extensionOptions}
+                      value={selectedExtensions[i]}
+                      style={{ minWidth: 120 }}
+                      onChange={(value) => {
+                        setSelectedExtensions((prev) => {
+                          const next = [...prev];
+                          next[i] = value;
+                          return next;
+                        });
+                      }}
+                      maxCount={3}
+                      dropdownMatchSelectWidth={200}
+                    />
+                  </Space>
+                ))}
+              </Space>
+            </Card>
           </div>
         </Card>
       </Space>
