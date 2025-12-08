@@ -29,6 +29,11 @@ const pinkColor = "#f2c2c2";
 const greyColor = "#cccccc";
 
 const defaultRootNote = "C3";
+const STATE_API_URL =
+  process.env.REACT_APP_STATE_API_URL || "http://localhost:7420/state";
+const STATE_POLL_INTERVAL_MS = Number(
+  process.env.REACT_APP_STATE_POLL_MS || 2000
+);
 export const notes = generateOctaves(6);
 
 export default function App() {
@@ -88,6 +93,43 @@ export default function App() {
       setRootNote(notes[rootIndex]);
     },
   });
+
+  useEffect(() => {
+    let active = true;
+
+    const fetchRemoteState = async () => {
+      try {
+        const response = await fetch(STATE_API_URL, { cache: "no-store" });
+        if (!response.ok) return;
+
+        const remoteState = await response.json();
+        if (!active || !remoteState) return;
+
+        if (remoteState.rootNote) {
+          setRootNote((prev) =>
+            remoteState.rootNote !== prev ? remoteState.rootNote : prev
+          );
+        }
+
+        if (remoteState.mode && NotesUtils.modes[remoteState.mode]) {
+          setSelectedMode((prev) =>
+            remoteState.mode !== prev ? remoteState.mode : prev
+          );
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Unable to fetch MCP state", error);
+        }
+      }
+    };
+
+    fetchRemoteState();
+    const poller = setInterval(fetchRemoteState, STATE_POLL_INTERVAL_MS);
+    return () => {
+      active = false;
+      clearInterval(poller);
+    };
+  }, []);
 
   const items = Object.keys(NotesUtils.modes).map((mode) => ({
     key: mode,

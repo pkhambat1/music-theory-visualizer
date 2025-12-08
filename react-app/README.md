@@ -1,3 +1,11 @@
+# MCP demo (Claude + MCP -> React key control)
+
+1. From `react-app`, install deps (Node 18+ recommended for the MCP SDK): `npm install`.
+2. Start the MCP server so Claude can call `set_key` and so the UI can poll state: `npm run mcp-server`. It exposes `stdio` for Claude and `http://localhost:7420/state` for the React app.
+3. Start the React app separately: `npm start`. The UI polls `/state` every ~2s and will update when Claude changes the key.
+4. In Claude Desktop, add a custom MCP server that runs `npm run mcp-server` in this folder (stdio transport). Then ask Claude: “Change the key to G.” Claude will call the `set_key` tool, updating the UI.
+5. Customize with env vars: `MCP_STATE_PORT` (server HTTP port), `MCP_DEFAULT_OCTAVE` (used when Claude says “G” with no octave), `REACT_APP_STATE_API_URL`/`REACT_APP_STATE_POLL_MS` on the React side.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

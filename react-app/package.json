@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
     "cra-template": "1.2.0",
     "embla-carousel": "^8.5.1",
     "embla-carousel-react": "^8.5.1",
@@ -11,14 +12,16 @@
     "react": "^19.0.0",
     "react-d3": "^0.4.0",
     "react-dom": "^19.0.0",
-    "react-scripts": "^5.0.1",
-    "tone": "^15.0.4"
+    "react-scripts": "^0.0.0",
+    "tone": "^15.0.4",
+    "zod": "^4.1.13"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "mcp-server": "node mcp-server.js"
   },
   "eslintConfig": {
     "extends": [
