@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.22.0",
+    "@ant-design/icons": "6.x",
+    "antd": "6.x",
     "cra-template": "1.2.0",
     "embla-carousel": "^8.5.1",
     "embla-carousel-react": "^8.5.1",
