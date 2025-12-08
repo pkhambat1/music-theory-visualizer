@@ -1,22 +1,9 @@
 import * as Tone from "tone";
+import baseNotes from "../constants/notes.json";
 
 export function generateOctaves(octaveCount) {
-  const baseScale = [
-    "C",
-    "C#",
-    "D",
-    "D#",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "G#",
-    "A",
-    "A#",
-    "B",
-  ];
   return Array.from({ length: octaveCount }, (_, i) => i + 1).flatMap(
-    (octave) => baseScale.map((note) => note + octave)
+    (octave) => baseNotes.map((note) => note + octave)
   );
 }
 

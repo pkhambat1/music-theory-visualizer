@@ -39,6 +39,7 @@ export const notes = generateOctaves(6);
 export default function App() {
   const [selectedMode, setSelectedMode] = useState("Ionian (major)");
   const [rootNote, setRootNote] = useState(defaultRootNote);
+  const lastAppliedTsRef = useRef(0);
   const modeIntervals = NotesUtils.modes[selectedMode];
   const modeWithOverflowIntervalsRef = useRef(
     addOverflowToModeIntervals(modeIntervals)
@@ -55,6 +56,10 @@ export default function App() {
   const [modeNotesWithOverflow, setModeNotesWithOverflow] = useState(() => {
     return buildModeNotesWithOverflow(rootNote, modeIntervals, notes);
   });
+  const keyItems = notes.map((note) => ({
+    key: note,
+    label: renderNote(note),
+  }));
   const extensionOptions = [
     { value: "maj", label: "maj" },
     { value: "m", label: "m" },
@@ -76,7 +81,21 @@ export default function App() {
     ...Array(NotesUtils.modes["Ionian (major)"].length),
   ]);
 
-  const [sliderRef] = useKeenSlider({
+  const setRootNoteWithTimestamp = (note, source = "ui") => {
+    setRootNote(note);
+    if (source !== "remote") {
+      lastAppliedTsRef.current = Date.now();
+    }
+  };
+
+  const setModeWithTimestamp = (mode, source = "ui") => {
+    setSelectedMode(mode);
+    if (source !== "remote") {
+      lastAppliedTsRef.current = Date.now();
+    }
+  };
+
+  const [sliderRef, sliderInstanceRef] = useKeenSlider({
     centered: true,
     slides: {
       perView: baseScaleWithOverflowSize,
@@ -84,15 +103,26 @@ export default function App() {
     initial: notes.indexOf(defaultRootNote) - baseScaleLeftOverflowSize,
 
     slideChanged(s) {
-      console.log("Slider changed event!", {
-        position: s.track.details.abs,
-        newRootIndex: s.track.details.abs + baseScaleLeftOverflowSize,
-        newRootNote: notes[s.track.details.abs + baseScaleLeftOverflowSize],
-      });
       const rootIndex = s.track.details.abs + baseScaleLeftOverflowSize;
-      setRootNote(notes[rootIndex]);
+      const nextRoot = notes[rootIndex];
+      // Avoid redundant state updates to prevent feedback loops.
+      setRootNoteWithTimestamp(
+        (prev) => (prev !== nextRoot ? nextRoot : prev),
+        "ui"
+      );
     },
   });
+
+  useEffect(() => {
+    const instance = sliderInstanceRef.current;
+    const targetIndex = notes.indexOf(rootNote) - baseScaleLeftOverflowSize;
+    if (!instance || targetIndex < 0) return;
+    const currentIndex = instance.track?.details?.abs ?? -1;
+    // Only move the slider if it is actually out of sync to avoid triggering slideChanged unnecessarily.
+    if (currentIndex === targetIndex) return;
+    // Keep the slider position in sync when rootNote changes externally (e.g., MCP state).
+    instance.moveToIdx(targetIndex);
+  }, [rootNote, sliderInstanceRef]);
 
   useEffect(() => {
     let active = true;
@@ -105,17 +135,24 @@ export default function App() {
         const remoteState = await response.json();
         if (!active || !remoteState) return;
 
+        const remoteUpdatedAt = remoteState.updatedAt
+          ? Date.parse(remoteState.updatedAt)
+          : 0;
+        const shouldApply =
+          remoteUpdatedAt === 0
+            ? lastAppliedTsRef.current === 0
+            : remoteUpdatedAt > lastAppliedTsRef.current;
+        if (!shouldApply) return;
+
         if (remoteState.rootNote) {
-          setRootNote((prev) =>
-            remoteState.rootNote !== prev ? remoteState.rootNote : prev
-          );
+          setRootNoteWithTimestamp(remoteState.rootNote, "remote");
         }
 
         if (remoteState.mode && NotesUtils.modes[remoteState.mode]) {
-          setSelectedMode((prev) =>
-            remoteState.mode !== prev ? remoteState.mode : prev
-          );
+          setModeWithTimestamp(remoteState.mode, "remote");
         }
+        lastAppliedTsRef.current =
+          remoteUpdatedAt || /* fallback if missing */ Date.now();
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
           console.warn("Unable to fetch MCP state", error);
@@ -156,7 +193,8 @@ export default function App() {
               Music Theory Visualizer
             </Title>
             <Text type="secondary">
-              Explore modes, intervals, and diatonic chords with quick audio playback.
+              Explore modes, intervals, and diatonic chords with quick audio
+              playback.
             </Text>
             <Divider style={{ margin: "12px 0" }} />
             <Space size="middle" wrap>
@@ -177,22 +215,22 @@ export default function App() {
                 menu={{
                   items,
                   onClick: ({ key }) => {
-                    setSelectedMode(key);
+                    setModeWithTimestamp(key);
                   },
                 }}
                 trigger={["click"]}
               >
-                <Tag color="#ffffff" style={{ border: "1px solid #d9d9d9", color: "#333", cursor: "pointer" }}>
+                <Tag
+                  color="#ffffff"
+                  style={{
+                    border: "1px solid #d9d9d9",
+                    color: "#333",
+                    cursor: "pointer",
+                  }}
+                >
                   {selectedMode} <DownOutlined />
                 </Tag>
               </Dropdown>
-            </Space>
-            <Divider style={{ margin: "12px 0" }} />
-            <Space size="small" wrap align="center">
-              <Text type="secondary">Legend:</Text>
-              <Tag color={pinkColor}>Root note</Tag>
-              <Tag color={greyColor}>Mode tone</Tag>
-              <Tag>Non-mode tone</Tag>
             </Space>
           </Space>
         </Card>
@@ -220,12 +258,12 @@ export default function App() {
               depKey={`${rootNote}-${selectedMode}`}
             />
 
-          <HoverLines
-            hoveredIndex={hoveredTriadIndex}
-            containerRef={diagramRef}
-            modeNotesWithOverflow={modeNotesWithOverflow}
-            modeLeftOverflowSize={modeLeftOverflowSize}
-          />
+            <HoverLines
+              hoveredIndex={hoveredTriadIndex}
+              containerRef={diagramRef}
+              modeNotesWithOverflow={modeNotesWithOverflow}
+              modeLeftOverflowSize={modeLeftOverflowSize}
+            />
 
             <TriadScale
               baseScale={NotesUtils.chromaticScale}
@@ -339,20 +377,20 @@ export default function App() {
                 })}
               </div>
 
-            {modeNotesWithOverflow.map((note, idx) => {
-              const noteString = notes[note];
-              return (
-                <NoteCell
-                  squareSidePx={squareSidePx}
-                  idx={idx}
-                  key={idx}
-                  dataRow="mode-row"
-                  dataIdx={idx}
-                  show_border={false}
-                  onClick={() => playNote(noteString)}
-                >
-                  {noteString && renderNote(noteString)}
-                </NoteCell>
+              {modeNotesWithOverflow.map((note, idx) => {
+                const noteString = notes[note];
+                return (
+                  <NoteCell
+                    squareSidePx={squareSidePx}
+                    idx={idx}
+                    key={idx}
+                    dataRow="mode-row"
+                    dataIdx={idx}
+                    show_border={false}
+                    onClick={() => playNote(noteString)}
+                  >
+                    {noteString && renderNote(noteString)}
+                  </NoteCell>
                 );
               })}
             </NotesArray>
@@ -415,7 +453,7 @@ export default function App() {
                         });
                       }}
                       maxCount={3}
-                      dropdownMatchSelectWidth={200}
+                      popupMatchSelectWidth={200}
                     />
                   </Space>
                 ))}

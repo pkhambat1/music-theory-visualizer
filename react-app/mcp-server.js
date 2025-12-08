@@ -8,33 +8,20 @@
 const {
   McpServer,
   ResourceTemplate,
-} = require("./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/mcp.js");
+} = require("@modelcontextprotocol/sdk/server/mcp.js");
 const {
   StdioServerTransport,
-} = require("./node_modules/@modelcontextprotocol/sdk/dist/cjs/server/stdio.js");
+} = require("@modelcontextprotocol/sdk/server/stdio.js");
 const { z } = require("zod");
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const BASE_NOTES = require("./src/constants/notes.json");
+const MODE_NAMES = require("./modes.json");
 
 const STATE_PORT = parseInt(process.env.MCP_STATE_PORT || "7420", 10);
 const DEFAULT_OCTAVE = parseInt(process.env.MCP_DEFAULT_OCTAVE || "3", 10);
 const STATE_FILE = path.join(__dirname, "mcp-state.json");
-
-const BASE_NOTES = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
-];
 const FLAT_TO_SHARP = { Db: "C#", Eb: "D#", Gb: "F#", Ab: "G#", Bb: "A#" };
 const ALLOWED_ROOT_NOTES = Array.from({ length: 6 }, (_, i) => i + 1).flatMap(
   (octave) => BASE_NOTES.map((note) => `${note}${octave}`)
@@ -67,6 +54,29 @@ function persistState(nextState) {
   state = { ...state, ...nextState, updatedAt: new Date().toISOString() };
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
   return state;
+}
+
+function normalizeModeName(input) {
+  if (!input || typeof input !== "string") return null;
+  const candidate = input.trim();
+  const lower = candidate.toLowerCase();
+
+  // Exact match (case-insensitive) against canonical names.
+  const direct = MODE_NAMES.find((mode) => mode.toLowerCase() === lower);
+  if (direct) return direct;
+
+  // Conventional fallback: treat common shorthand/variants as natural minor.
+  const isMinorish =
+    lower === "aeolian" ||
+    lower === "natural minor" ||
+    lower === "minor" ||
+    lower.includes("aeolian") ||
+    lower.includes("minor");
+  if (isMinorish) {
+    return "Aeolian (natural minor)";
+  }
+
+  return null;
 }
 
 function normalizeKey(input) {
@@ -136,6 +146,37 @@ server.registerTool(
 );
 
 server.registerTool(
+  "set_mode",
+  {
+    title: "Set the mode/scale",
+    description: `Change the current mode. Allowed: ${MODE_NAMES.join(
+      ", "
+    )}.`,
+    inputSchema: z.object({
+      mode: z.string(),
+    }),
+    outputSchema: z.object({
+      rootNote: z.string(),
+      mode: z.string(),
+      updatedAt: z.string().optional(),
+    }),
+  },
+  async ({ mode }) => {
+    const normalized = normalizeModeName(mode);
+    if (!normalized) {
+      throw new Error(
+        `Invalid mode '${mode}'. Allowed: ${MODE_NAMES.join(", ")}.`
+      );
+    }
+    const updated = persistState({ mode: normalized });
+    return {
+      content: [{ type: "text", text: `Mode set to ${normalized}` }],
+      structuredContent: updated,
+    };
+  }
+);
+
+server.registerTool(
   "set_key",
   {
     title: "Set the key/root note",
@@ -189,6 +230,13 @@ function startStateHttpServer() {
 
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Not found" }));
+  });
+
+  server.on("error", (err) => {
+    console.error(
+      `[mcp] State HTTP server failed to bind to 127.0.0.1:${STATE_PORT}: ${err.message}`
+    );
+    process.exit(1);
   });
 
   server.listen(STATE_PORT, "127.0.0.1", () => {

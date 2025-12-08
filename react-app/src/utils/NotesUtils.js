@@ -25,6 +25,7 @@ export default class NotesUtils {
     Locrian: [0, 1, 3, 5, 6, 8, 10, 12],
     "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11, 12],
     "Melodic Minor": [0, 2, 3, 5, 7, 9, 11, 12],
+    "Whole Tone": [0, 2, 4, 6, 8, 10, 12],
   };
 
   static #getSecond(rootNote) {
