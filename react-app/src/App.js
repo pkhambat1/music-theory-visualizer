@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import { DownOutlined } from "@ant-design/icons";
@@ -40,6 +40,7 @@ export default function App() {
   const [selectedMode, setSelectedMode] = useState("Ionian (major)");
   const [rootNote, setRootNote] = useState(defaultRootNote);
   const lastAppliedTsRef = useRef(0);
+  const lastChangeSourceRef = useRef("init");
   const modeIntervals = NotesUtils.modes[selectedMode];
   const modeWithOverflowIntervalsRef = useRef(
     addOverflowToModeIntervals(modeIntervals)
@@ -85,6 +86,7 @@ export default function App() {
     setRootNote(note);
     if (source !== "remote") {
       lastAppliedTsRef.current = Date.now();
+      lastChangeSourceRef.current = source;
     }
   };
 
@@ -92,6 +94,7 @@ export default function App() {
     setSelectedMode(mode);
     if (source !== "remote") {
       lastAppliedTsRef.current = Date.now();
+      lastChangeSourceRef.current = source;
     }
   };
 
@@ -112,6 +115,23 @@ export default function App() {
       );
     },
   });
+
+  const pushStateToMcp = useCallback(
+    async (nextState) => {
+      try {
+        await fetch(STATE_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(nextState),
+        });
+      } catch (err) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Unable to push MCP state", err);
+        }
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     const instance = sliderInstanceRef.current;
@@ -153,6 +173,7 @@ export default function App() {
         }
         lastAppliedTsRef.current =
           remoteUpdatedAt || /* fallback if missing */ Date.now();
+        lastChangeSourceRef.current = "remote";
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
           console.warn("Unable to fetch MCP state", error);
@@ -167,6 +188,12 @@ export default function App() {
       clearInterval(poller);
     };
   }, []);
+
+  useEffect(() => {
+    if (lastChangeSourceRef.current !== "ui") return;
+    pushStateToMcp({ rootNote, mode: selectedMode });
+    lastChangeSourceRef.current = "synced";
+  }, [rootNote, selectedMode, pushStateToMcp]);
 
   const items = Object.keys(NotesUtils.modes).map((mode) => ({
     key: mode,

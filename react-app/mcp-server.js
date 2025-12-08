@@ -209,7 +209,7 @@ server.registerTool(
 function startStateHttpServer() {
   const server = http.createServer((req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
     if (req.method === "OPTIONS") {
@@ -218,14 +218,58 @@ function startStateHttpServer() {
       return;
     }
 
-    if (
-      req.method === "GET" &&
-      req.url &&
-      new URL(req.url, "http://localhost").pathname === "/state"
-    ) {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(state));
-      return;
+    if (req.url && new URL(req.url, "http://localhost").pathname === "/state") {
+      if (req.method === "GET") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(state));
+        return;
+      }
+
+      if (req.method === "POST") {
+        let body = "";
+        req.on("data", (chunk) => {
+          body += chunk.toString();
+          // Limit body size to prevent abuse
+          if (body.length > 10_000) {
+            res.writeHead(413);
+            res.end();
+            req.destroy();
+          }
+        });
+        req.on("end", () => {
+          try {
+            const payload = body ? JSON.parse(body) : {};
+            const next = {};
+            if (payload.rootNote) {
+              const normalizedKey = normalizeKey(payload.rootNote);
+              if (!normalizedKey) {
+                throw new Error(
+                  `Invalid key '${payload.rootNote}'. Use notes like C3, G#2, Bb4.`
+                );
+              }
+              next.rootNote = normalizedKey;
+            }
+            if (payload.mode) {
+              const normalizedMode = normalizeModeName(payload.mode);
+              if (!normalizedMode) {
+                throw new Error(
+                  `Invalid mode '${payload.mode}'. Allowed: ${MODE_NAMES.join(
+                    ", "
+                  )}.`
+                );
+              }
+              next.mode = normalizedMode;
+            }
+            const updated = persistState(next);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(updated));
+          } catch (err) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: err.message || "Invalid payload" }));
+          }
+        });
+        return;
+      }
     }
 
     res.writeHead(404, { "Content-Type": "application/json" });
