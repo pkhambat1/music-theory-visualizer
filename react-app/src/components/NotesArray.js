@@ -15,7 +15,7 @@ const NotesArray = ({
         display: "flex",
         justifyContent: "center",
         margin: `${marginPx}px auto`,
-        overflow: "hidden",
+        overflow: "visible",
         position: "relative",
       }}
     >

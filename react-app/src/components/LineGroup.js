@@ -57,6 +57,16 @@ const LineGroup = ({ containerRef, connections = [], depKey = "" }) => {
 
   if (!lines.length) return null;
 
+  const buildPath = (line) => {
+    const dx = line.x2 - line.x1;
+    const dy = line.y2 - line.y1;
+    const c1x = line.x1 + dx * 0.25;
+    const c1y = line.y1 + dy * 0.35;
+    const c2x = line.x1 + dx * 0.75;
+    const c2y = line.y2 - dy * 0.35;
+    return `M ${line.x1} ${line.y1} C ${c1x} ${c1y} ${c2x} ${c2y} ${line.x2} ${line.y2}`;
+  };
+
   return (
     <svg
       style={{
@@ -70,14 +80,12 @@ const LineGroup = ({ containerRef, connections = [], depKey = "" }) => {
       }}
     >
       {lines.map((line, idx) => (
-        <line
+        <path
           key={idx}
-          x1={line.x1}
-          y1={line.y1}
-          x2={line.x2}
-          y2={line.y2}
+          d={buildPath(line)}
           stroke="black"
           strokeWidth=".5"
+          fill="none"
         />
       ))}
     </svg>

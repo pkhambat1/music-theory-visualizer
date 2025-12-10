@@ -12,6 +12,7 @@
     "konva": "^9.3.16",
     "react": "^19.0.0",
     "react-d3": "^0.4.0",
+    "react-diff-viewer-continued": "^3.4.0",
     "react-dom": "^19.0.0",
     "react-scripts": "^5.0.1",
     "tone": "^15.0.4"

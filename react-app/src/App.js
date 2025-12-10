@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import { DownOutlined } from "@ant-design/icons";
@@ -9,6 +15,7 @@ import LineGroup from "./components/LineGroup";
 import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
 import NotesArray from "./components/NotesArray";
+import ModeNoteCell from "./components/ModeNoteCell";
 import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesUtils from "./utils/NotesUtils";
 import {
@@ -21,6 +28,7 @@ import {
   getModeLeftOverflowSize,
   modeIntervalsToMode,
 } from "./lib/music/scale";
+import { spellModeNotes } from "./utils/noteSpelling";
 
 const { Title, Text } = Typography;
 
@@ -70,6 +78,11 @@ export default function App() {
   const [majorScaleNotes, setMajorScaleNotes] = useState([
     ...Array(NotesUtils.modes["Ionian (major)"].length),
   ]);
+  const handlePlayNote = useCallback((val) => playNote(val), []);
+  const spelledModeNotes = useMemo(
+    () => spellModeNotes(modeNotesWithOverflow, modeLeftOverflowSize, notes),
+    [modeNotesWithOverflow, modeLeftOverflowSize]
+  );
 
   const [sliderRef] = useKeenSlider({
     centered: true,
@@ -107,14 +120,15 @@ export default function App() {
 
   return (
     <div style={{ padding: "32px", background: "#f5f5f5" }}>
-      <Space direction="vertical" size="large" style={{ width: "100%" }}>
+      <Space orientation="vertical" size="large" style={{ width: "100%" }}>
         <Card style={{ maxWidth: 1200, width: "100%", margin: "0 auto" }}>
-          <Space direction="vertical" size="small" style={{ width: "100%" }}>
+          <Space orientation="vertical" size="small" style={{ width: "100%" }}>
             <Title level={3} style={{ margin: 0 }}>
               Music Theory Visualizer
             </Title>
             <Text type="secondary">
-              Explore modes, intervals, and diatonic chords with quick audio playback.
+              Explore modes, intervals, and diatonic chords with quick audio
+              playback.
             </Text>
             <Divider style={{ margin: "12px 0" }} />
             <Space size="middle" wrap>
@@ -140,18 +154,19 @@ export default function App() {
                 }}
                 trigger={["click"]}
               >
-                <Tag color="#ffffff" style={{ border: "1px solid #d9d9d9", color: "#333", cursor: "pointer" }}>
+                <Tag
+                  color="#ffffff"
+                  style={{
+                    border: "1px solid #d9d9d9",
+                    color: "#333",
+                    cursor: "pointer",
+                  }}
+                >
                   {selectedMode} <DownOutlined />
                 </Tag>
               </Dropdown>
             </Space>
             <Divider style={{ margin: "12px 0" }} />
-            <Space size="small" wrap align="center">
-              <Text type="secondary">Legend:</Text>
-              <Tag color={pinkColor}>Root note</Tag>
-              <Tag color={greyColor}>Mode tone</Tag>
-              <Tag>Non-mode tone</Tag>
-            </Space>
           </Space>
         </Card>
 
@@ -178,12 +193,12 @@ export default function App() {
               depKey={`${rootNote}-${selectedMode}`}
             />
 
-          <HoverLines
-            hoveredIndex={hoveredTriadIndex}
-            containerRef={diagramRef}
-            modeNotesWithOverflow={modeNotesWithOverflow}
-            modeLeftOverflowSize={modeLeftOverflowSize}
-          />
+            <HoverLines
+              hoveredIndex={hoveredTriadIndex}
+              containerRef={diagramRef}
+              modeNotesWithOverflow={modeNotesWithOverflow}
+              modeLeftOverflowSize={modeLeftOverflowSize}
+            />
 
             <TriadScale
               baseScale={NotesUtils.chromaticScale}
@@ -297,20 +312,18 @@ export default function App() {
                 })}
               </div>
 
-            {modeNotesWithOverflow.map((note, idx) => {
-              const noteString = notes[note];
-              return (
-                <NoteCell
-                  squareSidePx={squareSidePx}
-                  idx={idx}
-                  key={idx}
-                  dataRow="mode-row"
-                  dataIdx={idx}
-                  show_border={false}
-                  onClick={() => playNote(noteString)}
-                >
-                  {noteString && renderNote(noteString)}
-                </NoteCell>
+              {modeNotesWithOverflow.map((note, idx) => {
+                const noteString = notes[note];
+                return (
+                  <ModeNoteCell
+                    key={idx}
+                    squareSidePx={squareSidePx}
+                    idx={idx}
+                    dataIdx={idx}
+                    noteString={noteString}
+                    newValue={spelledModeNotes[idx]}
+                    onPlay={handlePlayNote}
+                  />
                 );
               })}
             </NotesArray>
@@ -324,61 +337,16 @@ export default function App() {
               chordType="triads"
               setMajorScaleNotes={setMajorScaleNotes}
               selectedExtensions={selectedExtensions}
+              extensionOptions={extensionOptions}
+              onExtensionChange={(degreeIdx, value) => {
+                setSelectedExtensions((prev) => {
+                  const next = [...prev];
+                  next[degreeIdx] = value;
+                  return next;
+                });
+              }}
               modeLeftOverflowSize={modeLeftOverflowSize}
             />
-
-            {/* Variation Controls */}
-            <Card
-              size="small"
-              style={{ width: "100%", marginTop: 24 }}
-              title="Chord extensions per degree"
-              styles={{ body: { padding: 16 } }}
-            >
-              <Space
-                wrap
-                size="middle"
-                style={{ width: "100%", justifyContent: "center" }}
-              >
-                {Array.from({ length: modeIntervals.length }).map((_, i) => (
-                  <Space
-                    key={i}
-                    direction="vertical"
-                    size={8}
-                    align="center"
-                    style={{
-                      padding: "10px 12px",
-                      border: "1px solid #e5e5e5",
-                      borderRadius: 8,
-                      minWidth: 140,
-                      background: "#fafafa",
-                    }}
-                  >
-                    <Text strong>
-                      {["I", "II", "III", "IV", "V", "VI", "VII", "I"][i] ||
-                        `Deg ${i + 1}`}
-                    </Text>
-                    <Select
-                      mode="multiple"
-                      allowClear
-                      size="small"
-                      placeholder="Extensions"
-                      options={extensionOptions}
-                      value={selectedExtensions[i]}
-                      style={{ minWidth: 120 }}
-                      onChange={(value) => {
-                        setSelectedExtensions((prev) => {
-                          const next = [...prev];
-                          next[i] = value;
-                          return next;
-                        });
-                      }}
-                      maxCount={3}
-                      dropdownMatchSelectWidth={200}
-                    />
-                  </Space>
-                ))}
-              </Space>
-            </Card>
           </div>
         </Card>
       </Space>
