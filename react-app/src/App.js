@@ -8,7 +8,16 @@ import React, {
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import { DownOutlined } from "@ant-design/icons";
-import { Dropdown, Space, Select, Card, Typography, Divider, Tag } from "antd";
+import {
+  Dropdown,
+  Space,
+  Select,
+  Card,
+  Typography,
+  Divider,
+  Tag,
+  theme,
+} from "antd";
 import TriadScale from "./components/TriadScale";
 import DiatonicScaleDegreesRow from "./components/DistonicScaleDegreesRow";
 import LineGroup from "./components/LineGroup";
@@ -16,6 +25,7 @@ import HoverLines from "./components/HoverLines";
 import NoteCell from "./components/NoteCell";
 import NotesArray from "./components/NotesArray";
 import ModeNoteCell from "./components/ModeNoteCell";
+import { geekblue } from "@ant-design/colors";
 import { renderNote, generateOctaves, playNote } from "./utils/helpers";
 import NotesUtils from "./utils/NotesUtils";
 import {
@@ -33,13 +43,17 @@ import { spellModeNotes } from "./utils/noteSpelling";
 const { Title, Text } = Typography;
 
 const squareSidePx = 60;
-const pinkColor = "#f2c2c2";
-const greyColor = "#cccccc";
 
 const defaultRootNote = "C3";
 export const notes = generateOctaves(6);
 
 export default function App() {
+  const { token } = theme.useToken();
+  const azureHighlight = geekblue[2];
+  const coolBorder = token.colorBorderSecondary;
+  const charcoalText = token.colorTextBase;
+  const canvasBackground = token.colorBgBase;
+  const ashFill = token.colorFill;
   const [selectedMode, setSelectedMode] = useState("Ionian (major)");
   const [rootNote, setRootNote] = useState(defaultRootNote);
   const modeIntervals = NotesUtils.modes[selectedMode];
@@ -119,7 +133,7 @@ export default function App() {
   }));
 
   return (
-    <div style={{ padding: "32px", background: "#f5f5f5" }}>
+    <div style={{ padding: "32px", background: canvasBackground }}>
       <Space orientation="vertical" size="large" style={{ width: "100%" }}>
         <Card style={{ maxWidth: 1200, width: "100%", margin: "0 auto" }}>
           <Space orientation="vertical" size="small" style={{ width: "100%" }}>
@@ -134,12 +148,11 @@ export default function App() {
             <Space size="middle" wrap>
               <Text strong>Key:</Text>
               <Tag
-                color="#ffffff"
                 style={{
                   fontSize: 16,
                   padding: "6px 10px",
-                  border: "1px solid #d9d9d9",
-                  color: "#333",
+                  border: `1px solid ${coolBorder}`,
+                  color: charcoalText,
                 }}
               >
                 {renderNote(rootNote)}
@@ -155,11 +168,11 @@ export default function App() {
                 trigger={["click"]}
               >
                 <Tag
-                  color="#ffffff"
                   style={{
-                    border: "1px solid #d9d9d9",
-                    color: "#333",
+                    border: `1px solid ${coolBorder}`,
+                    color: charcoalText,
                     cursor: "pointer",
+                    background: token.colorBgContainer,
                   }}
                 >
                   {selectedMode} <DownOutlined />
@@ -241,9 +254,9 @@ export default function App() {
                 {NotesUtils.chromaticScale.map((_, idx) => {
                   let background = null;
                   if (idx === 0) {
-                    background = pinkColor;
+                    background = azureHighlight;
                   } else if (modeIntervals.includes(idx)) {
-                    background = greyColor;
+                    background = ashFill;
                   }
                   return (
                     <NoteCell

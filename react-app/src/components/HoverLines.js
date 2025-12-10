@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useState } from "react";
 import NotesUtils from "../utils/NotesUtils";
+import { buildSplinePath } from "../utils/linePath";
 
 /**
  * Draw tapered lines from the hovered diatonic (Roman numeral) cell
@@ -91,16 +92,6 @@ const HoverLines = ({
 
   if (!lines.length) return null;
 
-  const buildPath = (line) => {
-    const dx = line.x2 - line.x1;
-    const dy = line.y2 - line.y1;
-    const c1x = line.x1 + dx * 0.25;
-    const c1y = line.y1 + dy * 0.35;
-    const c2x = line.x1 + dx * 0.75;
-    const c2y = line.y2 - dy * 0.35;
-    return `M ${line.x1} ${line.y1} C ${c1x} ${c1y} ${c2x} ${c2y} ${line.x2} ${line.y2}`;
-  };
-
   return (
     <svg
       style={{
@@ -116,7 +107,7 @@ const HoverLines = ({
       {lines.map((line, idx) => (
         <path
           key={idx}
-          d={buildPath(line)}
+          d={buildSplinePath(line)}
           stroke="black"
           strokeWidth=".5"
           fill="none"
