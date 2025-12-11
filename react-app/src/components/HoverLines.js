@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useState } from "react";
+import colors from "tailwindcss/colors";
 import NotesUtils from "../utils/NotesUtils";
 import { buildSplinePath } from "../utils/linePath";
 
@@ -11,6 +12,8 @@ const HoverLines = ({
   hoveredIndex,
   modeNotesWithOverflow,
   modeLeftOverflowSize,
+  chordHighlightPairs = [],
+  neonColor = colors.cyan["400"],
 }) => {
   const [lines, setLines] = useState([]);
 
@@ -66,7 +69,30 @@ const HoverLines = ({
         })
         .filter(Boolean);
 
-      setLines(nextLines);
+      const baseLines = chordHighlightPairs
+        .map(({ baseIdx, modeIdx }) => {
+          const fromEl = container.querySelector(
+            `[data-row="base-row"][data-idx="${baseIdx}"]`
+          );
+          const toEl = container.querySelector(
+            `[data-row="mode-row"][data-idx="${modeIdx}"]`
+          );
+          if (!fromEl || !toEl) return null;
+          const fromRect = fromEl.getBoundingClientRect();
+          const toRect = toEl.getBoundingClientRect();
+          return {
+            x1: fromRect.left - containerRect.left + fromRect.width / 2,
+            y1: fromRect.bottom - containerRect.top,
+            x2: toRect.left - containerRect.left + toRect.width / 2,
+            y2: toRect.top - containerRect.top,
+          };
+        })
+        .filter(Boolean);
+
+      setLines([
+        ...nextLines.map((line) => ({ ...line, type: "diatonic" })),
+        ...baseLines.map((line) => ({ ...line, type: "base" })),
+      ]);
     };
 
     measure();
@@ -88,7 +114,13 @@ const HoverLines = ({
         ro.disconnect();
       }
     };
-  }, [containerRef, hoveredIndex, modeNotesWithOverflow, modeLeftOverflowSize]);
+  }, [
+    containerRef,
+    hoveredIndex,
+    modeNotesWithOverflow,
+    modeLeftOverflowSize,
+    chordHighlightPairs,
+  ]);
 
   if (!lines.length) return null;
 
@@ -108,8 +140,12 @@ const HoverLines = ({
         <path
           key={idx}
           d={buildSplinePath(line)}
-          stroke="black"
-          strokeWidth=".5"
+          stroke={neonColor}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          style={{
+            filter: `drop-shadow(0 0 6px ${neonColor})`,
+          }}
           fill="none"
         />
       ))}

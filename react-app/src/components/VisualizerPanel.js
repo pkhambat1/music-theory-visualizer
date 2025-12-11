@@ -20,6 +20,7 @@ import Card from "./ui/Card";
 import Tag from "./ui/Tag";
 import Divider from "./ui/Divider";
 import Dropdown from "./ui/Dropdown";
+import colors from "tailwindcss/colors";
 import {
   addOverflowToModeIntervals,
   baseScaleLeftOverflowSize,
@@ -39,9 +40,10 @@ export const notes = generateOctaves(6);
 export default function VisualizerPanel() {
   const azureHighlight = "rgb(191 219 254)"; // tailwind blue-200
   const ashFill = "#e2e8f0";
+  const neonHighlight = colors.cyan["400"]; // tailwind cyan-400 glow
   const [selectedMode, setSelectedMode] = useState("Ionian (major)");
   const [rootNote, setRootNote] = useState(defaultRootNote);
-  const modeIntervals = NotesUtils.modes[selectedMode];
+  const modeIntervals = NotesUtils.modes[selectedMode] || [];
   const modeWithOverflowIntervalsRef = useRef(
     addOverflowToModeIntervals(modeIntervals)
   );
@@ -74,6 +76,7 @@ export default function VisualizerPanel() {
   const [majorScaleNotes, setMajorScaleNotes] = useState([
     ...Array(NotesUtils.modes["Ionian (major)"].length),
   ]);
+  const [hoveredChordNotes, setHoveredChordNotes] = useState([]);
   const handlePlayNote = useCallback((val) => playNote(val), []);
   const spelledModeNotes = useMemo(
     () => spellModeNotes(modeNotesWithOverflow, modeLeftOverflowSize, notes),
@@ -106,6 +109,11 @@ export default function VisualizerPanel() {
   const [selectedExtensions, setSelectedExtensions] = useState(
     Array.from({ length: modeIntervals.length }, () => [])
   );
+  useEffect(() => {
+    setSelectedExtensions((prev) =>
+      Array.from({ length: modeIntervals.length }, (_, idx) => prev[idx] || [])
+    );
+  }, [modeIntervals.length]);
   const diagramRef = useRef(null);
   const modeConnections = modeIntervals.map((interval, idx) => ({
     fromRow: "chromatic-row",
@@ -113,6 +121,32 @@ export default function VisualizerPanel() {
     toRow: "mode-row",
     toIdx: modeLeftOverflowSize + idx,
   }));
+  const chordHighlightPairs = useMemo(() => {
+    if (!Array.isArray(hoveredChordNotes) || !hoveredChordNotes.length) {
+      return [];
+    }
+    return hoveredChordNotes
+      .map((noteIdx) => {
+        if (typeof noteIdx !== "number") return null;
+        const modeIdx = modeNotesWithOverflow.indexOf(noteIdx);
+        if (modeIdx < 0) return null;
+        return { modeIdx, baseIdx: noteIdx };
+      })
+      .filter(Boolean);
+  }, [hoveredChordNotes, modeNotesWithOverflow]);
+  const highlightedModeIdxs = useMemo(
+    () => new Set(chordHighlightPairs.map((pair) => pair.modeIdx)),
+    [chordHighlightPairs]
+  );
+  const highlightedBaseIdxs = useMemo(
+    () =>
+      new Set(
+        chordHighlightPairs
+          .map((pair) => pair.baseIdx)
+          .filter((idx) => idx >= 0 && idx < notes.length)
+      ),
+    [chordHighlightPairs]
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -162,6 +196,8 @@ export default function VisualizerPanel() {
             containerRef={diagramRef}
             modeNotesWithOverflow={modeNotesWithOverflow}
             modeLeftOverflowSize={modeLeftOverflowSize}
+            chordHighlightPairs={chordHighlightPairs}
+            neonColor={neonHighlight}
           />
 
           <TriadScale
@@ -175,7 +211,7 @@ export default function VisualizerPanel() {
           <NotesArray
             squareSidePx={squareSidePx}
             marginPx={squareSidePx}
-            size={NotesUtils.modes[selectedMode].length}
+            size={majorScaleNotes.length || modeIntervals.length}
           >
             {majorScaleNotes.map((note, idx) => (
               <NoteCell squareSidePx={squareSidePx} idx={idx} key={idx}>
@@ -232,6 +268,14 @@ export default function VisualizerPanel() {
                   dataIdx={idx}
                   className="keen-slider__slide"
                   show_border={false}
+                  style={
+                    highlightedBaseIdxs.has(idx)
+                      ? {
+                          border: `2px solid ${neonHighlight}`,
+                          boxShadow: `0 0 10px ${neonHighlight}`,
+                        }
+                      : undefined
+                  }
                   onClick={() => playNote(note)}
                 >
                   {renderNote(note)}
@@ -266,6 +310,7 @@ export default function VisualizerPanel() {
 
             {modeNotesWithOverflow.map((note, idx) => {
               const noteString = notes[note];
+              const isHighlighted = highlightedModeIdxs.has(idx);
               return (
                 <ModeNoteCell
                   key={idx}
@@ -275,6 +320,8 @@ export default function VisualizerPanel() {
                   noteString={noteString}
                   newValue={spelledModeNotes[idx]}
                   onPlay={handlePlayNote}
+                  isHighlighted={isHighlighted}
+                  highlightColor={neonHighlight}
                 />
               );
             })}
@@ -298,6 +345,8 @@ export default function VisualizerPanel() {
               });
             }}
             modeLeftOverflowSize={modeLeftOverflowSize}
+            modeLength={modeIntervals.length}
+            onChordHoverChange={setHoveredChordNotes}
           />
         </div>
       </Card>

@@ -19,9 +19,15 @@ const DiatonicScaleDegreesRow = ({
   onExtensionChange = () => {},
   setMajorScaleNotes,
   modeLeftOverflowSize,
+  modeLength = 0,
   dataRow = "diatonic-row",
+  onChordHoverChange = () => {},
 }) => {
-  const chordNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "I"];
+  const romanBase = ["I", "II", "III", "IV", "V", "VI", "VII"];
+  const degreeCount = modeLength > 0 ? modeLength : romanBase.length + 1;
+  const chordNumerals = Array.from({ length: degreeCount }, (_, idx) =>
+    idx === degreeCount - 1 ? "I" : romanBase[idx] || "I"
+  );
   const [openIdx, setOpenIdx] = useState(null);
 
   const getChordDescriptor = (chordAbsoluteIndices) => {
@@ -65,6 +71,7 @@ const DiatonicScaleDegreesRow = ({
               squareSidePx={SQUARE_SIDE}
               dataRow={dataRow}
               dataIdx={chordNumeralIdx}
+              className="group"
               onMouseEnter={() => {
                 setHoveredChordIndex(chordNumeralIdx);
                 const chordNotesInChromaticScale =
@@ -78,6 +85,7 @@ const DiatonicScaleDegreesRow = ({
                 );
 
                 setMajorScaleNotes(majorScaleNotes);
+                onChordHoverChange(chordNotes);
               }}
               onMouseLeave={() => {
                 setHoveredChordIndex(null);
@@ -85,18 +93,19 @@ const DiatonicScaleDegreesRow = ({
                 setMajorScaleNotes([
                   ...Array(NotesUtils.modes["Ionian (major)"].length),
                 ]);
+                onChordHoverChange([]);
               }}
               onClick={() => {
                 playChord(chordNotes.map((idx) => notes[idx]));
               }}
             >
-              <span>
-                {chordNumeral}
-                {chordDescriptor}
-              </span>
-              <div
-                className="absolute right-1 bottom-1 z-10"
-                onClick={(e) => e.stopPropagation()}
+                <span>
+                  {chordNumeral}
+                  {chordDescriptor}
+                </span>
+                <div
+                  className="absolute right-1 bottom-1 z-10 opacity-0 transition-opacity pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+                  onClick={(e) => e.stopPropagation()}
                 onMouseEnter={(e) => {
                   e.stopPropagation();
                   setHoveredChordIndex(null);
@@ -104,6 +113,7 @@ const DiatonicScaleDegreesRow = ({
                   setMajorScaleNotes([
                     ...Array(NotesUtils.modes["Ionian (major)"].length),
                   ]);
+                  onChordHoverChange([]);
                 }}
                 onMouseLeave={(e) => {
                   e.stopPropagation();
@@ -123,6 +133,7 @@ const DiatonicScaleDegreesRow = ({
                     (inter) => notes[inter + chordRoot]
                   );
                   setMajorScaleNotes(majorScaleNotes);
+                  onChordHoverChange(chordNotes);
                 }}
               >
                 <Popover
@@ -130,6 +141,7 @@ const DiatonicScaleDegreesRow = ({
                   onOpenChange={(nextOpen) =>
                     setOpenIdx(nextOpen ? chordNumeralIdx : null)
                   }
+                  position="top"
                   trigger={
                     <Button
                       variant="ghost"

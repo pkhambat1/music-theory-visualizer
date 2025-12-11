@@ -12,6 +12,8 @@ const NoteCell = React.forwardRef(
       show_border = true,
       dataRow,
       dataIdx,
+      className = "",
+      style: customStyle = {},
       ...props
     },
     ref
@@ -37,6 +39,7 @@ const NoteCell = React.forwardRef(
         ref={ref}
         data-row={dataRow}
         data-idx={dataIdx}
+        className={className}
         style={{
           display: "flex",
           justifyContent: "center",
@@ -49,6 +52,7 @@ const NoteCell = React.forwardRef(
           border: show_border ? getLineBorder(borderPx) : null,
           position: "relative",
           background: opt_background ? opt_background : null,
+          ...(customStyle || {}),
         }}
         {...props}
       >

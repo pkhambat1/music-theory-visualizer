@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from "react";
+import colors from "tailwindcss/colors";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import NoteCell from "./NoteCell";
 import { renderNote } from "../utils/helpers";
@@ -99,6 +100,8 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
   noteString,
   newValue,
   onPlay,
+  isHighlighted = false,
+  highlightColor = colors.cyan["400"],
 }) {
   const cOctave = useMemo(() => getCOctave(noteString || ""), [noteString]);
   const displayNote = useMemo(
@@ -126,6 +129,14 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
       dataIdx={dataIdx}
       show_border={false}
       onClick={handleClick}
+      style={
+        isHighlighted
+          ? {
+              border: `2px solid ${highlightColor}`,
+              boxShadow: `0 0 10px ${highlightColor}`,
+            }
+          : undefined
+      }
     >
       {usePlainRender ? (
         renderNote(displayNote)
