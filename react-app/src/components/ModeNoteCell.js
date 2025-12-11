@@ -1,6 +1,27 @@
 import React, { useCallback, useMemo } from "react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import NoteCell from "./NoteCell";
+import { renderNote } from "../utils/helpers";
+
+const getCOctave = (note) => {
+  if (!note) return null;
+  if (!/\d$/.test(note)) return null;
+  const base = note.slice(0, -1);
+  return base === "C" ? note.slice(-1) : null;
+};
+
+const formatNoteForDiff = (note, cOctave = null) => {
+  if (!note) return "";
+  const hasOctave = /\d$/.test(note);
+  if (hasOctave) {
+    const base = note.slice(0, -1);
+    return base === "C" ? note : base;
+  }
+  if (cOctave && note[0]?.toUpperCase() === "C") {
+    return `${note}${cOctave}`;
+  }
+  return note;
+};
 
 const diffWrapperStyle = {
   width: "100%",
@@ -53,8 +74,6 @@ const diffStyles = {
   },
 };
 
-const stripOctave = (note) => (note ? note.replace(/[0-9]/g, "") : "");
-
 const ModeNoteDiff = React.memo(function ModeNoteDiff({ oldValue, newValue }) {
   const diffContent = useMemo(
     () => (
@@ -81,7 +100,19 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
   newValue,
   onPlay,
 }) {
-  const displayNote = useMemo(() => stripOctave(noteString), [noteString]);
+  const cOctave = useMemo(() => getCOctave(noteString || ""), [noteString]);
+  const displayNote = useMemo(
+    () => formatNoteForDiff(noteString || "", cOctave),
+    [noteString, cOctave]
+  );
+  const displayNewValue = useMemo(
+    () => formatNoteForDiff(newValue || "", cOctave),
+    [newValue, cOctave]
+  );
+  const usePlainRender =
+    displayNote === displayNewValue &&
+    displayNote?.startsWith("C") &&
+    /\d$/.test(displayNote);
   const handleClick = useCallback(() => {
     if (noteString) onPlay(noteString);
   }, [noteString, onPlay]);
@@ -96,7 +127,11 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
       show_border={false}
       onClick={handleClick}
     >
-      <ModeNoteDiff oldValue={displayNote} newValue={newValue} />
+      {usePlainRender ? (
+        renderNote(displayNote)
+      ) : (
+        <ModeNoteDiff oldValue={displayNote} newValue={displayNewValue} />
+      )}
     </NoteCell>
   );
 });

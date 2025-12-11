@@ -147,16 +147,7 @@ export default function App() {
             <Divider style={{ margin: "12px 0" }} />
             <Space size="middle" wrap>
               <Text strong>Key:</Text>
-              <Tag
-                style={{
-                  fontSize: 16,
-                  padding: "6px 10px",
-                  border: `1px solid ${coolBorder}`,
-                  color: charcoalText,
-                }}
-              >
-                {renderNote(rootNote)}
-              </Tag>
+              <Tag>{renderNote(rootNote)}</Tag>
               <Text strong>Mode:</Text>
               <Dropdown
                 menu={{
@@ -179,7 +170,6 @@ export default function App() {
                 </Tag>
               </Dropdown>
             </Space>
-            <Divider style={{ margin: "12px 0" }} />
           </Space>
         </Card>
 
