@@ -24,11 +24,16 @@ const LineGroup = ({ containerRef, connections = [], depKey = "" }) => {
         if (!fromEl || !toEl) return;
         const fromRect = fromEl.getBoundingClientRect();
         const toRect = toEl.getBoundingClientRect();
+
+        // Account for scrolling by adding scroll offsets
+        const scrollLeft = container.scrollLeft;
+        const scrollTop = container.scrollTop;
+
         nextLines.push({
-          x1: fromRect.left - containerRect.left + fromRect.width / 2,
-          y1: fromRect.bottom - containerRect.top, // bottom center of from cell
-          x2: toRect.left - containerRect.left + toRect.width / 2,
-          y2: toRect.top - containerRect.top, // top center of to cell
+          x1: fromRect.left - containerRect.left + fromRect.width / 2 + scrollLeft,
+          y1: fromRect.bottom - containerRect.top + scrollTop,
+          x2: toRect.left - containerRect.left + toRect.width / 2 + scrollLeft,
+          y2: toRect.top - containerRect.top + scrollTop,
         });
       });
 
@@ -68,6 +73,7 @@ const LineGroup = ({ containerRef, connections = [], depKey = "" }) => {
         height: "100%",
         pointerEvents: "none",
         zIndex: 1,
+        overflow: "visible",
       }}
     >
       {lines.map((line, idx) => (

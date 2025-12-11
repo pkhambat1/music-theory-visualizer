@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Select, Popover, Button } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
 import { playChord } from "../utils/helpers";
 import NotesUtils from "../utils/NotesUtils";
+import Popover from "./ui/Popover";
+import MultiSelect from "./ui/MultiSelect";
+import Button from "./ui/Button";
 
 const DiatonicScaleDegreesRow = ({
   SQUARE_SIDE,
@@ -94,12 +95,8 @@ const DiatonicScaleDegreesRow = ({
                 {chordDescriptor}
               </span>
               <div
-                style={{
-                  position: "absolute",
-                  right: 4,
-                  bottom: 2,
-                  zIndex: 10,
-                }}
+                className="absolute right-1 bottom-1 z-10"
+                onClick={(e) => e.stopPropagation()}
                 onMouseEnter={(e) => {
                   e.stopPropagation();
                   setHoveredChordIndex(null);
@@ -113,7 +110,7 @@ const DiatonicScaleDegreesRow = ({
                   const goingToPopover =
                     e.relatedTarget &&
                     e.relatedTarget.closest &&
-                    e.relatedTarget.closest(".ant-popover");
+                    e.relatedTarget.closest("[data-popover-panel]");
                   if (goingToPopover) return;
 
                   // Restore hover state when coming back to the cell
@@ -129,52 +126,32 @@ const DiatonicScaleDegreesRow = ({
                 }}
               >
                 <Popover
-                  trigger="click"
-                  placement="bottom"
                   open={openIdx === chordNumeralIdx}
-                  getPopupContainer={(triggerNode) => triggerNode.parentElement}
                   onOpenChange={(nextOpen) =>
                     setOpenIdx(nextOpen ? chordNumeralIdx : null)
                   }
-                  content={
-                    <div
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ padding: 8 }}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 rounded-full border border-slate-200 bg-white/80 p-0 text-slate-500 hover:bg-slate-100 hover:text-slate-900 shadow-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                      aria-label="Add extensions"
                     >
-                      <Select
-                        mode="multiple"
-                        allowClear
-                        size="small"
-                        placeholder="Extensions"
-                        options={extensionOptions}
-                        value={selectedExtensions[chordNumeralIdx]}
-                        style={{ minWidth: 180 }}
-                        onChange={(value) =>
-                          onExtensionChange(chordNumeralIdx, value)
-                        }
-                        maxCount={3}
-                        popupMatchSelectWidth={220}
-                      />
-                    </div>
+                      <span className="text-xs font-bold leading-none">+</span>
+                    </Button>
                   }
                 >
-                  <Button
-                    type="default"
-                    shape="circle"
-                    size="small"
-                    icon={<PlusOutlined />}
+                  <div
+                    data-popover-panel
+                    className="min-w-[180px] space-y-2 rounded-md border border-slate-200 bg-white p-2 shadow-lg"
                     onClick={(e) => e.stopPropagation()}
-                    style={{
-                      boxShadow: "0 0 0 1px #d9d9d9",
-                      background: "transparent",
-                      color: "#8c8c8c",
-                      width: 16,
-                      height: 16,
-                      minWidth: 16,
-                      padding: 0,
-                    }}
-                    aria-label="Add extensions"
-                  />
+                  >
+                    <MultiSelect
+                      options={extensionOptions}
+                      value={selectedExtensions[chordNumeralIdx]}
+                      onChange={(value) => onExtensionChange(chordNumeralIdx, value)}
+                    />
+                  </div>
                 </Popover>
               </div>
             </NoteCell>
