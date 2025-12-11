@@ -50,6 +50,7 @@ const DiatonicScaleDegreesRow = ({
         return (
           <div
             key={chordNumeralIdx}
+            className="group"
             style={{
               position: "relative",
               width: `${SQUARE_SIDE}px`,
@@ -95,7 +96,11 @@ const DiatonicScaleDegreesRow = ({
                 {chordDescriptor}
               </span>
               <div
-                className="absolute right-1 bottom-1 z-10"
+                className={`absolute right-1 bottom-1 z-10 transition-opacity duration-200 ${
+                  openIdx === chordNumeralIdx
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-100"
+                }`}
                 onClick={(e) => e.stopPropagation()}
                 onMouseEnter={(e) => {
                   e.stopPropagation();
@@ -130,14 +135,15 @@ const DiatonicScaleDegreesRow = ({
                   onOpenChange={(nextOpen) =>
                     setOpenIdx(nextOpen ? chordNumeralIdx : null)
                   }
+                  position="top"
                   trigger={
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 rounded-full border border-slate-200 bg-white/80 p-0 text-slate-500 hover:bg-slate-100 hover:text-slate-900 shadow-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                      className="flex items-center justify-center h-4 w-4 rounded-full border border-slate-200 bg-white/80 p-0 text-slate-500 hover:bg-slate-100 hover:text-slate-900 shadow-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
                       aria-label="Add extensions"
                     >
-                      <span className="text-xs font-bold leading-none">+</span>
+                      <span className="text-sm leading-none mb-[1px]">+</span>
                     </Button>
                   }
                 >
@@ -150,6 +156,7 @@ const DiatonicScaleDegreesRow = ({
                       options={extensionOptions}
                       value={selectedExtensions[chordNumeralIdx]}
                       onChange={(value) => onExtensionChange(chordNumeralIdx, value)}
+                      autoFocus
                     />
                   </div>
                 </Popover>

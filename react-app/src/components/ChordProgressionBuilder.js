@@ -1,4 +1,19 @@
 import React, { useEffect, useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
 import NotesArray from "./NotesArray";
 import NoteCell from "./NoteCell";
 import { playChord, renderNote } from "../utils/helpers";
@@ -7,6 +22,11 @@ import Dropdown from "./ui/Dropdown";
 import Button from "./ui/Button";
 import Tooltip from "./ui/Tooltip";
 import MultiSelect from "./ui/MultiSelect";
+import Popover from "./ui/Popover";
+import SortableChordCell from "./SortableChordCell";
+
+// Helper to generate unique IDs
+const generateId = () => `chord-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 const ChordProgressionBuilder = ({
   rootNote,
@@ -18,21 +38,33 @@ const ChordProgressionBuilder = ({
   onUpdateChordProgression,
 }) => {
   const [chords, setChords] = useState(
-    chordProgression || [
+    () => (chordProgression || [
       { degree: 1, extensions: [] },
       { degree: 4, extensions: [] },
       { degree: 5, extensions: [] },
       { degree: 1, extensions: [] },
-    ]
+    ]).map(c => ({ ...c, id: c.id || generateId() })) // Ensure IDs exist
   );
+
+  // Track open state for extension popovers by chord index
+  const [openIdx, setOpenIdx] = useState(null);
+
   const [progressionKey, setProgressionKey] = useState(rootNote);
   const [progressionMode, setProgressionMode] = useState(selectedMode);
   const [progressionModeIntervals, setProgressionModeIntervals] =
     useState(modeIntervals);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   useEffect(() => {
     if (chordProgression) {
-      setChords(chordProgression);
+       // Preserve IDs if they exist, or generate new ones
+      setChords(chordProgression.map(c => ({ ...c, id: c.id || generateId() })));
     }
   }, [chordProgression]);
 
@@ -41,6 +73,9 @@ const ChordProgressionBuilder = ({
   }, [progressionMode]);
 
   const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"];
+  // Extended roman numerals with default "I" if index out of bounds
+  const getRomanNumeral = (degree) => romanNumerals[degree - 1] || "I";
+
   const extensionOptions = [
     { value: "maj", label: "maj" },
     { value: "m", label: "m" },
@@ -61,7 +96,7 @@ const ChordProgressionBuilder = ({
       label: renderNote(note),
     }));
 
-  const addChord = () => setChords([...chords, { degree: 1, extensions: [] }]);
+  const addChord = () => setChords([...chords, { degree: 1, extensions: [], id: generateId() }]);
 
   const removeChord = (index) => {
     const next = [...chords];
@@ -75,6 +110,20 @@ const ChordProgressionBuilder = ({
     next[index] = { ...next[index], [field]: value };
     setChords(next);
     onUpdateChordProgression?.(next);
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      setChords((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newChords = arrayMove(items, oldIndex, newIndex);
+        onUpdateChordProgression?.(newChords);
+        return newChords;
+      });
+    }
   };
 
   const buildChordNotes = (root, extensions) => {
@@ -110,6 +159,7 @@ const ChordProgressionBuilder = ({
     const scaleIndex = chordObj.degree - 1;
     const rootIndex = notes.indexOf(progressionKey);
     const intervalOffset = progressionModeIntervals[scaleIndex];
+    if (intervalOffset === undefined) return [];
     const chordRootIndex = rootIndex + intervalOffset;
     const chordRootNote = notes[chordRootIndex];
     return buildChordNotes(chordRootNote, chordObj.extensions || []);
@@ -126,6 +176,7 @@ const ChordProgressionBuilder = ({
     });
   };
 
+  // Helper logic to nicely format the display numeral based on mode intervals like before
   const getFormattedRomanNumeral = (degree, mode) => {
     const intervals = NotesUtils.modes[mode];
     if (!intervals) return romanNumerals[degree - 1];
@@ -137,15 +188,17 @@ const ChordProgressionBuilder = ({
     const fifthInMode = intervals[fifthOffset];
     const normalizedThird = (thirdInMode - rootInMode + 12) % 12;
     const normalizedFifth = (fifthInMode - rootInMode + 12) % 12;
-    const numeral = romanNumerals[degree - 1];
-    if (normalizedThird === 3 && normalizedFifth === 6) return numeral.toLowerCase() + "°";
+    const numeral = romanNumerals[degree - 1] || "I";
+    if (normalizedThird === 3 && normalizedFifth === 6)
+      return numeral.toLowerCase() + "°";
     if (normalizedThird === 4 && normalizedFifth === 8) return numeral + "+";
-    if (normalizedThird === 3 && normalizedFifth === 7) return numeral.toLowerCase();
+    if (normalizedThird === 3 && normalizedFifth === 7)
+      return numeral.toLowerCase();
     return numeral;
   };
 
   return (
-    <div className="mt-6 space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h3 className="m-0 text-lg font-semibold text-slate-900">
           Chord Progression Builder
@@ -154,7 +207,11 @@ const ChordProgressionBuilder = ({
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-700">Key:</span>
             <Dropdown
-              label={<span className="text-slate-900">{renderNote(progressionKey)}</span>}
+              label={
+                <span className="text-slate-900">
+                  {renderNote(progressionKey)}
+                </span>
+              }
               items={keyOptions}
               onSelect={(key) => setProgressionKey(key)}
             />
@@ -174,7 +231,10 @@ const ChordProgressionBuilder = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={playProgression} className="bg-indigo-600 text-white hover:bg-indigo-700">
+        <Button
+          onClick={playProgression}
+          className="bg-indigo-600 text-white hover:bg-indigo-700"
+        >
           Play Progression
         </Button>
         <Button variant="ghost" onClick={addChord}>
@@ -182,72 +242,142 @@ const ChordProgressionBuilder = ({
         </Button>
       </div>
 
-      <NotesArray
-        squareSidePx={squareSidePx * 2}
-        size={chords.length + 1}
-        marginPx={squareSidePx}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
       >
-        {chords.map((chord, index) => (
-          <NoteCell
-            key={index}
-            squareSidePx={squareSidePx * 2}
-            overflow="visible"
-            className="flex flex-col items-center justify-center gap-2 p-3"
-          >
-            <div className="absolute right-1 top-1">
-              <Button variant="ghost" size="sm" onClick={() => removeChord(index)}>
-                ✕
-              </Button>
-            </div>
-            <div className="text-lg font-semibold text-slate-900">
-              {getFormattedRomanNumeral(chord.degree, progressionMode)}
-              {chord.extensions?.length > 0 && (
-                <span className="ml-1 text-sm text-slate-600">
-                  {chord.extensions.join(",")}
-                </span>
-              )}
-            </div>
-            <select
-              className="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              value={chord.degree}
-              onChange={(e) => updateChord(index, "degree", Number(e.target.value))}
-            >
-              {romanNumerals.map((numeral, i) => (
-                <option key={numeral} value={i + 1}>
-                  {numeral}
-                </option>
-              ))}
-            </select>
-            <MultiSelect
-              options={extensionOptions}
-              value={chord.extensions}
-              onChange={(value) => updateChord(index, "extensions", value)}
-            />
-            <Button variant="ghost" size="sm" onClick={() => handlePlayChord(chord)}>
-              ▶
-            </Button>
-          </NoteCell>
-        ))}
-        <NoteCell
+        <NotesArray
           squareSidePx={squareSidePx * 2}
-          className="flex flex-col items-center justify-center gap-2"
+          size={chords.length + 1}
+          marginPx={squareSidePx}
         >
-          <Tooltip title="Add chord">
-            <Button variant="ghost" size="sm" onClick={addChord}>
-              +
-            </Button>
-          </Tooltip>
-          <Tooltip title="Play progression">
-            <Button
-              className="bg-indigo-600 text-white hover:bg-indigo-700"
-              size="md"
-              onClick={playProgression}
-            >
-              ▶
-            </Button>
-          </Tooltip>
-        </NoteCell>
-      </NotesArray>
+          <SortableContext
+            items={chords.map((c) => c.id)}
+            strategy={horizontalListSortingStrategy}
+          >
+            {chords.map((chord, index) => (
+              <SortableChordCell key={chord.id} id={chord.id}>
+                <NoteCell
+                  idx={index}
+                  squareSidePx={squareSidePx * 2}
+                  overflow="visible"
+                  className="group flex flex-col items-center justify-center p-2 relative"
+                >
+                  {/* Remove Button (Top Right) - No drag here */}
+                  <div
+                    className="absolute right-1 top-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onPointerDown={(e) => e.stopPropagation()} // Prevent drag start
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-slate-400 hover:text-red-500"
+                      onClick={() => removeChord(index)}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+
+                  {/* Main Content */}
+                  <div className="flex flex-col items-center gap-1">
+                    {/* Degree Dropdown Trigger - Prevent drag propagation */}
+                    <div onPointerDown={(e) => e.stopPropagation()}>
+                      <Dropdown
+                        label={
+                          <div className="text-2xl font-bold text-slate-900 cursor-pointer hover:text-indigo-600 transition-colors">
+                            {getFormattedRomanNumeral(
+                              chord.degree,
+                              progressionMode
+                            )}
+                          </div>
+                        }
+                        items={romanNumerals.map((numeral, i) => ({
+                          key: i + 1,
+                          label: numeral,
+                        }))}
+                        onSelect={(key) =>
+                          updateChord(index, "degree", Number(key))
+                        }
+                      />
+                    </div>
+
+                    {/* Extensions Display */}
+                    <div className="h-4 text-xs font-medium text-slate-500 truncate max-w-full px-1">
+                      {chord.extensions?.length > 0
+                        ? chord.extensions.join(", ")
+                        : ""}
+                    </div>
+                  </div>
+
+                  {/* Add Extensions Button (Bottom Right) - No drag */}
+                  <div
+                    className={`absolute right-1 bottom-1 z-10 transition-opacity duration-200 ${
+                      openIdx === index
+                        ? "opacity-100"
+                        : "opacity-0 group-hover:opacity-100"
+                    }`}
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    <Popover
+                      open={openIdx === index}
+                      onOpenChange={(nextOpen) =>
+                        setOpenIdx(nextOpen ? index : null)
+                      }
+                      position="top"
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="flex items-center justify-center h-4 w-4 rounded-full border border-slate-200 bg-white/80 p-0 text-slate-500 hover:bg-slate-100 hover:text-slate-900 shadow-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                          aria-label="Add extensions"
+                        >
+                          <span className="text-sm leading-none mb-[1px]">
+                            +
+                          </span>
+                        </Button>
+                      }
+                    >
+                      <div
+                        data-popover-panel
+                        className="min-w-[180px] p-1"
+                        onClick={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()} 
+                      >
+                        <MultiSelect
+                          options={extensionOptions}
+                          value={chord.extensions}
+                          onChange={(value) =>
+                            updateChord(index, "extensions", value)
+                          }
+                          autoFocus
+                        />
+                      </div>
+                    </Popover>
+                  </div>
+
+                  {/* Play Button (Bottom Left) - No drag */}
+                  <div
+                    className="absolute left-1 bottom-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-indigo-600 hover:bg-indigo-50"
+                      onClick={() => handlePlayChord(chord)}
+                    >
+                      ▶
+                    </Button>
+                  </div>
+                </NoteCell>
+              </SortableChordCell>
+            ))}
+          </SortableContext>
+
+        </NotesArray>
+      </DndContext>
     </div>
   );
 };

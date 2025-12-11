@@ -16,6 +16,7 @@ import NotesArray from "./NotesArray";
 import ModeNoteCell from "./ModeNoteCell";
 import { renderNote, generateOctaves, playNote } from "../utils/helpers";
 import NotesUtils from "../utils/NotesUtils";
+import ChordProgressionBuilder from "./ChordProgressionBuilder";
 import Card from "./ui/Card";
 import Tag from "./ui/Tag";
 import Divider from "./ui/Divider";
@@ -300,6 +301,16 @@ export default function VisualizerPanel() {
             modeLeftOverflowSize={modeLeftOverflowSize}
           />
         </div>
+      </Card>
+
+      <Card className="max-w-[1600px] w-full mx-auto" bodyClassName="p-6">
+        <ChordProgressionBuilder
+          rootNote={rootNote}
+          selectedMode={selectedMode}
+          modeIntervals={modeIntervals}
+          notes={notes}
+          squareSidePx={squareSidePx}
+        />
       </Card>
     </div>
   );
