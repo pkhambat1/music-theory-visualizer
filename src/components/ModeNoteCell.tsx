@@ -1,0 +1,107 @@
+import React, { useCallback, useMemo } from "react";
+import colors from "tailwindcss/colors";
+import NoteCell from "./NoteCell";
+import { renderNote } from "../lib/notes";
+
+// ─── Helpers ───────────────────────────────────────────────────────
+
+function getCOctave(note: string): string | null {
+  if (!note || !/\d$/.test(note)) return null;
+  const base = note.slice(0, -1);
+  return base === "C" ? note.slice(-1) : null;
+}
+
+function formatNoteForDiff(note: string, cOctave: string | null = null): string {
+  if (!note) return "";
+  const hasOctave = /\d$/.test(note);
+  if (hasOctave) {
+    const base = note.slice(0, -1);
+    return base === "C" ? note : base;
+  }
+  if (cOctave && note[0]?.toUpperCase() === "C") {
+    return `${note}${cOctave}`;
+  }
+  return note;
+}
+
+// ─── Component ─────────────────────────────────────────────────────
+
+export interface ModeNoteCellProps {
+  squareSidePx: number;
+  idx: number;
+  dataIdx: number;
+  noteString: string;
+  newValue: string;
+  onPlay: (note: string) => void;
+  isHighlighted?: boolean;
+  highlightColor?: string;
+}
+
+const ModeNoteCell = React.memo(function ModeNoteCell({
+  squareSidePx,
+  idx,
+  dataIdx,
+  noteString,
+  newValue,
+  onPlay,
+  isHighlighted = false,
+  highlightColor = colors.cyan["400"],
+}: ModeNoteCellProps) {
+  const cOctave = useMemo(() => getCOctave(noteString || ""), [noteString]);
+  const displayNote = useMemo(
+    () => formatNoteForDiff(noteString || "", cOctave),
+    [noteString, cOctave],
+  );
+  const displayNewValue = useMemo(
+    () => formatNoteForDiff(newValue || "", cOctave),
+    [newValue, cOctave],
+  );
+
+  const isSimple =
+    displayNote === displayNewValue &&
+    displayNote?.startsWith("C") &&
+    /\d$/.test(displayNote);
+
+  const isDifferent = displayNote !== displayNewValue && !!displayNewValue;
+
+  const handleClick = useCallback(() => {
+    if (noteString) onPlay(noteString);
+  }, [noteString, onPlay]);
+
+  return (
+    <NoteCell
+      squareSidePx={squareSidePx}
+      idx={idx}
+      dataRow="mode-row"
+      dataIdx={dataIdx}
+      showBorder={false}
+      onClick={handleClick}
+      className="cursor-pointer hover:bg-white/[0.06]"
+      style={
+        isHighlighted
+          ? {
+              border: `2px solid ${highlightColor}`,
+              boxShadow: `0 0 12px ${highlightColor}`,
+            }
+          : undefined
+      }
+    >
+      {isSimple ? (
+        renderNote(displayNote)
+      ) : isDifferent ? (
+        <div className="flex flex-col items-center gap-0 leading-none">
+          <span className="text-[9px] text-slate-500 line-through decoration-red-400/60">
+            {displayNote}
+          </span>
+          <span className="text-[13px] font-semibold text-emerald-400">
+            {displayNewValue}
+          </span>
+        </div>
+      ) : (
+        <span>{renderNote(displayNewValue || displayNote)}</span>
+      )}
+    </NoteCell>
+  );
+});
+
+export default ModeNoteCell;
