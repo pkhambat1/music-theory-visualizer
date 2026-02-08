@@ -79,6 +79,41 @@ export function getChordNotesInChromaticScale(
   return result;
 }
 
+// ─── Extension conflict rules ───────────────────────────────────────
+
+/**
+ * Mutual exclusion groups: selecting any member disables the rest of its group.
+ * - 3rd quality: maj, m, sus2, sus4, dim (all write to the 3rd slot)
+ * - 5th quality: aug, dim (both write to the 5th slot; dim spans both groups)
+ * - 7th type:    7, maj7, 9 (9 implies a 7th)
+ * - 9th type:    add9, 9 (9 implies a 9th)
+ */
+const EXCLUSION_GROUPS: Extension[][] = [
+  ["maj", "m", "sus2", "sus4", "dim"],
+  ["aug", "dim"],
+  ["7", "maj7", "9"],
+  ["add9", "9"],
+];
+
+/**
+ * Given the currently selected extensions, return the set of extensions
+ * that should be disabled (greyed out) because they conflict.
+ */
+export function getDisabledExtensions(
+  selected: Extension[],
+): Set<Extension> {
+  const disabled = new Set<Extension>();
+  for (const group of EXCLUSION_GROUPS) {
+    const active = group.filter((ext) => selected.includes(ext));
+    if (active.length > 0) {
+      for (const ext of group) {
+        if (!active.includes(ext)) disabled.add(ext);
+      }
+    }
+  }
+  return disabled;
+}
+
 /**
  * Apply chord extensions/alterations to a copy of the chord notes.
  * Extensions modify or add notes relative to the major-scale intervals.

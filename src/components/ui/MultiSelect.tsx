@@ -11,6 +11,8 @@ export interface MultiSelectProps {
   onChange?: (value: string[]) => void;
   placeholder?: string;
   autoFocus?: boolean;
+  /** Values that should be greyed out and non-interactive (e.g. conflicting options). */
+  disabledValues?: Set<string>;
 }
 
 export default function MultiSelect({
@@ -19,6 +21,7 @@ export default function MultiSelect({
   onChange,
   placeholder = "Select",
   autoFocus = false,
+  disabledValues = new Set(),
 }: MultiSelectProps) {
   const [query, setQuery] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -44,20 +47,27 @@ export default function MultiSelect({
     setFocusedIndex(filtered.length > 0 ? 0 : -1);
   }, [filtered]);
 
+  const findNextEnabled = (from: number, direction: 1 | -1): number => {
+    for (let i = 0; i < filtered.length; i++) {
+      const idx = (from + direction * (i + 1) + filtered.length * filtered.length) % filtered.length;
+      if (!disabledValues.has(filtered[idx]!.value)) return idx;
+    }
+    return from; // all disabled, stay put
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (filtered.length === 0) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setFocusedIndex((prev) => (prev + 1) % filtered.length);
+      setFocusedIndex((prev) => findNextEnabled(prev, 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setFocusedIndex(
-        (prev) => (prev - 1 + filtered.length) % filtered.length,
-      );
+      setFocusedIndex((prev) => findNextEnabled(prev, -1));
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (focusedIndex >= 0 && focusedIndex < filtered.length) {
-        toggle(filtered[focusedIndex]!.value);
+        const val = filtered[focusedIndex]!.value;
+        if (!disabledValues.has(val)) toggle(val);
       }
     }
   };
@@ -78,23 +88,29 @@ export default function MultiSelect({
         <div className="max-h-[200px] overflow-y-auto flex flex-col gap-0.5">
           {filtered.map((opt, idx) => {
             const isSelected = value.includes(opt.value);
+            const isDisabled = disabledValues.has(opt.value);
             const isFocused = idx === focusedIndex;
             return (
               <label
                 key={opt.value}
-                className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors cursor-pointer ${
-                  isSelected
-                    ? "bg-cyan-400/10 text-cyan-300 font-medium"
+                className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${
+                  isDisabled
+                    ? "text-slate-600 pointer-events-none"
+                    : isSelected
+                    ? "bg-cyan-400/10 text-cyan-300 font-medium cursor-pointer"
                     : isFocused
-                    ? "bg-white/[0.06] text-slate-200"
-                    : "text-slate-400 hover:bg-white/[0.04]"
+                    ? "bg-white/[0.06] text-slate-200 cursor-pointer"
+                    : "text-slate-400 hover:bg-white/[0.04] cursor-pointer"
                 }`}
-                onMouseEnter={() => setFocusedIndex(idx)}
+                onMouseEnter={() => {
+                  if (!isDisabled) setFocusedIndex(idx);
+                }}
               >
                 <input
                   type="checkbox"
-                  className="h-3.5 w-3.5 rounded border-white/20 bg-white/[0.04] text-cyan-500 focus:ring-cyan-400/30"
+                  className={`h-3.5 w-3.5 rounded border-white/20 bg-white/[0.04] text-cyan-500 focus:ring-cyan-400/30 ${isDisabled ? "opacity-40" : ""}`}
                   checked={isSelected}
+                  disabled={isDisabled}
                   onChange={() => toggle(opt.value)}
                 />
                 <span>{opt.label ?? opt.value}</span>

@@ -37,7 +37,6 @@ import Card from "./ui/Card";
 import Tag from "./ui/Tag";
 import Divider from "./ui/Divider";
 import Dropdown from "./ui/Dropdown";
-import TriadScale from "./TriadScale";
 import NotesArray from "./NotesArray";
 import NoteCell from "./NoteCell";
 import ModeNoteCell from "./ModeNoteCell";
@@ -45,6 +44,7 @@ import LineGroup from "./LineGroup";
 import HoverLines from "./HoverLines";
 import DiatonicScaleDegreesRow from "./DiatonicScaleDegreesRow";
 import type { ChordHoverData } from "./DiatonicScaleDegreesRow";
+import ChordScaleContext from "./ChordScaleContext";
 
 // ─── Constants ─────────────────────────────────────────────────────
 
@@ -107,10 +107,6 @@ export default function VisualizerPanel() {
   const [hoveredTriadIndex, setHoveredTriadIndex] = useState<number | null>(
     null,
   );
-  const [triadNotes, setTriadNotes] = useState<(NoteIndex | null)[]>([]);
-  const [majorScaleNotes, setMajorScaleNotes] = useState<
-    (string | undefined)[]
-  >([...Array(MODES["Ionian (major)"].length)]);
   const [hoveredChordNotes, setHoveredChordNotes] = useState<NoteIndex[]>([]);
   const [originalHoverNotes, setOriginalHoverNotes] = useState<NoteIndex[]>(
     [],
@@ -185,7 +181,17 @@ export default function VisualizerPanel() {
   const chordHighlightPairs = useMemo<ChordHighlightPair[]>(() => {
     if (!Array.isArray(hoveredChordNotes) || !hoveredChordNotes.length)
       return [];
-    return hoveredChordNotes
+
+    // Only highlight notes in the mode row that existed in the original chord.
+    // Extension-added notes (e.g. sus4) bypass the mode row and only appear
+    // in the chromatic row via highlightedBaseIdxs.
+    const originalSet = new Set(originalHoverNotes);
+    const notesToHighlight =
+      originalSet.size > 0
+        ? hoveredChordNotes.filter((n) => originalSet.has(n))
+        : hoveredChordNotes;
+
+    return notesToHighlight
       .map((noteIdx) => {
         if (typeof noteIdx !== "number") return null;
         const modeIdx = modeNotesWithOverflow.indexOf(noteIdx);
@@ -193,7 +199,7 @@ export default function VisualizerPanel() {
         return { modeIdx, baseIdx: noteIdx } as ChordHighlightPair;
       })
       .filter((p): p is ChordHighlightPair => p !== null);
-  }, [hoveredChordNotes, modeNotesWithOverflow]);
+  }, [hoveredChordNotes, modeNotesWithOverflow, originalHoverNotes]);
 
   const highlightedModeIdxs = useMemo(
     () => new Set(chordHighlightPairs.map((p) => p.modeIdx)),
@@ -282,33 +288,19 @@ export default function VisualizerPanel() {
             modifiedChordNotes={modifiedHoverNotes}
           />
 
-          <TriadScale
-            caption="Chord Tones"
-            baseScale={CHROMATIC_SCALE}
-            squareSidePx={SQUARE_SIDE}
-            triadNotes={triadNotes}
+          {/* Chord root's major scale — content appears on chord hover */}
+          <ChordScaleContext
+            chordNotes={modifiedHoverNotes}
             notes={notes}
-          />
-
-          {/* Major scale row */}
-          <NotesArray
             squareSidePx={SQUARE_SIDE}
-            size={majorScaleNotes.length || modeIntervals.length}
-            caption="Major Scale"
-          >
-            {majorScaleNotes.map((note, idx) => (
-              <NoteCell squareSidePx={SQUARE_SIDE} idx={idx} key={idx}>
-                {note ? renderNote(note) : null}
-              </NoteCell>
-            ))}
-          </NotesArray>
+          />
 
           {/* Chromatic scale + slider */}
           <NotesArray
             squareSidePx={SQUARE_SIDE}
             size={BASE_SCALE_WITH_OVERFLOW_SIZE}
             showBorder={false}
-            caption="Chromatic"
+            caption="Chromatic · drag to change key"
           >
             <div
               className="absolute z-10 flex"
@@ -341,7 +333,7 @@ export default function VisualizerPanel() {
 
             <div
               ref={sliderRef}
-              className="keen-slider relative z-20 flex h-full cursor-grab items-center"
+              className="keen-slider relative z-20 flex h-full cursor-grab active:cursor-grabbing items-center"
             >
               {notes.map((note, idx) => (
                 <NoteCell
@@ -366,6 +358,10 @@ export default function VisualizerPanel() {
                 </NoteCell>
               ))}
             </div>
+
+            {/* Edge fades to hint at scrollable content */}
+            <div className="pointer-events-none absolute left-0 top-0 z-30 h-full w-10 bg-gradient-to-r from-[#050510] to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 z-30 h-full w-10 bg-gradient-to-l from-[#050510] to-transparent" />
           </NotesArray>
 
           {/* Mode row */}
@@ -373,6 +369,7 @@ export default function VisualizerPanel() {
             squareSidePx={SQUARE_SIDE}
             size={modeNotesWithOverflow.length}
             showBorder={false}
+            caption={selectedMode}
           >
             <div
               className="absolute z-0 flex"
@@ -413,10 +410,8 @@ export default function VisualizerPanel() {
             squareSide={SQUARE_SIDE}
             modeNotesWithOverflow={modeNotesWithOverflow}
             setHoveredChordIndex={setHoveredTriadIndex}
-            setChordNotes={setTriadNotes}
             notes={notes}
             chordType="triads"
-            setMajorScaleNotes={setMajorScaleNotes}
             selectedExtensions={selectedExtensions}
             extensionOptions={EXTENSION_OPTIONS}
             onExtensionChange={(degreeIdx, value) => {

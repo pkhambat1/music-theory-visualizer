@@ -90,8 +90,11 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
         renderNote(displayNote)
       ) : isDifferent ? (
         <div className="flex flex-col items-center gap-0 leading-none">
-          <span className="text-[9px] text-slate-500 line-through decoration-red-400/60">
+          <span className="relative text-[9px] text-slate-500">
             {displayNote}
+            <span className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+              <span className="block h-px w-[140%] bg-slate-300 rotate-[-45deg]" />
+            </span>
           </span>
           <span className="text-[13px] font-semibold text-emerald-400">
             {displayNewValue}

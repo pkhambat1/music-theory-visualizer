@@ -3,9 +3,8 @@ import type { ChordType, Extension, ExtensionOption, NoteIndex, NoteName } from 
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
 import { playChord } from "../lib/audio";
-import { getChordDescriptor, getChordNotes, getChordNotesInChromaticScale, applyExtensions } from "../lib/music/chords";
+import { getChordDescriptor, getChordNotes, applyExtensions, getDisabledExtensions } from "../lib/music/chords";
 import { leftTrimOverflowNotes } from "../lib/music/scale";
-import { IONIAN } from "../lib/music/modes";
 import Popover from "./ui/Popover";
 import MultiSelect from "./ui/MultiSelect";
 import Button from "./ui/Button";
@@ -19,13 +18,11 @@ export interface DiatonicScaleDegreesRowProps {
   squareSide: number;
   modeNotesWithOverflow: NoteIndex[];
   setHoveredChordIndex: (idx: number | null) => void;
-  setChordNotes: (notes: (NoteIndex | null)[]) => void;
   notes: NoteName[];
   chordType?: ChordType;
   selectedExtensions: Extension[][];
   extensionOptions?: ExtensionOption[];
   onExtensionChange?: (degreeIdx: number, value: string[]) => void;
-  setMajorScaleNotes: (notes: (string | undefined)[]) => void;
   modeLeftOverflowSize: number;
   modeLength?: number;
   dataRow?: string;
@@ -37,13 +34,11 @@ export default function DiatonicScaleDegreesRow({
   squareSide,
   modeNotesWithOverflow,
   setHoveredChordIndex,
-  setChordNotes,
   notes,
   chordType = "triads",
   selectedExtensions,
   extensionOptions = [],
   onExtensionChange,
-  setMajorScaleNotes,
   modeLeftOverflowSize,
   modeLength = 0,
   dataRow = "diatonic-row",
@@ -68,19 +63,11 @@ export default function DiatonicScaleDegreesRow({
     modifiedNotes: NoteIndex[],
   ) => {
     setHoveredChordIndex(chordNumeralIdx);
-    setChordNotes(getChordNotesInChromaticScale(modifiedNotes));
-    const chordRoot = modifiedNotes[0]!;
-    const majorScaleNotes = IONIAN.map(
-      (inter) => notes[inter + chordRoot],
-    );
-    setMajorScaleNotes(majorScaleNotes);
     onChordHoverChange?.({ original: originalNotes, modified: modifiedNotes });
   };
 
   const clearHover = () => {
     setHoveredChordIndex(null);
-    setChordNotes([]);
-    setMajorScaleNotes([...Array(IONIAN.length)]);
     onChordHoverChange?.({ original: [], modified: [] });
   };
 
@@ -200,6 +187,7 @@ export default function DiatonicScaleDegreesRow({
                       onChange={(value) =>
                         onExtensionChange?.(chordNumeralIdx, value)
                       }
+                      disabledValues={getDisabledExtensions(activeExtensions)}
                     />
                   </div>
                 </Popover>
