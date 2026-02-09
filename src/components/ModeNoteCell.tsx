@@ -35,6 +35,7 @@ export interface ModeNoteCellProps {
   onPlay: (note: string) => void;
   isHighlighted?: boolean;
   highlightColor?: string;
+  optCaption?: string | number | null;
 }
 
 const ModeNoteCell = React.memo(function ModeNoteCell({
@@ -46,6 +47,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
   onPlay,
   isHighlighted = false,
   highlightColor = colors.cyan["400"],
+  optCaption,
 }: ModeNoteCellProps) {
   const cOctave = useMemo(() => getCOctave(noteString || ""), [noteString]);
   const displayNote = useMemo(
@@ -77,6 +79,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
       showBorder={false}
       onClick={handleClick}
       className="cursor-pointer hover:bg-white/[0.06]"
+      optCaption={optCaption}
       style={
         isHighlighted
           ? {

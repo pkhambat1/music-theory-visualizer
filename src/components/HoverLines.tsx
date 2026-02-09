@@ -5,6 +5,38 @@ import { leftTrimOverflowNotes } from "../lib/music/scale";
 import { getChordNotes } from "../lib/music/chords";
 import { buildSplinePath } from "../lib/linePath";
 
+// ─── Interval → degree label mapping ────────────────────────────────
+
+const INTERVAL_DEGREE_LABELS: Record<number, string> = {
+  0: "1",
+  1: "\u266d2",
+  2: "2",
+  3: "\u266d3",
+  4: "3",
+  5: "4",
+  6: "\u266d5",
+  7: "5",
+  8: "\u266d6",
+  9: "6",
+  10: "\u266d7",
+  11: "7",
+  12: "8",
+  13: "\u266d9",
+  14: "9",
+};
+
+function getIntervalLabel(semitones: number): string {
+  return INTERVAL_DEGREE_LABELS[semitones] ?? `${semitones}`;
+}
+
+// ─── Types ──────────────────────────────────────────────────────────
+
+interface LineWithInterval extends Line {
+  intervalSemitones?: number;
+}
+
+// ─── Component ──────────────────────────────────────────────────────
+
 export interface HoverLinesProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   hoveredIndex: number | null;
@@ -26,7 +58,7 @@ export default function HoverLines({
   originalChordNotes = [],
   modifiedChordNotes = [],
 }: HoverLinesProps) {
-  const [lines, setLines] = useState<Line[]>([]);
+  const [lines, setLines] = useState<LineWithInterval[]>([]);
 
   useLayoutEffect(() => {
     if (hoveredIndex === null) {
@@ -53,16 +85,28 @@ export default function HoverLines({
         sourceRect.left - containerRect.left + sourceRect.width / 2;
       const sourceY = sourceRect.top - containerRect.top;
 
+      // Determine the root note for interval calculation
+      const modeNotes = leftTrimOverflowNotes(
+        modeNotesWithOverflow,
+        modeLeftOverflowSize,
+      );
+      const chordRoot = modeNotes[hoveredIndex];
+
       // Helper: build a line from source to a mode-row target
       const lineToModeTarget = (
         tIdx: number,
         type: LineType,
-      ): Line | null => {
+        noteIdx?: NoteIndex,
+      ): LineWithInterval | null => {
         const targetEl = container.querySelector(
           `[data-row="mode-row"][data-idx="${tIdx}"]`,
         );
         if (!targetEl) return null;
         const targetRect = targetEl.getBoundingClientRect();
+        const intervalSemitones =
+          noteIdx !== undefined && chordRoot !== undefined
+            ? noteIdx - chordRoot
+            : undefined;
         return {
           x1: sourceX,
           y1: sourceY,
@@ -70,6 +114,7 @@ export default function HoverLines({
             targetRect.left - containerRect.left + targetRect.width / 2,
           y2: targetRect.bottom - containerRect.top,
           type,
+          intervalSemitones,
         };
       };
 
@@ -77,12 +122,16 @@ export default function HoverLines({
       const lineToBaseTarget = (
         noteIdx: number,
         type: LineType,
-      ): Line | null => {
+      ): LineWithInterval | null => {
         const targetEl = container.querySelector(
           `[data-row="base-row"][data-idx="${noteIdx}"]`,
         );
         if (!targetEl) return null;
         const targetRect = targetEl.getBoundingClientRect();
+        const intervalSemitones =
+          chordRoot !== undefined
+            ? noteIdx - chordRoot
+            : undefined;
         return {
           x1: sourceX,
           y1: sourceY,
@@ -90,11 +139,12 @@ export default function HoverLines({
             targetRect.left - containerRect.left + targetRect.width / 2,
           y2: targetRect.bottom - containerRect.top,
           type,
+          intervalSemitones,
         };
       };
 
       // ── Diatonic → Mode lines (extension-aware) ──
-      let diatonicLines: Line[] = [];
+      let diatonicLines: LineWithInterval[] = [];
       const hasExtensionData =
         originalChordNotes.length > 0 && modifiedChordNotes.length > 0;
 
@@ -115,22 +165,22 @@ export default function HoverLines({
         const resolveToModeRow = (
           noteList: NoteIndex[],
           type: LineType,
-        ): Line[] =>
+        ): LineWithInterval[] =>
           noteList
             .map((note) => {
               const tIdx = modeNotesWithOverflow.indexOf(note);
               if (tIdx < 0) return null;
-              return lineToModeTarget(tIdx, type);
+              return lineToModeTarget(tIdx, type, note);
             })
-            .filter((l): l is Line => l !== null);
+            .filter((l): l is LineWithInterval => l !== null);
 
         const resolveToBaseRow = (
           noteList: NoteIndex[],
           type: LineType,
-        ): Line[] =>
+        ): LineWithInterval[] =>
           noteList
             .map((note) => lineToBaseTarget(note, type))
-            .filter((l): l is Line => l !== null);
+            .filter((l): l is LineWithInterval => l !== null);
 
         diatonicLines = [
           ...resolveToModeRow(removedNotes, "removed"),
@@ -139,10 +189,6 @@ export default function HoverLines({
         ];
       } else {
         // Fallback: compute internally from unmodified triad
-        const modeNotes = leftTrimOverflowNotes(
-          modeNotesWithOverflow,
-          modeLeftOverflowSize,
-        );
         const chordNotesArr = getChordNotes(
           modeNotes,
           hoveredIndex,
@@ -153,12 +199,15 @@ export default function HoverLines({
           .filter((idx) => idx >= 0);
 
         diatonicLines = targetIdxs
-          .map((tIdx) => lineToModeTarget(tIdx, "diatonic"))
-          .filter((l): l is Line => l !== null);
+          .map((tIdx) => {
+            const noteIdx = modeNotesWithOverflow[tIdx];
+            return lineToModeTarget(tIdx, "diatonic", noteIdx);
+          })
+          .filter((l): l is LineWithInterval => l !== null);
       }
 
       // ── Base → Mode lines (chromatic highlighting) ──
-      const baseLines: Line[] = chordHighlightPairs
+      const baseLines: LineWithInterval[] = chordHighlightPairs
         .map(({ baseIdx, modeIdx }) => {
           const fromEl = container.querySelector(
             `[data-row="base-row"][data-idx="${baseIdx}"]`,
@@ -179,7 +228,7 @@ export default function HoverLines({
             type: "base" as LineType,
           };
         })
-        .filter((l): l is Line => l !== null);
+        .filter((l): l is LineWithInterval => l !== null);
 
       setLines([...diatonicLines, ...baseLines]);
     };
@@ -226,25 +275,57 @@ export default function HoverLines({
     >
       {lines.map((line, idx) => {
         const isRemoved = line.type === "removed";
+        const midX = (line.x1 + line.x2) / 2;
+        const midY = (line.y1 + line.y2) / 2;
+        const showLabel =
+          line.intervalSemitones !== undefined &&
+          line.type !== "base" &&
+          line.type !== "removed";
         return (
-          <path
-            key={idx}
-            d={buildSplinePath(line)}
-            stroke={
-              isRemoved ? "rgba(100, 116, 139, 0.4)" : neonColor
-            }
-            strokeWidth={isRemoved ? "1" : "1.5"}
-            strokeLinecap="round"
-            strokeDasharray={isRemoved ? "4 3" : undefined}
-            style={
-              isRemoved
-                ? undefined
-                : {
-                    filter: `drop-shadow(0 0 6px ${neonColor})`,
-                  }
-            }
-            fill="none"
-          />
+          <g key={idx}>
+            <path
+              d={buildSplinePath(line)}
+              stroke={
+                isRemoved ? "rgba(100, 116, 139, 0.4)" : neonColor
+              }
+              strokeWidth={isRemoved ? "1" : "2"}
+              strokeLinecap="round"
+              strokeDasharray={isRemoved ? "4 3" : undefined}
+              style={
+                isRemoved
+                  ? undefined
+                  : {
+                      filter: `drop-shadow(0 0 4px ${neonColor}) drop-shadow(0 0 8px ${neonColor})`,
+                    }
+              }
+              fill="none"
+            />
+            {showLabel && (
+              <>
+                <rect
+                  x={midX - 14}
+                  y={midY - 8}
+                  width="28"
+                  height="16"
+                  rx="4"
+                  fill="rgba(8, 8, 24, 0.9)"
+                  stroke="rgba(34, 211, 238, 0.3)"
+                  strokeWidth="0.5"
+                />
+                <text
+                  x={midX}
+                  y={midY + 4}
+                  textAnchor="middle"
+                  fill="rgba(34, 211, 238, 0.9)"
+                  fontSize="9"
+                  fontWeight="600"
+                  fontFamily="Inter, system-ui, sans-serif"
+                >
+                  {getIntervalLabel(line.intervalSemitones!)}
+                </text>
+              </>
+            )}
+          </g>
         );
       })}
     </svg>

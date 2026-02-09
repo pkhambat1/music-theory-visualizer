@@ -10,6 +10,7 @@ export interface NoteCellProps extends React.HTMLAttributes<HTMLDivElement> {
   showBorder?: boolean;
   dataRow?: string;
   dataIdx?: number;
+  isRoot?: boolean;
 }
 
 const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
@@ -23,6 +24,7 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
       showBorder = true,
       dataRow,
       dataIdx,
+      isRoot = false,
       className = "",
       style: customStyle = {},
       ...props
@@ -36,7 +38,8 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
         data-row={dataRow}
         data-idx={dataIdx}
         className={cn(
-          "flex items-center justify-center text-sm font-semibold box-border relative select-none transition-colors duration-150 text-slate-200",
+          "flex items-center justify-center text-sm font-semibold box-border relative select-none transition-all duration-150 text-slate-200 hover:scale-[1.08] hover:z-10",
+          isRoot && "animate-root-pulse",
           className,
         )}
         style={{
@@ -44,12 +47,13 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
           height: `${squareSidePx}px`,
           border: showBorder ? getLineBorder(BORDER_PX) : undefined,
           background: optBackground || undefined,
+          borderRadius: "8px",
           ...customStyle,
         }}
         {...props}
       >
         {children}
-        {optCaption && (
+        {optCaption != null && (
           <div className="absolute bottom-1 text-[10px] font-normal text-slate-500">
             {optCaption}
           </div>

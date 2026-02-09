@@ -30,6 +30,24 @@
   .animate-fade-in-up {
     animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  .animate-fade-in-up-delayed {
+    opacity: 0;
+    animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+  }
+
+  .animate-root-pulse {
+    animation: root-pulse 2.5s ease-in-out infinite;
+  }
+}
+
+/* Subtle dot pattern background */
+.dot-pattern {
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
 }
 
 @keyframes fade-in-up {
@@ -40,5 +58,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes root-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.4),
+      0 0 16px rgba(34, 211, 238, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(34, 211, 238, 0.6),
+      0 0 28px rgba(34, 211, 238, 0.25);
   }
 }

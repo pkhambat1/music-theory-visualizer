@@ -65,6 +65,18 @@ const EXTENSION_OPTIONS: ExtensionOption[] = [
   { value: "9", label: "9" },
 ];
 
+const MODE_DESCRIPTIONS: Record<ModeName, string> = {
+  "Ionian (major)": "The natural major scale \u2014 bright and resolved",
+  "Dorian": "Minor with a raised 6th \u2014 jazzy and warm",
+  "Phrygian": "Minor with a flat 2nd \u2014 dark and Spanish-flavored",
+  "Lydian": "Major with a raised 4th \u2014 dreamy and floating",
+  "Mixolydian": "Major with a flat 7th \u2014 bluesy and dominant",
+  "Aeolian (natural minor)": "The natural minor scale \u2014 sad and introspective",
+  "Locrian": "Diminished \u2014 unstable and dissonant",
+  "Harmonic Minor": "Minor with a raised 7th \u2014 exotic and dramatic",
+  "Melodic Minor": "Minor with raised 6th and 7th \u2014 smooth and jazzy",
+};
+
 // ─── Component ─────────────────────────────────────────────────────
 
 export default function VisualizerPanel() {
@@ -139,7 +151,7 @@ export default function VisualizerPanel() {
 
   // ── Keen Slider ──────────────────────────────────────────────────
 
-  const [sliderRef] = useKeenSlider({
+  const [sliderRef, sliderInstanceRef] = useKeenSlider({
     slides: {
       perView: BASE_SCALE_WITH_OVERFLOW_SIZE,
     },
@@ -227,10 +239,10 @@ export default function VisualizerPanel() {
   // ── Render ───────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in-up">
+    <div className="flex flex-col gap-6">
       {/* Header card */}
       <Card
-        className="max-w-[1600px] w-full mx-auto relative z-10"
+        className="max-w-[1600px] w-full mx-auto relative z-10 animate-fade-in-up"
         bodyClassName="flex flex-col gap-4"
       >
         <div>
@@ -263,10 +275,15 @@ export default function VisualizerPanel() {
             />
           </div>
         </div>
+        {MODE_DESCRIPTIONS[selectedMode] && (
+          <p className="text-sm text-slate-500 italic">
+            {MODE_DESCRIPTIONS[selectedMode]}
+          </p>
+        )}
       </Card>
 
       {/* Visualization card */}
-      <Card className="max-w-[1600px] w-full mx-auto" bodyClassName="p-5">
+      <Card className="max-w-[1600px] w-full mx-auto animate-fade-in-up-delayed" bodyClassName="p-5">
         <div
           ref={diagramRef}
           className="relative w-full flex flex-col items-center gap-8 overflow-x-auto pb-2"
@@ -300,7 +317,9 @@ export default function VisualizerPanel() {
             squareSidePx={SQUARE_SIDE}
             size={BASE_SCALE_WITH_OVERFLOW_SIZE}
             showBorder={false}
-            caption="Chromatic · drag to change key"
+            caption="Chromatic Scale"
+            captionSubtitle="All 12 notes — drag to change key"
+            accentColor="rgba(34, 211, 238, 0.03)"
           >
             <div
               className="absolute z-10 flex"
@@ -326,6 +345,7 @@ export default function VisualizerPanel() {
                     dataRow="chromatic-row"
                     dataIdx={idx}
                     optBackground={background}
+                    isRoot={idx === 0}
                   />
                 );
               })}
@@ -359,17 +379,41 @@ export default function VisualizerPanel() {
               ))}
             </div>
 
-            {/* Edge fades to hint at scrollable content */}
+            {/* Edge fades + arrow buttons */}
             <div className="pointer-events-none absolute left-0 top-0 z-30 h-full w-10 bg-gradient-to-r from-[#050510] to-transparent" />
             <div className="pointer-events-none absolute right-0 top-0 z-30 h-full w-10 bg-gradient-to-l from-[#050510] to-transparent" />
+            <button
+              onClick={() => sliderInstanceRef.current?.prev()}
+              className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-slate-400 hover:text-slate-200 transition-colors backdrop-blur-sm border border-white/[0.06]"
+              aria-label="Scroll left"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+            <button
+              onClick={() => sliderInstanceRef.current?.next()}
+              className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-slate-400 hover:text-slate-200 transition-colors backdrop-blur-sm border border-white/[0.06]"
+              aria-label="Scroll right"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
           </NotesArray>
+
+          {/* Active key indicator */}
+          <div className="flex items-center gap-2 -mt-4">
+            <span className="text-xs font-medium uppercase tracking-wider text-slate-500">Key:</span>
+            <span className="text-lg font-bold bg-gradient-to-r from-cyan-300 to-cyan-400 bg-clip-text text-transparent">
+              {renderNote(rootNote)}
+            </span>
+          </div>
 
           {/* Mode row */}
           <NotesArray
             squareSidePx={SQUARE_SIDE}
             size={modeNotesWithOverflow.length}
             showBorder={false}
-            caption={selectedMode}
+            caption={`${selectedMode} Scale`}
+            captionSubtitle="Notes in the selected mode"
+            accentColor="rgba(139, 92, 246, 0.03)"
           >
             <div
               className="absolute z-0 flex"
@@ -388,6 +432,12 @@ export default function VisualizerPanel() {
             {modeNotesWithOverflow.map((note, idx) => {
               const noteString = notes[note] ?? "";
               const isHighlighted = highlightedModeIdxs.has(idx);
+              // Show scale degree numbers (1-7) for visible mode notes, skip overflow
+              const visibleDegree = idx - modeLeftOverflowSize;
+              const scaleDegreeCaption =
+                visibleDegree >= 0 && visibleDegree < modeIntervals.length - 1
+                  ? visibleDegree + 1
+                  : null;
               return (
                 <ModeNoteCell
                   key={idx}
@@ -399,6 +449,7 @@ export default function VisualizerPanel() {
                   onPlay={handlePlayNote}
                   isHighlighted={isHighlighted}
                   highlightColor={neonHighlight}
+                  optCaption={scaleDegreeCaption}
                 />
               );
             })}
@@ -407,6 +458,8 @@ export default function VisualizerPanel() {
           {/* Diatonic chord degrees */}
           <DiatonicScaleDegreesRow
             caption="Diatonic Chords"
+            captionSubtitle="Chords built from the mode"
+            accentColor="rgba(52, 211, 153, 0.03)"
             squareSide={SQUARE_SIDE}
             modeNotesWithOverflow={modeNotesWithOverflow}
             setHoveredChordIndex={setHoveredTriadIndex}

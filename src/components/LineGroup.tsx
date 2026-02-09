@@ -88,12 +88,18 @@ export default function LineGroup({
         overflow: "visible",
       }}
     >
+      <defs>
+        <linearGradient id="line-gradient-static" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(34, 211, 238, 0.2)" />
+          <stop offset="100%" stopColor="rgba(139, 92, 246, 0.35)" />
+        </linearGradient>
+      </defs>
       {lines.map((line, idx) => (
         <path
           key={idx}
           d={buildSplinePath(line)}
-          stroke="rgba(148, 163, 184, 0.25)"
-          strokeWidth=".5"
+          stroke="url(#line-gradient-static)"
+          strokeWidth="0.75"
           fill="none"
         />
       ))}

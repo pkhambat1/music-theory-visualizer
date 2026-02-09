@@ -143,69 +143,94 @@ export default function ChordScaleContext({
   };
 
   return (
-    <NotesArray
-      squareSidePx={squareSidePx}
-      size={majorScale.length}
-      caption={caption}
+    <div
+      style={{
+        transition: "opacity 200ms ease, transform 200ms ease",
+        opacity: isEmpty ? 0.4 : 1,
+        transform: isEmpty ? "translateY(4px)" : "translateY(0)",
+      }}
     >
-      {majorScale.map((scaleNote, idx) => {
-        const scaleNoteName = notes[scaleNote] ?? "";
-        const info = degreeMap.get(idx);
+      <NotesArray
+        squareSidePx={squareSidePx}
+        size={majorScale.length}
+        caption={caption}
+        captionSubtitle={isEmpty ? "Hover a chord to see its scale context" : undefined}
+      >
+        {majorScale.map((scaleNote, idx) => {
+          const scaleNoteName = notes[scaleNote] ?? "";
+          const info = degreeMap.get(idx);
 
-        // ── Empty state or non-chord-tone scale degree ──
-        if (!info) {
+          // ── Empty state: ghost cells ──
+          if (isEmpty) {
+            return (
+              <NoteCell
+                key={idx}
+                idx={idx}
+                squareSidePx={squareSidePx}
+                className="text-slate-700 font-normal"
+                style={{
+                  border: "1px dashed rgba(255, 255, 255, 0.06)",
+                  background: "transparent",
+                }}
+              />
+            );
+          }
+
+          // ── Non-chord-tone scale degree ──
+          if (!info) {
+            return (
+              <NoteCell
+                key={idx}
+                idx={idx}
+                squareSidePx={squareSidePx}
+                className="text-slate-600 font-normal"
+              >
+                {renderNote(scaleNoteName)}
+              </NoteCell>
+            );
+          }
+
+          // ── Unaltered chord tone ──
+          if (!info.isAltered) {
+            return (
+              <NoteCell
+                key={idx}
+                idx={idx}
+                squareSidePx={squareSidePx}
+                className="text-slate-100 font-semibold"
+                style={CHORD_TONE_STYLE}
+                optCaption={info.degreeLabel}
+              >
+                {renderNote(scaleNoteName)}
+              </NoteCell>
+            );
+          }
+
+          // ── Altered chord tone ──
+          const alteredNoteName = notes[info.actualNote] ?? "";
           return (
             <NoteCell
               key={idx}
               idx={idx}
               squareSidePx={squareSidePx}
-              className="text-slate-600 font-normal"
-            >
-              {isEmpty ? null : renderNote(scaleNoteName)}
-            </NoteCell>
-          );
-        }
-
-        // ── Unaltered chord tone ──
-        if (!info.isAltered) {
-          return (
-            <NoteCell
-              key={idx}
-              idx={idx}
-              squareSidePx={squareSidePx}
-              className="text-slate-100 font-semibold"
               style={CHORD_TONE_STYLE}
               optCaption={info.degreeLabel}
             >
-              {renderNote(scaleNoteName)}
+              <div className="flex flex-col items-center gap-0 leading-none">
+                <span className="relative text-[9px] text-slate-500">
+                  {stripOctave(scaleNoteName)}
+                  <span className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+                    <span className="block h-px w-[140%] bg-slate-300 rotate-[-45deg]" />
+                  </span>
+                </span>
+                <span className="text-[13px] font-semibold text-emerald-400">
+                  {stripOctave(alteredNoteName)}
+                </span>
+              </div>
             </NoteCell>
           );
-        }
-
-        // ── Altered chord tone ──
-        const alteredNoteName = notes[info.actualNote] ?? "";
-        return (
-          <NoteCell
-            key={idx}
-            idx={idx}
-            squareSidePx={squareSidePx}
-            style={CHORD_TONE_STYLE}
-            optCaption={info.degreeLabel}
-          >
-            <div className="flex flex-col items-center gap-0 leading-none">
-              <span className="relative text-[9px] text-slate-500">
-                {stripOctave(scaleNoteName)}
-                <span className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-                  <span className="block h-px w-[140%] bg-slate-300 rotate-[-45deg]" />
-                </span>
-              </span>
-              <span className="text-[13px] font-semibold text-emerald-400">
-                {stripOctave(alteredNoteName)}
-              </span>
-            </div>
-          </NoteCell>
-        );
-      })}
-    </NotesArray>
+        })}
+      </NotesArray>
+    </div>
   );
 }

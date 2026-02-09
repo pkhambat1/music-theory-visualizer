@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { ChordType, Extension, ExtensionOption, NoteIndex, NoteName } from "../types";
+import { useMemo, useState } from "react";
+import type { ChordQuality, ChordType, Extension, ExtensionOption, NoteIndex, NoteName } from "../types";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
 import { playChord } from "../lib/audio";
@@ -28,7 +28,23 @@ export interface DiatonicScaleDegreesRowProps {
   dataRow?: string;
   onChordHoverChange?: (data: ChordHoverData) => void;
   caption?: string;
+  captionSubtitle?: string;
+  accentColor?: string;
 }
+
+// ─── Chord quality → color mapping ──────────────────────────────────
+
+function qualityColor(quality: ChordQuality): string {
+  switch (quality) {
+    case "":     return "rgb(103, 232, 249)";   // cyan-300 — Major
+    case "m":    return "rgb(196, 181, 253)";   // violet-300 — Minor
+    case "\u00b0": return "rgb(252, 211, 77)";  // amber-300 — Diminished
+    case "+":    return "rgb(253, 164, 175)";   // rose-300 — Augmented
+    default:     return "rgb(203, 213, 225)";   // slate-300 — fallback
+  }
+}
+
+// ─── Component ──────────────────────────────────────────────────────
 
 export default function DiatonicScaleDegreesRow({
   squareSide,
@@ -44,6 +60,8 @@ export default function DiatonicScaleDegreesRow({
   dataRow = "diatonic-row",
   onChordHoverChange,
   caption,
+  captionSubtitle,
+  accentColor,
 }: DiatonicScaleDegreesRowProps) {
   const romanBase = ["I", "II", "III", "IV", "V", "VI", "VII"];
   const degreeCount = modeLength > 0 ? modeLength : romanBase.length + 1;
@@ -52,9 +70,9 @@ export default function DiatonicScaleDegreesRow({
   );
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
-  const modeNotes = leftTrimOverflowNotes(
-    modeNotesWithOverflow,
-    modeLeftOverflowSize,
+  const modeNotes = useMemo(
+    () => leftTrimOverflowNotes(modeNotesWithOverflow, modeLeftOverflowSize),
+    [modeNotesWithOverflow, modeLeftOverflowSize],
   );
 
   const emitHover = (
@@ -76,6 +94,8 @@ export default function DiatonicScaleDegreesRow({
       size={chordNumerals.length}
       squareSidePx={squareSide}
       caption={caption}
+      captionSubtitle={captionSubtitle}
+      accentColor={accentColor}
     >
       {chordNumerals.map((chordNumeral, chordNumeralIdx) => {
         const originalNotes = getChordNotes(
@@ -89,12 +109,13 @@ export default function DiatonicScaleDegreesRow({
         );
         const chordDescriptor = getChordDescriptor(chordNotesArr);
         const activeExtensions = selectedExtensions[chordNumeralIdx] ?? [];
+        const color = qualityColor(chordDescriptor);
 
         return (
           <div
             key={chordNumeralIdx}
+            className="relative"
             style={{
-              position: "relative",
               width: `${squareSide}px`,
               height: `${squareSide}px`,
               overflow: "visible",
@@ -121,6 +142,7 @@ export default function DiatonicScaleDegreesRow({
                 className={
                   activeExtensions.length > 0 ? "-translate-y-1" : ""
                 }
+                style={{ color }}
               >
                 {chordNumeral}
                 {chordDescriptor}
@@ -132,7 +154,7 @@ export default function DiatonicScaleDegreesRow({
                   {activeExtensions.map((ext) => (
                     <span
                       key={ext}
-                      className="rounded bg-cyan-400/15 px-[3px] text-[7px] font-medium text-cyan-300 leading-[12px]"
+                      className="rounded bg-cyan-400/15 px-1 text-[9px] font-medium text-cyan-300 leading-[14px]"
                     >
                       {ext}
                     </span>
@@ -141,7 +163,7 @@ export default function DiatonicScaleDegreesRow({
               )}
 
               <div
-                className="absolute right-1 bottom-1 z-10 opacity-0 transition-opacity pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+                className="absolute right-1 bottom-1 z-10 opacity-30 transition-opacity pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
                 onClick={(e) => e.stopPropagation()}
                 onMouseEnter={(e) => {
                   e.stopPropagation();
@@ -193,6 +215,7 @@ export default function DiatonicScaleDegreesRow({
                 </Popover>
               </div>
             </NoteCell>
+
           </div>
         );
       })}
