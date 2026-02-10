@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import type { ChordQuality, ChordType, Extension, ExtensionOption, NoteIndex, NoteName } from "../types";
+import type { ChordType, Extension, ExtensionOption, NoteIndex, NoteName } from "../types";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
-import { playChord } from "../lib/audio";
+import { playChord, arpeggiateChord } from "../lib/audio";
 import { getChordDescriptor, getChordNotes, applyExtensions, getDisabledExtensions } from "../lib/music/chords";
 import { leftTrimOverflowNotes } from "../lib/music/scale";
 import Popover from "./ui/Popover";
@@ -29,19 +29,8 @@ export interface DiatonicScaleDegreesRowProps {
   onChordHoverChange?: (data: ChordHoverData) => void;
   caption?: string;
   captionSubtitle?: string;
-  accentColor?: string;
-}
-
-// ─── Chord quality → color mapping ──────────────────────────────────
-
-function qualityColor(quality: ChordQuality): string {
-  switch (quality) {
-    case "":     return "rgb(103, 232, 249)";   // cyan-300 — Major
-    case "m":    return "rgb(196, 181, 253)";   // violet-300 — Minor
-    case "\u00b0": return "rgb(252, 211, 77)";  // amber-300 — Diminished
-    case "+":    return "rgb(253, 164, 175)";   // rose-300 — Augmented
-    default:     return "rgb(203, 213, 225)";   // slate-300 — fallback
-  }
+  captionRight?: React.ReactNode;
+  arpeggiate?: boolean;
 }
 
 // ─── Component ──────────────────────────────────────────────────────
@@ -61,7 +50,8 @@ export default function DiatonicScaleDegreesRow({
   onChordHoverChange,
   caption,
   captionSubtitle,
-  accentColor,
+  captionRight,
+  arpeggiate = false,
 }: DiatonicScaleDegreesRowProps) {
   const romanBase = ["I", "II", "III", "IV", "V", "VI", "VII"];
   const degreeCount = modeLength > 0 ? modeLength : romanBase.length + 1;
@@ -73,6 +63,18 @@ export default function DiatonicScaleDegreesRow({
   const modeNotes = useMemo(
     () => leftTrimOverflowNotes(modeNotesWithOverflow, modeLeftOverflowSize),
     [modeNotesWithOverflow, modeLeftOverflowSize],
+  );
+
+  const chordData = useMemo(
+    () =>
+      chordNumerals.map((_, chordNumeralIdx) => {
+        const originalNotes = getChordNotes(modeNotes, chordNumeralIdx, chordType);
+        const activeExtensions = selectedExtensions[chordNumeralIdx] ?? [];
+        const chordNotesArr = applyExtensions(originalNotes, activeExtensions as Extension[]);
+        const chordDescriptor = getChordDescriptor(chordNotesArr);
+        return { originalNotes, chordNotesArr, chordDescriptor, activeExtensions };
+      }),
+    [chordNumerals, modeNotes, chordType, selectedExtensions],
   );
 
   const emitHover = (
@@ -95,22 +97,10 @@ export default function DiatonicScaleDegreesRow({
       squareSidePx={squareSide}
       caption={caption}
       captionSubtitle={captionSubtitle}
-      accentColor={accentColor}
+      captionRight={captionRight}
     >
       {chordNumerals.map((chordNumeral, chordNumeralIdx) => {
-        const originalNotes = getChordNotes(
-          modeNotes,
-          chordNumeralIdx,
-          chordType,
-        );
-        const chordNotesArr = applyExtensions(
-          originalNotes,
-          (selectedExtensions[chordNumeralIdx] ?? []) as Extension[],
-        );
-        const chordDescriptor = getChordDescriptor(chordNotesArr);
-        const activeExtensions = selectedExtensions[chordNumeralIdx] ?? [];
-        const color = qualityColor(chordDescriptor);
-
+        const { originalNotes, chordNotesArr, chordDescriptor, activeExtensions } = chordData[chordNumeralIdx]!;
         return (
           <div
             key={chordNumeralIdx}
@@ -135,14 +125,14 @@ export default function DiatonicScaleDegreesRow({
               }
               onMouseLeave={() => clearHover()}
               onClick={() => {
-                playChord(chordNotesArr.map((idx) => notes[idx]!));
+                const noteNames = chordNotesArr.map((idx) => notes[idx]!);
+                arpeggiate ? arpeggiateChord(noteNames) : playChord(noteNames);
               }}
             >
               <span
-                className={
+                className={`text-slate-200 ${
                   activeExtensions.length > 0 ? "-translate-y-1" : ""
-                }
-                style={{ color }}
+                }`}
               >
                 {chordNumeral}
                 {chordDescriptor}
@@ -189,9 +179,11 @@ export default function DiatonicScaleDegreesRow({
                       className="h-5 w-5 rounded-full border border-white/[0.15] bg-white/[0.06] p-0 text-slate-400 hover:bg-white/[0.12] hover:text-slate-200 shadow-sm"
                       aria-label="Add extensions"
                     >
-                      <span className="text-[10px] font-bold leading-none">
-                        +
-                      </span>
+                      <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+                        <circle cx="3" cy="8" r="1.5" />
+                        <circle cx="8" cy="8" r="1.5" />
+                        <circle cx="13" cy="8" r="1.5" />
+                      </svg>
                     </Button>
                   }
                 >
@@ -201,6 +193,7 @@ export default function DiatonicScaleDegreesRow({
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MultiSelect
+                      header="Extensions"
                       options={extensionOptions.map((o) => ({
                         value: o.value,
                         label: o.label,

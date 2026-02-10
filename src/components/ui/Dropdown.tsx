@@ -37,7 +37,7 @@ export default function Dropdown({
         <span className="text-slate-200">{label}</span>
         <svg
           className={cn(
-            "ml-2 h-3.5 w-3.5 text-slate-500 transition-transform duration-200",
+            "ml-2 h-3.5 w-3.5 text-slate-500 transition-transform duration-100",
             open && "rotate-180",
           )}
           fill="none"

@@ -84,9 +84,10 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
         isHighlighted
           ? {
               border: `2px solid ${highlightColor}`,
-              boxShadow: `0 0 12px ${highlightColor}`,
             }
-          : undefined
+          : {
+              border: "2px solid transparent",
+            }
       }
     >
       {isSimple ? (

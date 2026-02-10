@@ -50,6 +50,17 @@ export async function playChord(notes: string[]): Promise<void> {
   sampler!.triggerAttackRelease(notes, "1n");
 }
 
+/** Play notes one at a time with a short delay between each. */
+export async function arpeggiateChord(notes: string[]): Promise<void> {
+  initializeSampler();
+  await Tone.loaded();
+  const now = Tone.now();
+  const delay = 0.15; // seconds between notes
+  for (let i = 0; i < notes.length; i++) {
+    sampler!.triggerAttackRelease(notes[i]!, "2n", now + i * delay);
+  }
+}
+
 /** Play a single note. */
 export async function playNote(note: string): Promise<void> {
   initializeSampler();

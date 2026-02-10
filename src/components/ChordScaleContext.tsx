@@ -52,6 +52,7 @@ function baseDegreeLabel(degreeIdx: number): string {
 interface DegreeChordTone {
   actualNote: NoteIndex;
   isAltered: boolean;
+  isFlat: boolean;
   /** e.g. "1", "♭3", "♯5", "9" */
   degreeLabel: string;
 }
@@ -80,14 +81,15 @@ function buildDegreeMap(
     const degreeIdx = intervalToDegreeIdx(interval);
     const natural = naturalInterval(degreeIdx);
     const isAltered = interval !== natural;
+    const isFlat = interval < natural;
 
     let degreeLabel = baseDegreeLabel(degreeIdx);
     if (isAltered) {
-      const prefix = interval < natural ? "♭" : "♯";
+      const prefix = isFlat ? "♭" : "♯";
       degreeLabel = `${prefix}${degreeLabel}`;
     }
 
-    map.set(degreeIdx, { actualNote: chordNote, isAltered, degreeLabel });
+    map.set(degreeIdx, { actualNote: chordNote, isAltered, isFlat, degreeLabel });
     if (degreeIdx > maxDegreeIdx) maxDegreeIdx = degreeIdx;
   }
 
@@ -145,7 +147,7 @@ export default function ChordScaleContext({
   return (
     <div
       style={{
-        transition: "opacity 200ms ease, transform 200ms ease",
+        transition: "opacity 50ms ease, transform 50ms ease",
         opacity: isEmpty ? 0.4 : 1,
         transform: isEmpty ? "translateY(4px)" : "translateY(0)",
       }}
@@ -169,7 +171,6 @@ export default function ChordScaleContext({
                 squareSidePx={squareSidePx}
                 className="text-slate-700 font-normal"
                 style={{
-                  border: "1px dashed rgba(255, 255, 255, 0.06)",
                   background: "transparent",
                 }}
               />
@@ -208,6 +209,7 @@ export default function ChordScaleContext({
 
           // ── Altered chord tone ──
           const alteredNoteName = notes[info.actualNote] ?? "";
+          const arrow = info.isFlat ? "←" : "→";
           return (
             <NoteCell
               key={idx}
@@ -216,16 +218,28 @@ export default function ChordScaleContext({
               style={CHORD_TONE_STYLE}
               optCaption={info.degreeLabel}
             >
-              <div className="flex flex-col items-center gap-0 leading-none">
-                <span className="relative text-[9px] text-slate-500">
-                  {stripOctave(scaleNoteName)}
-                  <span className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-                    <span className="block h-px w-[140%] bg-slate-300 rotate-[-45deg]" />
-                  </span>
-                </span>
-                <span className="text-[13px] font-semibold text-emerald-400">
-                  {stripOctave(alteredNoteName)}
-                </span>
+              <div className="flex items-center gap-[2px] leading-none">
+                {info.isFlat ? (
+                  <>
+                    <span className="text-[12px] font-semibold text-slate-100">
+                      {stripOctave(alteredNoteName)}
+                    </span>
+                    <span className="text-[9px] text-slate-600">{arrow}</span>
+                    <span className="text-[10px] text-slate-600 line-through">
+                      {stripOctave(scaleNoteName)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[10px] text-slate-600 line-through">
+                      {stripOctave(scaleNoteName)}
+                    </span>
+                    <span className="text-[9px] text-slate-600">{arrow}</span>
+                    <span className="text-[12px] font-semibold text-slate-100">
+                      {stripOctave(alteredNoteName)}
+                    </span>
+                  </>
+                )}
               </div>
             </NoteCell>
           );

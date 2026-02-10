@@ -25,9 +25,7 @@ import {
   addOverflowToModeIntervals,
   BASE_SCALE_LEFT_OVERFLOW_SIZE,
   BASE_SCALE_WITH_OVERFLOW_SIZE,
-  BORDER_PX,
   buildModeNotesWithOverflow,
-  getLineBorder,
   getModeLeftOverflowSize,
   modeIntervalsToMode,
 } from "../lib/music/scale";
@@ -65,6 +63,15 @@ const EXTENSION_OPTIONS: ExtensionOption[] = [
   { value: "9", label: "9" },
 ];
 
+const MODE_ITEMS = Object.keys(MODES).map((mode) => ({
+  key: mode,
+  label: mode,
+}));
+
+const HIGHLIGHTED_BASE_STYLE = (color: string) => ({
+  border: `2px solid ${color}`,
+});
+
 const MODE_DESCRIPTIONS: Record<ModeName, string> = {
   "Ionian (major)": "The natural major scale \u2014 bright and resolved",
   "Dorian": "Minor with a raised 6th \u2014 jazzy and warm",
@@ -87,6 +94,7 @@ export default function VisualizerPanel() {
 
   const [selectedMode, setSelectedMode] = useState<ModeName>("Ionian (major)");
   const [rootNote, setRootNote] = useState<NoteName>(DEFAULT_ROOT_NOTE);
+  const [arpeggiate, setArpeggiate] = useState(false);
 
   const modeIntervals = useMemo(
     () => MODES[selectedMode] ?? ([] as Interval[]),
@@ -116,16 +124,30 @@ export default function VisualizerPanel() {
 
   // ── Hover / chord state ──────────────────────────────────────────
 
-  const [hoveredTriadIndex, setHoveredTriadIndex] = useState<number | null>(
-    null,
-  );
-  const [hoveredChordNotes, setHoveredChordNotes] = useState<NoteIndex[]>([]);
-  const [originalHoverNotes, setOriginalHoverNotes] = useState<NoteIndex[]>(
-    [],
-  );
-  const [modifiedHoverNotes, setModifiedHoverNotes] = useState<NoteIndex[]>(
-    [],
-  );
+  interface HoverState {
+    index: number | null;
+    original: NoteIndex[];
+    modified: NoteIndex[];
+  }
+
+  const [hoverState, setHoverState] = useState<HoverState>({
+    index: null,
+    original: [],
+    modified: [],
+  });
+
+  const hoveredTriadIndex = hoverState.index;
+  const originalHoverNotes = hoverState.original;
+  const modifiedHoverNotes = hoverState.modified;
+  const hoveredChordNotes = hoverState.modified;
+
+  const setHoveredTriadIndex = useCallback((idx: number | null) => {
+    if (idx === null) {
+      setHoverState({ index: null, original: [], modified: [] });
+    } else {
+      setHoverState((prev) => ({ ...prev, index: idx }));
+    }
+  }, []);
 
   const handlePlayNote = useCallback(
     (val: string) => playNote(val),
@@ -139,13 +161,17 @@ export default function VisualizerPanel() {
 
   const handleChordHoverChange = useCallback((data: ChordHoverData) => {
     if (data?.original) {
-      setOriginalHoverNotes(data.original);
-      setModifiedHoverNotes(data.modified);
-      setHoveredChordNotes(data.modified);
+      setHoverState((prev) => ({
+        ...prev,
+        original: data.original,
+        modified: data.modified,
+      }));
     } else {
-      setOriginalHoverNotes([]);
-      setModifiedHoverNotes([]);
-      setHoveredChordNotes([]);
+      setHoverState((prev) => ({
+        ...prev,
+        original: [],
+        modified: [],
+      }));
     }
   }, []);
 
@@ -155,6 +181,7 @@ export default function VisualizerPanel() {
     slides: {
       perView: BASE_SCALE_WITH_OVERFLOW_SIZE,
     },
+    defaultAnimation: { duration: 125 },
     initial:
       notes.indexOf(DEFAULT_ROOT_NOTE) - BASE_SCALE_LEFT_OVERFLOW_SIZE,
     slideChanged(s) {
@@ -183,12 +210,16 @@ export default function VisualizerPanel() {
 
   const diagramRef = useRef<HTMLDivElement>(null);
 
-  const modeConnections = modeIntervals.map((interval, idx) => ({
-    fromRow: "chromatic-row",
-    fromIdx: interval as number,
-    toRow: "mode-row",
-    toIdx: modeLeftOverflowSize + idx,
-  }));
+  const modeConnections = useMemo(
+    () =>
+      modeIntervals.map((interval, idx) => ({
+        fromRow: "chromatic-row",
+        fromIdx: interval as number,
+        toRow: "mode-row",
+        toIdx: modeLeftOverflowSize + idx,
+      })),
+    [modeIntervals, modeLeftOverflowSize],
+  );
 
   const chordHighlightPairs = useMemo<ChordHighlightPair[]>(() => {
     if (!Array.isArray(hoveredChordNotes) || !hoveredChordNotes.length)
@@ -231,11 +262,6 @@ export default function VisualizerPanel() {
 
   // ── Mode dropdown items ──────────────────────────────────────────
 
-  const modeItems = Object.keys(MODES).map((mode) => ({
-    key: mode,
-    label: mode,
-  }));
-
   // ── Render ───────────────────────────────────────────────────────
 
   return (
@@ -246,10 +272,8 @@ export default function VisualizerPanel() {
         bodyClassName="flex flex-col gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 bg-clip-text text-transparent">
-              Music Theory Visualizer
-            </span>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-100">
+            Music Theory Visualizer
           </h1>
           <p className="mt-1.5 text-sm text-slate-500">
             Explore modes, intervals, and diatonic chords with quick audio
@@ -270,10 +294,20 @@ export default function VisualizerPanel() {
             </span>
             <Dropdown
               label={selectedMode}
-              items={modeItems}
+              items={MODE_ITEMS}
               onSelect={(key) => setSelectedMode(key as ModeName)}
             />
           </div>
+          <button
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${
+              arpeggiate
+                ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
+                : "border-white/[0.1] bg-white/[0.04] text-slate-400 hover:text-slate-200"
+            }`}
+            onClick={() => setArpeggiate((v) => !v)}
+          >
+            Arpeggiate
+          </button>
         </div>
         {MODE_DESCRIPTIONS[selectedMode] && (
           <p className="text-sm text-slate-500 italic">
@@ -317,9 +351,9 @@ export default function VisualizerPanel() {
             squareSidePx={SQUARE_SIDE}
             size={BASE_SCALE_WITH_OVERFLOW_SIZE}
             showBorder={false}
+            clipContent
             caption="Chromatic Scale"
             captionSubtitle="All 12 notes — drag to change key"
-            accentColor="rgba(34, 211, 238, 0.03)"
           >
             <div
               className="absolute z-10 flex"
@@ -328,7 +362,6 @@ export default function VisualizerPanel() {
                   (BASE_SCALE_LEFT_OVERFLOW_SIZE * 100) /
                   CHROMATIC_SCALE.length
                 }%`,
-                outline: getLineBorder(BORDER_PX),
               }}
             >
               {CHROMATIC_SCALE.map((_, idx) => {
@@ -345,7 +378,7 @@ export default function VisualizerPanel() {
                     dataRow="chromatic-row"
                     dataIdx={idx}
                     optBackground={background}
-                    isRoot={idx === 0}
+                    style={background ? { border: "1px solid rgba(34, 211, 238, 0.2)" } : undefined}
                   />
                 );
               })}
@@ -366,13 +399,10 @@ export default function VisualizerPanel() {
                   showBorder={false}
                   style={
                     highlightedBaseIdxs.has(idx as NoteIndex)
-                      ? {
-                          border: `2px solid ${neonHighlight}`,
-                          boxShadow: `0 0 12px ${neonHighlight}`,
-                        }
-                      : undefined
+                      ? HIGHLIGHTED_BASE_STYLE(neonHighlight)
+                      : { border: "2px solid transparent" }
                   }
-                  onClick={() => playNote(note)}
+                  onClick={() => handlePlayNote(note)}
                 >
                   {renderNote(note)}
                 </NoteCell>
@@ -398,22 +428,14 @@ export default function VisualizerPanel() {
             </button>
           </NotesArray>
 
-          {/* Active key indicator */}
-          <div className="flex items-center gap-2 -mt-4">
-            <span className="text-xs font-medium uppercase tracking-wider text-slate-500">Key:</span>
-            <span className="text-lg font-bold bg-gradient-to-r from-cyan-300 to-cyan-400 bg-clip-text text-transparent">
-              {renderNote(rootNote)}
-            </span>
-          </div>
-
           {/* Mode row */}
           <NotesArray
             squareSidePx={SQUARE_SIDE}
             size={modeNotesWithOverflow.length}
             showBorder={false}
+            clipContent
             caption={`${selectedMode} Scale`}
             captionSubtitle="Notes in the selected mode"
-            accentColor="rgba(139, 92, 246, 0.03)"
           >
             <div
               className="absolute z-0 flex"
@@ -421,7 +443,6 @@ export default function VisualizerPanel() {
                 translate: `${
                   (modeLeftOverflowSize * 100) / modeIntervals.length
                 }%`,
-                outline: getLineBorder(BORDER_PX),
               }}
             >
               {modeIntervals.map((_, idx) => (
@@ -459,7 +480,6 @@ export default function VisualizerPanel() {
           <DiatonicScaleDegreesRow
             caption="Diatonic Chords"
             captionSubtitle="Chords built from the mode"
-            accentColor="rgba(52, 211, 153, 0.03)"
             squareSide={SQUARE_SIDE}
             modeNotesWithOverflow={modeNotesWithOverflow}
             setHoveredChordIndex={setHoveredTriadIndex}
@@ -477,6 +497,21 @@ export default function VisualizerPanel() {
             modeLeftOverflowSize={modeLeftOverflowSize}
             modeLength={modeIntervals.length}
             onChordHoverChange={handleChordHoverChange}
+            arpeggiate={arpeggiate}
+            captionRight={
+              selectedExtensions.some((exts) => exts.length > 0) ? (
+                <button
+                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                  onClick={() =>
+                    setSelectedExtensions(
+                      Array.from({ length: modeIntervals.length }, () => []),
+                    )
+                  }
+                >
+                  Clear all extensions
+                </button>
+              ) : undefined
+            }
           />
         </div>
       </Card>
