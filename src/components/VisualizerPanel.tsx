@@ -28,10 +28,9 @@ import {
   modeIntervalsToMode,
 } from "../lib/music/scale";
 import { spellModeNotes } from "../lib/music/spelling";
+import { colors } from "../lib/colors";
 
-import Card from "./ui/Card";
 import Tag from "./ui/Tag";
-import Divider from "./ui/Divider";
 import Dropdown from "./ui/Dropdown";
 import NotesArray from "./NotesArray";
 import NoteCell from "./NoteCell";
@@ -85,11 +84,9 @@ const MODE_DESCRIPTIONS: Record<ModeName, string> = {
 // ─── Component ─────────────────────────────────────────────────────
 
 export default function VisualizerPanel() {
-  // Data-driven accent colors (opaque, bold)
-  // Teal = structure/root, Blue = scale membership, Gold = chord hover
-  const azureHighlight = "#46C8B2";                      // root note: full ST teal (structural, Ch.2)
-  const ashFill = "#8ECEF5";                              // in-scale: bold blue (membership, ST Ch.1)
-  const neonHighlight = "#D90677";                        // chord hover: magenta
+  // Three color roles — D3 categorical palette (imported from d3-scale-chromatic)
+
+
 
   const [selectedMode, setSelectedMode] = useState<ModeName>("Ionian (major)");
   const [rootNote, setRootNote] = useState<NoteName>(DEFAULT_ROOT_NOTE);
@@ -264,63 +261,58 @@ export default function VisualizerPanel() {
   // ── Render ───────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header card */}
-      <Card
-        className="max-w-[1600px] w-full mx-auto relative z-10"
-        bodyClassName="flex flex-col gap-4"
-      >
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Music Theory Visualizer
-          </h1>
-          <p className="mt-1.5 text-sm text-gray-500">
-            Explore modes, intervals, and diatonic chords with quick audio
-            playback.
-          </p>
-        </div>
-        <Divider />
-        <div className="flex flex-wrap items-center gap-5">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
-              Key
-            </span>
-            <Tag>{renderNote(rootNote)}</Tag>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
-              Mode
-            </span>
-            <Dropdown
-              label={selectedMode}
-              items={MODE_ITEMS}
-              onSelect={(key) => setSelectedMode(key as ModeName)}
-            />
-          </div>
-          <button
-            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${
-              arpeggiate
-                ? "border-[#64BDFF] bg-[#D6EFFA] text-[#009CDE]"
-                : "border-[#d5dbe2] bg-white text-gray-500 hover:text-gray-700"
-            }`}
-            onClick={() => setArpeggiate((v) => !v)}
-          >
-            Arpeggiate
-          </button>
-        </div>
-        {MODE_DESCRIPTIONS[selectedMode] && (
-          <p className="text-sm text-gray-500">
-            {MODE_DESCRIPTIONS[selectedMode]}
-          </p>
-        )}
-      </Card>
+    <div className="max-w-[1600px] w-full mx-auto flex flex-col gap-4">
+      {/* Title + subtitle */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          Music Theory Visualizer
+        </h1>
+        <p className="mt-1.5 text-sm text-gray-500">
+          Explore modes, intervals, and diatonic chords with quick audio
+          playback.
+        </p>
+      </div>
 
-      {/* Visualization card */}
-      <Card className="max-w-[1600px] w-full mx-auto" bodyClassName="p-5">
-        <div
-          ref={diagramRef}
-          className="relative w-full flex flex-col items-center gap-8 overflow-x-auto pb-2"
+      {/* Controls */}
+      <div className="flex flex-wrap items-center gap-5">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            Key
+          </span>
+          <Tag>{renderNote(rootNote)}</Tag>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            Mode
+          </span>
+          <Dropdown
+            label={selectedMode}
+            items={MODE_ITEMS}
+            onSelect={(key) => setSelectedMode(key as ModeName)}
+          />
+        </div>
+        <button
+          className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${
+            arpeggiate
+              ? "border-[var(--d3-primary)] bg-[var(--d3-scaleFill)] text-[var(--d3-primary)]"
+              : "border-[var(--d3-border)] bg-white text-gray-500 hover:text-gray-700"
+          }`}
+          onClick={() => setArpeggiate((v) => !v)}
         >
+          Arpeggiate
+        </button>
+      </div>
+      {MODE_DESCRIPTIONS[selectedMode] && (
+        <p className="text-sm text-gray-500">
+          {MODE_DESCRIPTIONS[selectedMode]}
+        </p>
+      )}
+
+      {/* Visualization rows */}
+      <div
+        ref={diagramRef}
+        className="relative w-full flex flex-col items-center gap-8 overflow-x-auto pb-2 mt-4"
+      >
           <LineGroup
             containerRef={diagramRef}
             connections={modeConnections}
@@ -333,7 +325,7 @@ export default function VisualizerPanel() {
             modeNotesWithOverflow={modeNotesWithOverflow}
             modeLeftOverflowSize={modeLeftOverflowSize}
             chordHighlightPairs={chordHighlightPairs}
-            neonColor={neonHighlight}
+
             originalChordNotes={originalHoverNotes}
             modifiedChordNotes={modifiedHoverNotes}
           />
@@ -364,13 +356,10 @@ export default function VisualizerPanel() {
             >
               {CHROMATIC_SCALE.map((_, idx) => {
                 let background: string | null = null;
-                let borderColor: string | null = null;
                 if (idx === 0) {
-                  background = azureHighlight;
-                  borderColor = "#2E9E8A";
+                  background = colors.rootFill;
                 } else if (modeIntervals.includes(idx as Interval)) {
-                  background = ashFill;
-                  borderColor = "#64BDFF";
+                  background = colors.scaleFill;
                 }
                 return (
                   <NoteCell
@@ -379,7 +368,6 @@ export default function VisualizerPanel() {
                     dataRow="chromatic-row"
                     dataIdx={idx}
                     optBackground={background}
-                    style={borderColor ? { border: `2px solid ${borderColor}` } : undefined}
                   />
                 );
               })}
@@ -400,7 +388,7 @@ export default function VisualizerPanel() {
                   showBorder={false}
                   style={
                     highlightedBaseIdxs.has(idx as NoteIndex)
-                      ? HIGHLIGHTED_BASE_STYLE(neonHighlight)
+                      ? HIGHLIGHTED_BASE_STYLE("#000000")
                       : { border: "2px solid transparent" }
                   }
                   onClick={() => handlePlayNote(note)}
@@ -411,18 +399,18 @@ export default function VisualizerPanel() {
             </div>
 
             {/* Edge fades + arrow buttons */}
-            <div className="pointer-events-none absolute left-0 top-0 z-30 h-full w-10 bg-gradient-to-r from-white to-transparent" />
-            <div className="pointer-events-none absolute right-0 top-0 z-30 h-full w-10 bg-gradient-to-l from-white to-transparent" />
+            <div className="pointer-events-none absolute left-0 top-0 z-30 h-full w-10 bg-gradient-to-r from-[var(--d3-rowBg)] to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 z-30 h-full w-10 bg-gradient-to-l from-[var(--d3-rowBg)] to-transparent" />
             <button
               onClick={() => sliderInstanceRef.current?.prev()}
-              className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[#d5dbe2]"
+              className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--d3-border)]"
               aria-label="Scroll left"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
             </button>
             <button
               onClick={() => sliderInstanceRef.current?.next()}
-              className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[#d5dbe2]"
+              className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--d3-border)]"
               aria-label="Scroll right"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
@@ -435,7 +423,7 @@ export default function VisualizerPanel() {
             size={modeNotesWithOverflow.length}
             clipContent
             zIndex={2}
-            rowBackground="white"
+            rowBackground={colors.rowBg}
             caption={`${selectedMode} Scale`}
             captionSubtitle="Notes in the selected mode"
           >
@@ -471,7 +459,7 @@ export default function VisualizerPanel() {
                   newValue={spelledModeNotes[idx] ?? ""}
                   onPlay={handlePlayNote}
                   isHighlighted={isHighlighted}
-                  highlightColor={neonHighlight}
+
                   optCaption={scaleDegreeCaption}
                 />
               );
@@ -501,7 +489,7 @@ export default function VisualizerPanel() {
             onChordHoverChange={handleChordHoverChange}
             arpeggiate={arpeggiate}
             hoveredIndex={hoveredTriadIndex}
-            hoverColor={neonHighlight}
+
             captionRight={
               selectedExtensions.some((exts) => exts.length > 0) ? (
                 <button
@@ -518,7 +506,6 @@ export default function VisualizerPanel() {
             }
           />
         </div>
-      </Card>
     </div>
   );
 }

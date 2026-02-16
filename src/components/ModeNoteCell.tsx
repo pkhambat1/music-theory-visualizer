@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import NoteCell from "./NoteCell";
 import { renderNote } from "../lib/notes";
 
+
 // ─── Helpers ───────────────────────────────────────────────────────
 
 function getCOctave(note: string): string | null {
@@ -45,7 +46,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
   newValue,
   onPlay,
   isHighlighted = false,
-  highlightColor = "#D90677",
+  highlightColor = "#000000",
   optCaption,
 }: ModeNoteCellProps) {
   const cOctave = useMemo(() => getCOctave(noteString || ""), [noteString]);
@@ -99,7 +100,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
               <span className="block h-px w-[140%] bg-gray-400 rotate-[-45deg]" />
             </span>
           </span>
-          <span className="text-[13px] font-semibold text-[#00896B]">
+          <span className="text-[13px] font-semibold text-[var(--d3-respelling)]">
             {displayNewValue}
           </span>
         </div>

@@ -63,7 +63,7 @@ export default function MultiSelect({
                   isDisabled
                     ? "text-gray-300 pointer-events-none"
                     : isSelected
-                    ? "bg-[#D6EFFA] text-[#009CDE] font-medium cursor-pointer"
+                    ? "bg-[var(--d3-scaleFill)] text-[var(--d3-primary)] font-medium cursor-pointer"
                     : isFocused
                     ? "bg-gray-100 text-gray-800 cursor-pointer"
                     : "text-gray-600 hover:bg-gray-50 cursor-pointer"
@@ -74,7 +74,7 @@ export default function MultiSelect({
               >
                 <input
                   type="checkbox"
-                  className={`h-3 w-3 rounded border-gray-300 bg-white text-[#009CDE] focus:ring-[#64BDFF] ${isDisabled ? "opacity-40" : ""}`}
+                  className={`h-3 w-3 rounded border-gray-300 bg-white text-[var(--d3-primary)] focus:ring-[var(--d3-primary)] ${isDisabled ? "opacity-40" : ""}`}
                   checked={isSelected}
                   disabled={isDisabled}
                   onChange={() => toggle(opt.value)}

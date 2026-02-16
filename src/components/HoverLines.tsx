@@ -4,6 +4,7 @@ import { leftTrimOverflowNotes } from "../lib/music/scale";
 import { getChordNotes } from "../lib/music/chords";
 import { buildSplinePath } from "../lib/linePath";
 
+
 // ─── Interval → degree label mapping ────────────────────────────────
 
 const INTERVAL_DEGREE_LABELS: Record<number, string> = {
@@ -42,7 +43,7 @@ export interface HoverLinesProps {
   modeNotesWithOverflow: NoteIndex[];
   modeLeftOverflowSize: number;
   chordHighlightPairs?: ChordHighlightPair[];
-  neonColor?: string;
+
   originalChordNotes?: NoteIndex[];
   modifiedChordNotes?: NoteIndex[];
 }
@@ -53,7 +54,7 @@ export default function HoverLines({
   modeNotesWithOverflow,
   modeLeftOverflowSize,
   chordHighlightPairs = [],
-  neonColor = "#D90677",
+
   originalChordNotes = [],
   modifiedChordNotes = [],
 }: HoverLinesProps) {
@@ -258,9 +259,7 @@ export default function HoverLines({
           <path
             key={`p${idx}`}
             d={buildSplinePath(line)}
-            stroke={
-              isRemoved ? "rgba(0, 0, 0, 0.25)" : neonColor
-            }
+            stroke="#000000"
             strokeWidth={isRemoved ? "1.5" : "2.5"}
             strokeLinecap="round"
             strokeDasharray={isRemoved ? "4 3" : undefined}
@@ -290,15 +289,13 @@ export default function HoverLines({
               width="28"
               height="16"
               rx="4"
-              fill="white"
-              stroke="rgba(0, 0, 0, 0.2)"
-              strokeWidth="0.75"
+              fill="#000000"
             />
             <text
               x={midX}
               y={midY + 4}
               textAnchor="middle"
-              fill="#333"
+              fill="#ffffff"
               fontSize="9"
               fontWeight="600"
               fontFamily="Inter, system-ui, sans-serif"

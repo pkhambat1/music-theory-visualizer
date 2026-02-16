@@ -1,6 +1,7 @@
 import { useLayoutEffect, useState } from "react";
 import type { Connection } from "../types";
 import { buildSplinePath, type LineCoords } from "../lib/linePath";
+import { colors } from "../lib/colors";
 
 export interface LineGroupProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -92,8 +93,9 @@ export default function LineGroup({
         <path
           key={idx}
           d={buildSplinePath(line)}
-          stroke="#000"
-          strokeWidth="1"
+          stroke={colors.border}
+          strokeWidth="1.5"
+
           fill="none"
         />
       ))}

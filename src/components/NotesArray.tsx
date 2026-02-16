@@ -1,11 +1,11 @@
 import { BORDER_PX } from "../lib/music/scale";
+import { colors } from "../lib/colors";
 
 export interface NotesArrayProps {
   size: number;
   squareSidePx: number;
   children: React.ReactNode;
   marginPx?: number;
-  showBorder?: boolean;
   caption?: string;
   captionSubtitle?: string;
   captionRight?: React.ReactNode;
@@ -19,7 +19,6 @@ export default function NotesArray({
   squareSidePx,
   children,
   marginPx = 0,
-  showBorder = true,
   caption,
   captionSubtitle,
   captionRight,
@@ -66,10 +65,8 @@ export default function NotesArray({
           height: `${squareSidePx}px`,
           position: "relative",
           boxSizing: "content-box",
-          background: rowBackground ?? "transparent",
-          border: showBorder
-            ? `${BORDER_PX}px solid #000`
-            : `${BORDER_PX}px solid transparent`,
+          background: rowBackground ?? colors.rowBg,
+          border: `${BORDER_PX}px solid transparent`,
           display: "flex",
           alignItems: "center",
           zIndex: 2,

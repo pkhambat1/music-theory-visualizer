@@ -3,6 +3,7 @@ import { IONIAN } from "../lib/music/modes";
 import { renderNote } from "../lib/notes";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
+import { colors } from "../lib/colors";
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -140,8 +141,8 @@ export default function ChordScaleContext({
     : "Root Major Scale";
 
   const CHORD_TONE_STYLE = {
-    background: "#F5B0D5",
-    border: "2px solid #A8044F",
+    background: colors.scaleFill,
+    border: `2px solid ${colors.scaleBorder}`,
   };
 
   return (

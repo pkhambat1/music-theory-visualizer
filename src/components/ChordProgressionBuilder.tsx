@@ -209,7 +209,7 @@ export default function ChordProgressionBuilder({
               )}
             </div>
             <select
-              className="w-20 rounded-lg border border-[#d5dbe2] bg-white px-2 py-1 text-sm text-gray-800 outline-none focus:border-[#64BDFF] focus:ring-1 focus:ring-[#64BDFF]"
+              className="w-20 rounded-lg border border-[var(--d3-border)] bg-white px-2 py-1 text-sm text-gray-800 outline-none focus:border-[var(--d3-primary)] focus:ring-1 focus:ring-[var(--d3-primary)]"
               value={chord.degree}
               onChange={(e) => updateChord(index, "degree", Number(e.target.value))}
             >

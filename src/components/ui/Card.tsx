@@ -13,7 +13,7 @@ export default function Card({
   return (
     <div
       className={cn(
-        "rounded-lg border border-[#d5dbe2] bg-white",
+        "rounded-lg border border-[var(--d3-border)] bg-white",
         className,
       )}
       {...props}

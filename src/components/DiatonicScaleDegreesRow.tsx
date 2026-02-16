@@ -8,6 +8,7 @@ import { leftTrimOverflowNotes } from "../lib/music/scale";
 import Popover from "./ui/Popover";
 import MultiSelect from "./ui/MultiSelect";
 import Button from "./ui/Button";
+import { DEGREE_COLORS } from "../lib/colors";
 
 export interface ChordHoverData {
   original: NoteIndex[];
@@ -55,7 +56,7 @@ export default function DiatonicScaleDegreesRow({
   captionRight,
   arpeggiate = false,
   hoveredIndex = null,
-  hoverColor = "#D90677",
+  hoverColor = "#000000",
 }: DiatonicScaleDegreesRowProps) {
   const romanBase = ["I", "II", "III", "IV", "V", "VI", "VII"];
   const degreeCount = modeLength > 0 ? modeLength : romanBase.length + 1;
@@ -105,6 +106,7 @@ export default function DiatonicScaleDegreesRow({
     >
       {chordNumerals.map((chordNumeral, chordNumeralIdx) => {
         const { originalNotes, chordNotesArr, chordDescriptor, activeExtensions } = chordData[chordNumeralIdx]!;
+        const degreeBg = DEGREE_COLORS[chordNumeralIdx % DEGREE_COLORS.length]!;
         return (
           <div
             key={chordNumeralIdx}
@@ -123,6 +125,7 @@ export default function DiatonicScaleDegreesRow({
               squareSidePx={squareSide}
               dataRow={dataRow}
               dataIdx={chordNumeralIdx}
+              optBackground={degreeBg}
               className="group cursor-pointer hover:bg-black/[0.08] transition-colors"
               style={
                 hoveredIndex === chordNumeralIdx
@@ -139,9 +142,8 @@ export default function DiatonicScaleDegreesRow({
               }}
             >
               <span
-                className={`text-gray-800 ${
-                  activeExtensions.length > 0 ? "-translate-y-1" : ""
-                }`}
+                className={activeExtensions.length > 0 ? "-translate-y-1" : ""}
+                style={{ color: "#000000" }}
               >
                 {chordNumeral}
                 {chordDescriptor}
@@ -153,7 +155,7 @@ export default function DiatonicScaleDegreesRow({
                   {activeExtensions.map((ext) => (
                     <span
                       key={ext}
-                      className="rounded bg-[#D6EFFA] px-1 text-[9px] font-medium text-[#009CDE] leading-[14px]"
+                      className="rounded bg-[var(--d3-scaleFill)] px-1 text-[9px] font-medium text-[var(--d3-primary)] leading-[14px]"
                     >
                       {ext}
                     </span>
@@ -185,7 +187,7 @@ export default function DiatonicScaleDegreesRow({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-5 w-5 rounded-full border border-[#d5dbe2] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                      className="h-5 w-5 rounded-full border border-[var(--d3-border)] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
                       aria-label="Add extensions"
                     >
                       <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">

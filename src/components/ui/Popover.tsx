@@ -50,7 +50,7 @@ export default function Popover({
       {open && (
         <div
           data-popover-panel
-          className={`absolute left-1/2 z-30 -translate-x-1/2 rounded-lg border border-[#d5dbe2] bg-white p-2 shadow-sm ${positionClasses[position]}`}
+          className={`absolute left-1/2 z-30 -translate-x-1/2 rounded-lg border border-[var(--d3-border)] bg-white p-2 shadow-sm ${positionClasses[position]}`}
         >
           {children}
         </div>
