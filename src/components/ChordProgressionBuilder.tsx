@@ -151,12 +151,12 @@ export default function ChordProgressionBuilder({
   return (
     <div className="mt-6 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h3 className="m-0 text-lg font-semibold text-slate-100">
+        <h3 className="m-0 text-lg font-semibold text-gray-900">
           Chord Progression Builder
         </h3>
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Key
             </span>
             <Dropdown
@@ -166,7 +166,7 @@ export default function ChordProgressionBuilder({
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Mode
             </span>
             <Dropdown
@@ -200,16 +200,16 @@ export default function ChordProgressionBuilder({
                 &times;
               </Button>
             </div>
-            <div className="text-lg font-semibold text-slate-100">
+            <div className="text-lg font-semibold text-gray-900">
               {getFormattedRomanNumeral(chord.degree, progressionMode)}
               {chord.extensions.length > 0 && (
-                <span className="ml-1 text-sm text-slate-400">
+                <span className="ml-1 text-sm text-gray-500">
                   {chord.extensions.join(",")}
                 </span>
               )}
             </div>
             <select
-              className="w-20 rounded-lg border border-white/[0.1] bg-white/[0.04] px-2 py-1 text-sm text-slate-200 shadow-sm outline-none focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/20"
+              className="w-20 rounded-lg border border-[#d5dbe2] bg-white px-2 py-1 text-sm text-gray-800 outline-none focus:border-[#64BDFF] focus:ring-1 focus:ring-[#64BDFF]"
               value={chord.degree}
               onChange={(e) => updateChord(index, "degree", Number(e.target.value))}
             >

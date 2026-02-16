@@ -1,4 +1,4 @@
-import { BORDER_PX, getLineBorder } from "../lib/music/scale";
+import { BORDER_PX } from "../lib/music/scale";
 
 export interface NotesArrayProps {
   size: number;
@@ -10,6 +10,8 @@ export interface NotesArrayProps {
   captionSubtitle?: string;
   captionRight?: React.ReactNode;
   clipContent?: boolean;
+  zIndex?: number;
+  rowBackground?: string;
 }
 
 export default function NotesArray({
@@ -22,6 +24,8 @@ export default function NotesArray({
   captionSubtitle,
   captionRight,
   clipContent = false,
+  zIndex,
+  rowBackground,
 }: NotesArrayProps) {
   return (
     <div
@@ -33,6 +37,7 @@ export default function NotesArray({
         margin: `${marginPx}px auto`,
         overflow: "visible",
         position: "relative",
+        zIndex,
       }}
     >
       {(caption || captionRight) && (
@@ -42,12 +47,12 @@ export default function NotesArray({
         >
           <div>
             {caption && (
-              <span className="pointer-events-none select-none whitespace-nowrap text-[13px] font-semibold tracking-wide text-slate-400">
+              <span className="pointer-events-none select-none whitespace-nowrap text-[13px] font-semibold tracking-wide text-gray-500">
                 {caption}
               </span>
             )}
             {captionSubtitle && (
-              <span className="pointer-events-none select-none whitespace-nowrap text-[11px] text-slate-600 ml-2">
+              <span className="pointer-events-none select-none whitespace-nowrap text-[11px] text-gray-400 ml-2">
                 {captionSubtitle}
               </span>
             )}
@@ -61,9 +66,9 @@ export default function NotesArray({
           height: `${squareSidePx}px`,
           position: "relative",
           boxSizing: "content-box",
-          background: "rgba(8, 8, 24, 0.85)",
+          background: rowBackground ?? "transparent",
           border: showBorder
-            ? getLineBorder(BORDER_PX)
+            ? `${BORDER_PX}px solid #000`
             : `${BORDER_PX}px solid transparent`,
           display: "flex",
           alignItems: "center",

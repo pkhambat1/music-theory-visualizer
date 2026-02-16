@@ -5,5 +5,5 @@ export interface DividerProps {
 }
 
 export default function Divider({ className }: DividerProps) {
-  return <div className={cn("h-px w-full bg-white/[0.08]", className)} />;
+  return <div className={cn("h-px w-full bg-[#d5dbe2]", className)} />;
 }

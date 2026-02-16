@@ -6,7 +6,7 @@ export default function Input({ className, ...rest }: InputProps) {
   return (
     <input
       className={cn(
-        "w-full rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-2 text-sm text-slate-200 shadow-sm outline-none placeholder:text-slate-500 transition focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/20",
+        "w-full rounded-lg border border-[#d5dbe2] bg-white px-3 py-2 text-sm text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#64BDFF] focus:ring-1 focus:ring-[#64BDFF]",
         className,
       )}
       {...rest}

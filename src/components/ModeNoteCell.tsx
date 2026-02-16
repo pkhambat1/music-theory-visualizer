@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo } from "react";
-import colors from "tailwindcss/colors";
 import NoteCell from "./NoteCell";
 import { renderNote } from "../lib/notes";
 
@@ -46,7 +45,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
   newValue,
   onPlay,
   isHighlighted = false,
-  highlightColor = colors.cyan["400"],
+  highlightColor = "#D90677",
   optCaption,
 }: ModeNoteCellProps) {
   const cOctave = useMemo(() => getCOctave(noteString || ""), [noteString]);
@@ -78,7 +77,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
       dataIdx={dataIdx}
       showBorder={false}
       onClick={handleClick}
-      className="cursor-pointer hover:bg-white/[0.06]"
+      className="cursor-pointer hover:bg-black/[0.08]"
       optCaption={optCaption}
       style={
         isHighlighted
@@ -94,13 +93,13 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
         renderNote(displayNote)
       ) : isDifferent ? (
         <div className="flex flex-col items-center gap-0 leading-none">
-          <span className="relative text-[9px] text-slate-500">
+          <span className="relative text-[9px] text-gray-400">
             {displayNote}
             <span className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-              <span className="block h-px w-[140%] bg-slate-300 rotate-[-45deg]" />
+              <span className="block h-px w-[140%] bg-gray-400 rotate-[-45deg]" />
             </span>
           </span>
-          <span className="text-[13px] font-semibold text-emerald-400">
+          <span className="text-[13px] font-semibold text-[#00896B]">
             {displayNewValue}
           </span>
         </div>

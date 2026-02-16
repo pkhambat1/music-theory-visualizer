@@ -34,10 +34,10 @@ export default function Dropdown({
   return (
     <div className="relative inline-block" ref={ref}>
       <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
-        <span className="text-slate-200">{label}</span>
+        <span className="text-gray-700">{label}</span>
         <svg
           className={cn(
-            "ml-2 h-3.5 w-3.5 text-slate-500 transition-transform duration-100",
+            "ml-2 h-3.5 w-3.5 text-gray-400 transition-transform duration-100",
             open && "rotate-180",
           )}
           fill="none"
@@ -53,11 +53,11 @@ export default function Dropdown({
         </svg>
       </Button>
       {open && (
-        <div className="absolute left-0 z-30 mt-2 max-h-64 min-w-[180px] overflow-y-auto rounded-xl border border-white/[0.08] bg-[#0d0d20] p-1 shadow-2xl shadow-black/40">
+        <div className="absolute left-0 z-30 mt-2 max-h-64 min-w-[180px] overflow-y-auto rounded-lg border border-[#d5dbe2] bg-white p-1 shadow-sm">
           {items.map((item) => (
             <button
               key={item.key}
-              className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-white/[0.08] hover:text-slate-100"
+              className="w-full rounded-lg px-3 py-2 text-left text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
               onClick={() => {
                 onSelect?.(item.key);
                 setOpen(false);

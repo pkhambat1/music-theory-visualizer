@@ -10,10 +10,10 @@ export const BASE_SCALE_WITH_OVERFLOW_SIZE =
 export const BASE_SCALE_LEFT_OVERFLOW_SIZE =
   (BASE_SCALE_WITH_OVERFLOW_SIZE - CHROMATIC_SCALE.length) / 2;
 
-export const BORDER_PX = 1;
+export const BORDER_PX = 2;
 
 export function getLineBorder(borderWidth: number): string {
-  return `${borderWidth}px solid rgba(255, 255, 255, 0.1)`;
+  return `${borderWidth}px solid rgba(0, 0, 0, 0.12)`;
 }
 
 // ─── Overflow helpers ──────────────────────────────────────────────

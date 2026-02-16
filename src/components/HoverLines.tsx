@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import colors from "tailwindcss/colors";
 import type { ChordHighlightPair, Line, LineType, NoteIndex } from "../types";
 import { leftTrimOverflowNotes } from "../lib/music/scale";
 import { getChordNotes } from "../lib/music/chords";
@@ -54,7 +53,7 @@ export default function HoverLines({
   modeNotesWithOverflow,
   modeLeftOverflowSize,
   chordHighlightPairs = [],
-  neonColor = colors.cyan["400"],
+  neonColor = "#D90677",
   originalChordNotes = [],
   modifiedChordNotes = [],
 }: HoverLinesProps) {
@@ -260,18 +259,11 @@ export default function HoverLines({
             key={`p${idx}`}
             d={buildSplinePath(line)}
             stroke={
-              isRemoved ? "rgba(100, 116, 139, 0.4)" : neonColor
+              isRemoved ? "rgba(0, 0, 0, 0.25)" : neonColor
             }
-            strokeWidth={isRemoved ? "1" : "2"}
+            strokeWidth={isRemoved ? "1.5" : "2.5"}
             strokeLinecap="round"
             strokeDasharray={isRemoved ? "4 3" : undefined}
-            style={
-              isRemoved
-                ? undefined
-                : {
-                    filter: `drop-shadow(0 0 4px ${neonColor}) drop-shadow(0 0 8px ${neonColor})`,
-                  }
-            }
             fill="none"
           />
         );
@@ -298,15 +290,15 @@ export default function HoverLines({
               width="28"
               height="16"
               rx="4"
-              fill="rgba(8, 8, 24, 0.9)"
-              stroke="rgba(34, 211, 238, 0.3)"
-              strokeWidth="0.5"
+              fill="white"
+              stroke="rgba(0, 0, 0, 0.2)"
+              strokeWidth="0.75"
             />
             <text
               x={midX}
               y={midY + 4}
               textAnchor="middle"
-              fill="rgba(34, 211, 238, 0.9)"
+              fill="#333"
               fontSize="9"
               fontWeight="600"
               fontFamily="Inter, system-ui, sans-serif"

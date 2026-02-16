@@ -114,7 +114,7 @@ export interface ChordScaleContextProps {
 /**
  * Shows the chord root's major scale with chord tones overlaid.
  *
- * - Unaltered chord tones: bold/bright with a cyan highlight
+ * - Unaltered chord tones: bold/bright with a blue highlight
  * - Altered chord tones: major scale note struck-through, actual note below
  * - Non-chord-tone degrees: dimmed
  */
@@ -140,16 +140,14 @@ export default function ChordScaleContext({
     : "Root Major Scale";
 
   const CHORD_TONE_STYLE = {
-    background: "rgba(34, 211, 238, 0.1)",
-    border: "1px solid rgba(34, 211, 238, 0.3)",
+    background: "#F5B0D5",
+    border: "2px solid #A8044F",
   };
 
   return (
     <div
       style={{
-        transition: "opacity 50ms ease, transform 50ms ease",
         opacity: isEmpty ? 0.4 : 1,
-        transform: isEmpty ? "translateY(4px)" : "translateY(0)",
       }}
     >
       <NotesArray
@@ -169,7 +167,7 @@ export default function ChordScaleContext({
                 key={idx}
                 idx={idx}
                 squareSidePx={squareSidePx}
-                className="text-slate-700 font-normal"
+                className="text-gray-300 font-normal"
                 style={{
                   background: "transparent",
                 }}
@@ -184,7 +182,7 @@ export default function ChordScaleContext({
                 key={idx}
                 idx={idx}
                 squareSidePx={squareSidePx}
-                className="text-slate-600 font-normal"
+                className="text-gray-400 font-normal"
               >
                 {renderNote(scaleNoteName)}
               </NoteCell>
@@ -198,7 +196,7 @@ export default function ChordScaleContext({
                 key={idx}
                 idx={idx}
                 squareSidePx={squareSidePx}
-                className="text-slate-100 font-semibold"
+                className="text-gray-900 font-semibold"
                 style={CHORD_TONE_STYLE}
                 optCaption={info.degreeLabel}
               >
@@ -221,21 +219,21 @@ export default function ChordScaleContext({
               <div className="flex items-center gap-[2px] leading-none">
                 {info.isFlat ? (
                   <>
-                    <span className="text-[12px] font-semibold text-slate-100">
+                    <span className="text-[12px] font-semibold text-gray-900">
                       {stripOctave(alteredNoteName)}
                     </span>
-                    <span className="text-[9px] text-slate-600">{arrow}</span>
-                    <span className="text-[10px] text-slate-600 line-through">
+                    <span className="text-[9px] text-gray-400">{arrow}</span>
+                    <span className="text-[10px] text-gray-400 line-through">
                       {stripOctave(scaleNoteName)}
                     </span>
                   </>
                 ) : (
                   <>
-                    <span className="text-[10px] text-slate-600 line-through">
+                    <span className="text-[10px] text-gray-400 line-through">
                       {stripOctave(scaleNoteName)}
                     </span>
-                    <span className="text-[9px] text-slate-600">{arrow}</span>
-                    <span className="text-[12px] font-semibold text-slate-100">
+                    <span className="text-[9px] text-gray-400">{arrow}</span>
+                    <span className="text-[12px] font-semibold text-gray-900">
                       {stripOctave(alteredNoteName)}
                     </span>
                   </>

@@ -7,8 +7,6 @@ import {
 } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
-import colors from "tailwindcss/colors";
-
 import type {
   ChordHighlightPair,
   Extension,
@@ -87,10 +85,11 @@ const MODE_DESCRIPTIONS: Record<ModeName, string> = {
 // ─── Component ─────────────────────────────────────────────────────
 
 export default function VisualizerPanel() {
-  // Dark-theme accent colors
-  const azureHighlight = "rgba(34, 211, 238, 0.5)";
-  const ashFill = "rgba(34, 211, 238, 0.18)";
-  const neonHighlight = colors.cyan["400"];
+  // Data-driven accent colors (opaque, bold)
+  // Teal = structure/root, Blue = scale membership, Gold = chord hover
+  const azureHighlight = "#46C8B2";                      // root note: full ST teal (structural, Ch.2)
+  const ashFill = "#8ECEF5";                              // in-scale: bold blue (membership, ST Ch.1)
+  const neonHighlight = "#D90677";                        // chord hover: magenta
 
   const [selectedMode, setSelectedMode] = useState<ModeName>("Ionian (major)");
   const [rootNote, setRootNote] = useState<NoteName>(DEFAULT_ROOT_NOTE);
@@ -268,14 +267,14 @@ export default function VisualizerPanel() {
     <div className="flex flex-col gap-6">
       {/* Header card */}
       <Card
-        className="max-w-[1600px] w-full mx-auto relative z-10 animate-fade-in-up"
+        className="max-w-[1600px] w-full mx-auto relative z-10"
         bodyClassName="flex flex-col gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-100">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             Music Theory Visualizer
           </h1>
-          <p className="mt-1.5 text-sm text-slate-500">
+          <p className="mt-1.5 text-sm text-gray-500">
             Explore modes, intervals, and diatonic chords with quick audio
             playback.
           </p>
@@ -283,13 +282,13 @@ export default function VisualizerPanel() {
         <Divider />
         <div className="flex flex-wrap items-center gap-5">
           <div className="flex items-center gap-2.5">
-            <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Key
             </span>
             <Tag>{renderNote(rootNote)}</Tag>
           </div>
           <div className="flex items-center gap-2.5">
-            <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Mode
             </span>
             <Dropdown
@@ -301,8 +300,8 @@ export default function VisualizerPanel() {
           <button
             className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${
               arpeggiate
-                ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
-                : "border-white/[0.1] bg-white/[0.04] text-slate-400 hover:text-slate-200"
+                ? "border-[#64BDFF] bg-[#D6EFFA] text-[#009CDE]"
+                : "border-[#d5dbe2] bg-white text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setArpeggiate((v) => !v)}
           >
@@ -310,14 +309,14 @@ export default function VisualizerPanel() {
           </button>
         </div>
         {MODE_DESCRIPTIONS[selectedMode] && (
-          <p className="text-sm text-slate-500 italic">
+          <p className="text-sm text-gray-500">
             {MODE_DESCRIPTIONS[selectedMode]}
           </p>
         )}
       </Card>
 
       {/* Visualization card */}
-      <Card className="max-w-[1600px] w-full mx-auto animate-fade-in-up-delayed" bodyClassName="p-5">
+      <Card className="max-w-[1600px] w-full mx-auto" bodyClassName="p-5">
         <div
           ref={diagramRef}
           className="relative w-full flex flex-col items-center gap-8 overflow-x-auto pb-2"
@@ -350,7 +349,6 @@ export default function VisualizerPanel() {
           <NotesArray
             squareSidePx={SQUARE_SIDE}
             size={BASE_SCALE_WITH_OVERFLOW_SIZE}
-            showBorder={false}
             clipContent
             caption="Chromatic Scale"
             captionSubtitle="All 12 notes — drag to change key"
@@ -366,10 +364,13 @@ export default function VisualizerPanel() {
             >
               {CHROMATIC_SCALE.map((_, idx) => {
                 let background: string | null = null;
+                let borderColor: string | null = null;
                 if (idx === 0) {
                   background = azureHighlight;
+                  borderColor = "#2E9E8A";
                 } else if (modeIntervals.includes(idx as Interval)) {
                   background = ashFill;
+                  borderColor = "#64BDFF";
                 }
                 return (
                   <NoteCell
@@ -378,7 +379,7 @@ export default function VisualizerPanel() {
                     dataRow="chromatic-row"
                     dataIdx={idx}
                     optBackground={background}
-                    style={background ? { border: "1px solid rgba(34, 211, 238, 0.2)" } : undefined}
+                    style={borderColor ? { border: `2px solid ${borderColor}` } : undefined}
                   />
                 );
               })}
@@ -395,7 +396,7 @@ export default function VisualizerPanel() {
                   squareSidePx={SQUARE_SIDE}
                   dataRow="base-row"
                   dataIdx={idx}
-                  className="keen-slider__slide cursor-pointer hover:bg-white/[0.06]"
+                  className="keen-slider__slide cursor-pointer hover:bg-black/[0.08]"
                   showBorder={false}
                   style={
                     highlightedBaseIdxs.has(idx as NoteIndex)
@@ -410,18 +411,18 @@ export default function VisualizerPanel() {
             </div>
 
             {/* Edge fades + arrow buttons */}
-            <div className="pointer-events-none absolute left-0 top-0 z-30 h-full w-10 bg-gradient-to-r from-[#050510] to-transparent" />
-            <div className="pointer-events-none absolute right-0 top-0 z-30 h-full w-10 bg-gradient-to-l from-[#050510] to-transparent" />
+            <div className="pointer-events-none absolute left-0 top-0 z-30 h-full w-10 bg-gradient-to-r from-white to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 z-30 h-full w-10 bg-gradient-to-l from-white to-transparent" />
             <button
               onClick={() => sliderInstanceRef.current?.prev()}
-              className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-slate-400 hover:text-slate-200 transition-colors backdrop-blur-sm border border-white/[0.06]"
+              className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[#d5dbe2]"
               aria-label="Scroll left"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
             </button>
             <button
               onClick={() => sliderInstanceRef.current?.next()}
-              className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-slate-400 hover:text-slate-200 transition-colors backdrop-blur-sm border border-white/[0.06]"
+              className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[#d5dbe2]"
               aria-label="Scroll right"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
@@ -432,8 +433,9 @@ export default function VisualizerPanel() {
           <NotesArray
             squareSidePx={SQUARE_SIDE}
             size={modeNotesWithOverflow.length}
-            showBorder={false}
             clipContent
+            zIndex={2}
+            rowBackground="white"
             caption={`${selectedMode} Scale`}
             captionSubtitle="Notes in the selected mode"
           >
@@ -498,10 +500,12 @@ export default function VisualizerPanel() {
             modeLength={modeIntervals.length}
             onChordHoverChange={handleChordHoverChange}
             arpeggiate={arpeggiate}
+            hoveredIndex={hoveredTriadIndex}
+            hoverColor={neonHighlight}
             captionRight={
               selectedExtensions.some((exts) => exts.length > 0) ? (
                 <button
-                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
                   onClick={() =>
                     setSelectedExtensions(
                       Array.from({ length: modeIntervals.length }, () => []),
