@@ -28,7 +28,7 @@ import {
   modeIntervalsToMode,
 } from "../lib/music/scale";
 import { spellModeNotes } from "../lib/music/spelling";
-import { colors } from "../lib/colors";
+import { colors, rainbowBand, BAND_SCALE } from "../lib/colors";
 
 import Tag from "./ui/Tag";
 import Dropdown from "./ui/Dropdown";
@@ -354,23 +354,31 @@ export default function VisualizerPanel() {
                 }%`,
               }}
             >
-              {CHROMATIC_SCALE.map((_, idx) => {
-                let background: string | null = null;
-                if (idx === 0) {
-                  background = colors.rootFill;
-                } else if (modeIntervals.includes(idx as Interval)) {
-                  background = colors.scaleFill;
-                }
-                return (
-                  <NoteCell
-                    key={idx}
-                    squareSidePx={SQUARE_SIDE}
-                    dataRow="chromatic-row"
-                    dataIdx={idx}
-                    optBackground={background}
-                  />
-                );
-              })}
+              {(() => {
+                const scaleIdxs = CHROMATIC_SCALE
+                  .map((_, i) => i)
+                  .filter((i) => i > 0 && modeIntervals.includes(i as Interval));
+                const scaleBand = rainbowBand(BAND_SCALE, scaleIdxs.length);
+                const scaleBandMap = new Map(scaleIdxs.map((si, bi) => [si, scaleBand[bi]!]));
+
+                return CHROMATIC_SCALE.map((_, idx) => {
+                  let background: string | null = null;
+                  if (idx === 0) {
+                    background = colors.rootFill;
+                  } else {
+                    background = scaleBandMap.get(idx) ?? null;
+                  }
+                  return (
+                    <NoteCell
+                      key={idx}
+                      squareSidePx={SQUARE_SIDE}
+                      dataRow="chromatic-row"
+                      dataIdx={idx}
+                      optBackground={background}
+                    />
+                  );
+                });
+              })()}
             </div>
 
             <div
@@ -398,9 +406,7 @@ export default function VisualizerPanel() {
               ))}
             </div>
 
-            {/* Edge fades + arrow buttons */}
-            <div className="pointer-events-none absolute left-0 top-0 z-30 h-full w-10 bg-gradient-to-r from-[var(--d3-rowBg)] to-transparent" />
-            <div className="pointer-events-none absolute right-0 top-0 z-30 h-full w-10 bg-gradient-to-l from-[var(--d3-rowBg)] to-transparent" />
+            {/* Arrow buttons */}
             <button
               onClick={() => sliderInstanceRef.current?.prev()}
               className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--d3-border)]"

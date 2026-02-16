@@ -45,6 +45,7 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
           border: showBorder ? getLineBorder(BORDER_PX) : undefined,
           background: optBackground || undefined,
           borderRadius: "6px",
+          fontFamily: "'JetBrains Mono', monospace",
           ...customStyle,
         }}
         {...props}

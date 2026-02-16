@@ -3,7 +3,7 @@ import { IONIAN } from "../lib/music/modes";
 import { renderNote } from "../lib/notes";
 import NoteCell from "./NoteCell";
 import NotesArray from "./NotesArray";
-import { colors } from "../lib/colors";
+import { rainbowBand, BAND_SCALE } from "../lib/colors";
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -140,9 +140,15 @@ export default function ChordScaleContext({
     ? `${stripOctave(rootName)} Major Scale`
     : "Root Major Scale";
 
-  const CHORD_TONE_STYLE = {
-    background: colors.scaleFill,
-    border: `2px solid ${colors.scaleBorder}`,
+  // Generate a subtle gradient band for chord tone cells
+  const chordToneCount = degreeMap.size;
+  const chordToneBand = rainbowBand(BAND_SCALE, chordToneCount);
+  // Map each degree index that is a chord tone to its band color (in insertion order)
+  const chordToneDegrees = [...degreeMap.keys()];
+  const chordToneStyle = (degreeIdx: number) => {
+    const bandIdx = chordToneDegrees.indexOf(degreeIdx);
+    const bg = bandIdx >= 0 ? chordToneBand[bandIdx]! : chordToneBand[0]!;
+    return { background: bg };
   };
 
   return (
@@ -198,7 +204,7 @@ export default function ChordScaleContext({
                 idx={idx}
                 squareSidePx={squareSidePx}
                 className="text-gray-900 font-semibold"
-                style={CHORD_TONE_STYLE}
+                style={chordToneStyle(idx)}
                 optCaption={info.degreeLabel}
               >
                 {renderNote(scaleNoteName)}
@@ -214,7 +220,7 @@ export default function ChordScaleContext({
               key={idx}
               idx={idx}
               squareSidePx={squareSidePx}
-              style={CHORD_TONE_STYLE}
+              style={chordToneStyle(idx)}
               optCaption={info.degreeLabel}
             >
               <div className="flex items-center gap-[2px] leading-none">

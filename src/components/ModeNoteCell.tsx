@@ -100,7 +100,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
               <span className="block h-px w-[140%] bg-gray-400 rotate-[-45deg]" />
             </span>
           </span>
-          <span className="text-[13px] font-semibold text-[var(--d3-respelling)]">
+          <span className="text-[13px] font-semibold text-black">
             {displayNewValue}
           </span>
         </div>
