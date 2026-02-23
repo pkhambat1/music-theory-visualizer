@@ -1,26 +1,22 @@
-import React from "react";
-import { BORDER_PX, getLineBorder } from "../lib/music/scale";
-import { cn } from "../lib/cn";
+import React from "react"
+import { cn } from "../lib/cn"
+import { SQUARE_SIDE } from "../lib/music/scale"
 
-export interface NoteCellProps extends React.HTMLAttributes<HTMLDivElement> {
-  squareSidePx: number;
+export type NoteCellProps = {
   idx?: number;
   optCaption?: string | number | null;
   optBackground?: string | null;
-  showBorder?: boolean;
   dataRow?: string;
   dataIdx?: number;
-}
+} & React.HTMLAttributes<HTMLDivElement>
 
 const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
   (
     {
-      squareSidePx,
       idx,
       children,
       optCaption,
       optBackground,
-      showBorder = false,
       dataRow,
       dataIdx,
       className = "",
@@ -40,9 +36,8 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
           className,
         )}
         style={{
-          width: `${squareSidePx}px`,
-          height: `${squareSidePx}px`,
-          border: showBorder ? getLineBorder(BORDER_PX) : undefined,
+          width: `${SQUARE_SIDE}px`,
+          height: `${SQUARE_SIDE}px`,
           background: optBackground || undefined,
           borderRadius: "6px",
           fontFamily: "'JetBrains Mono', monospace",
@@ -57,10 +52,10 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
           </div>
         )}
       </div>
-    );
+    )
   },
-);
+)
 
-NoteCell.displayName = "NoteCell";
+NoteCell.displayName = "NoteCell"
 
-export default NoteCell;
+export default NoteCell

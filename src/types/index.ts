@@ -1,2 +1,2 @@
-export * from "./music";
-export * from "./geometry";
+export * from "./music"
+export * from "./geometry"

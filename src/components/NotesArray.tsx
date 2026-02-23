@@ -1,11 +1,9 @@
-import { BORDER_PX } from "../lib/music/scale";
-import { colors } from "../lib/colors";
+import { SQUARE_SIDE } from "../lib/music/scale"
+import { colors } from "../lib/colors"
 
-export interface NotesArrayProps {
+export type NotesArrayProps = {
   size: number;
-  squareSidePx: number;
   children: React.ReactNode;
-  marginPx?: number;
   caption?: string;
   captionSubtitle?: string;
   captionRight?: React.ReactNode;
@@ -16,9 +14,7 @@ export interface NotesArrayProps {
 
 export default function NotesArray({
   size,
-  squareSidePx,
   children,
-  marginPx = 0,
   caption,
   captionSubtitle,
   captionRight,
@@ -33,7 +29,7 @@ export default function NotesArray({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        margin: `${marginPx}px auto`,
+        margin: "0 auto",
         overflow: "visible",
         position: "relative",
         zIndex,
@@ -41,7 +37,7 @@ export default function NotesArray({
     >
       {(caption || captionRight) && (
         <div
-          style={{ width: `${squareSidePx * size}px` }}
+          style={{ width: `${SQUARE_SIDE * size}px` }}
           className="mb-2 flex items-center justify-between"
         >
           <div>
@@ -61,15 +57,14 @@ export default function NotesArray({
       )}
       <div
         style={{
-          width: `${squareSidePx * size}px`,
-          height: `${squareSidePx}px`,
+          width: `${SQUARE_SIDE * size}px`,
+          height: `${SQUARE_SIDE}px`,
           position: "relative",
           boxSizing: "content-box",
           background: rowBackground ?? colors.rowBg,
-          border: `${BORDER_PX}px solid transparent`,
+          border: "2px solid transparent",
           display: "flex",
           alignItems: "center",
-          zIndex: 2,
           borderRadius: "8px",
           overflow: clipContent ? "hidden" : undefined,
         }}
@@ -77,5 +72,5 @@ export default function NotesArray({
         {children}
       </div>
     </div>
-  );
+  )
 }

@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react"
 
-export type PopoverPosition = "top" | "bottom";
+export type PopoverPosition = "top" | "bottom"
 
-export interface PopoverProps {
+export type PopoverProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   trigger: React.ReactNode;
@@ -13,7 +13,7 @@ export interface PopoverProps {
 const positionClasses: Record<PopoverPosition, string> = {
   top: "bottom-full mb-2",
   bottom: "top-full mt-2",
-};
+}
 
 export default function Popover({
   open,
@@ -22,27 +22,27 @@ export default function Popover({
   children,
   position = "bottom",
 }: PopoverProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        onOpenChange(false);
+        onOpenChange(false)
       }
-    };
+    }
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onOpenChange(false);
-    };
+      if (e.key === "Escape") onOpenChange(false)
+    }
 
     if (open) {
-      document.addEventListener("mousedown", handleClick);
-      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("mousedown", handleClick)
+      document.addEventListener("keydown", handleKeyDown)
     }
     return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open, onOpenChange]);
+      document.removeEventListener("mousedown", handleClick)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [open, onOpenChange])
 
   return (
     <div className="relative inline-block" ref={ref}>
@@ -56,5 +56,5 @@ export default function Popover({
         </div>
       )}
     </div>
-  );
+  )
 }

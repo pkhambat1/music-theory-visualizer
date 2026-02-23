@@ -1,51 +1,88 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { ChordHighlightPair, Line, LineType, NoteIndex } from "../types";
-import { leftTrimOverflowNotes } from "../lib/music/scale";
-import { getChordNotes } from "../lib/music/chords";
-import { buildSplinePath } from "../lib/linePath";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import type { ChordHighlightPair, ModeDataProps, NoteIndex, Point } from "../types"
+import {
+  Connection,
+  StaticConnection,
+  IntervalConnection,
+  DiatonicConnection,
+  RemovedConnection,
+  AddedConnection,
+  BassConnection,
+} from "../lib/connection"
+import { bezierPath, bezierPointAt } from "../lib/bezier"
+import { leftTrimOverflowNotes } from "../lib/music/scale"
+import { getChordNotes } from "../lib/music/chords"
 
 
 // ─── Interval → degree label mapping ────────────────────────────────
 
 const INTERVAL_DEGREE_LABELS: Record<number, string> = {
   0: "1",
-  1: "\u266d2",
+  1: "♭2",
   2: "2",
-  3: "\u266d3",
+  3: "♭3",
   4: "3",
   5: "4",
-  6: "\u266d5",
+  6: "♭5",
   7: "5",
-  8: "\u266d6",
+  8: "♭6",
   9: "6",
-  10: "\u266d7",
+  10: "♭7",
   11: "7",
   12: "8",
-  13: "\u266d9",
+  13: "♭9",
   14: "9",
-};
-
-function getIntervalLabel(semitones: number): string {
-  return INTERVAL_DEGREE_LABELS[semitones] ?? `${semitones}`;
+  15: "♯9",
+  16: "♭11",
+  17: "11",
+  18: "♯11",
+  19: "♭13",
+  20: "13",
+  21: "♯13",
 }
 
-// ─── Types ──────────────────────────────────────────────────────────
+function getIntervalLabel(semitones: number): string {
+  return INTERVAL_DEGREE_LABELS[semitones] ?? `${semitones}`
+}
 
-interface LineWithInterval extends Line {
-  intervalSemitones?: number;
+// ─── Interval label pill ─────────────────────────────────────────────
+
+function IntervalLabel({ x, y, children }: { x: number; y: number; children: React.ReactNode }) {
+  return (
+    <g>
+      <rect
+        x={x - 14}
+        y={y - 8}
+        width="28"
+        height="16"
+        rx="4"
+        fill="#000000"
+      />
+      <text
+        x={x}
+        y={y + 4}
+        textAnchor="middle"
+        fill="#ffffff"
+        fontSize="9"
+        fontWeight="600"
+        fontFamily="Inter, system-ui, sans-serif"
+      >
+        {children}
+      </text>
+    </g>
+  )
 }
 
 // ─── Component ──────────────────────────────────────────────────────
 
-export interface HoverLinesProps {
+export type HoverLinesProps = ModeDataProps & {
   containerRef: React.RefObject<HTMLDivElement | null>;
   hoveredIndex: number | null;
-  modeNotesWithOverflow: NoteIndex[];
-  modeLeftOverflowSize: number;
   chordHighlightPairs?: ChordHighlightPair[];
 
   originalChordNotes?: NoteIndex[];
   modifiedChordNotes?: NoteIndex[];
+  slashBassNoteIndex?: NoteIndex | null;
 }
 
 export default function HoverLines({
@@ -57,154 +94,183 @@ export default function HoverLines({
 
   originalChordNotes = [],
   modifiedChordNotes = [],
+  slashBassNoteIndex = null,
 }: HoverLinesProps) {
-  const [lines, setLines] = useState<LineWithInterval[]>([]);
-  const measureRef = useRef<(() => void) | null>(null);
+  const [lines, setLines] = useState<Connection[]>([])
+  const measureRef = useRef<(() => void) | null>(null)
 
   const measure = useCallback(() => {
-    const container = containerRef?.current;
+    const container = containerRef?.current
     if (!container || hoveredIndex === null) {
-      setLines([]);
-      return;
+      setLines([])
+      return
     }
-    const containerRect = container.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect()
 
     const sourceEl = container.querySelector(
       `[data-row="diatonic-row"][data-idx="${hoveredIndex}"]`,
-    );
+    )
     if (!sourceEl) {
-      setLines([]);
-      return;
+      setLines([])
+      return
     }
-    const sourceRect = sourceEl.getBoundingClientRect();
+    const sourceRect = sourceEl.getBoundingClientRect()
     const sourceX =
-      sourceRect.left - containerRect.left + sourceRect.width / 2;
-    const sourceY = sourceRect.top - containerRect.top;
+      sourceRect.left - containerRect.left + sourceRect.width / 2
+    const sourceY = sourceRect.top - containerRect.top
 
     const modeNotes = leftTrimOverflowNotes(
       modeNotesWithOverflow,
       modeLeftOverflowSize,
-    );
-    const chordRoot = modeNotes[hoveredIndex];
+    )
+    const chordRoot = modeNotes[hoveredIndex]
 
     const lineToModeTarget = (
       tIdx: number,
-      type: LineType,
+      Ctor: new (from: Point, to: Point, s: number) => IntervalConnection,
       noteIdx?: NoteIndex,
-    ): LineWithInterval | null => {
+    ): Connection | null => {
       const targetEl = container.querySelector(
         `[data-row="mode-row"][data-idx="${tIdx}"]`,
-      );
-      if (!targetEl) return null;
-      const targetRect = targetEl.getBoundingClientRect();
+      )
+      if (!targetEl) return null
+      const targetRect = targetEl.getBoundingClientRect()
+      const from = { x: sourceX, y: sourceY }
+      const to = {
+        x: targetRect.left - containerRect.left + targetRect.width / 2,
+        y: targetRect.bottom - containerRect.top,
+      }
       const intervalSemitones =
         noteIdx !== undefined && chordRoot !== undefined
           ? noteIdx - chordRoot
-          : undefined;
-      return {
-        x1: sourceX,
-        y1: sourceY,
-        x2: targetRect.left - containerRect.left + targetRect.width / 2,
-        y2: targetRect.bottom - containerRect.top,
-        type,
-        intervalSemitones,
-      };
-    };
+          : undefined
+      if (intervalSemitones !== undefined) {
+        return new Ctor(from, to, intervalSemitones)
+      }
+      return new StaticConnection(from, to)
+    }
 
     const lineToBaseTarget = (
       noteIdx: number,
-      type: LineType,
-    ): LineWithInterval | null => {
+    ): Connection | null => {
       const targetEl = container.querySelector(
         `[data-row="base-row"][data-idx="${noteIdx}"]`,
-      );
-      if (!targetEl) return null;
-      const targetRect = targetEl.getBoundingClientRect();
+      )
+      if (!targetEl) return null
+      const targetRect = targetEl.getBoundingClientRect()
+      const from = { x: sourceX, y: sourceY }
+      const to = {
+        x: targetRect.left - containerRect.left + targetRect.width / 2,
+        y: targetRect.bottom - containerRect.top,
+      }
       const intervalSemitones =
-        chordRoot !== undefined ? noteIdx - chordRoot : undefined;
-      return {
-        x1: sourceX,
-        y1: sourceY,
-        x2: targetRect.left - containerRect.left + targetRect.width / 2,
-        y2: targetRect.bottom - containerRect.top,
-        type,
-        intervalSemitones,
-      };
-    };
+        chordRoot !== undefined ? noteIdx - chordRoot : undefined
+      if (intervalSemitones !== undefined) {
+        return new AddedConnection(from, to, intervalSemitones)
+      }
+      return new StaticConnection(from, to)
+    }
 
-    let diatonicLines: LineWithInterval[] = [];
+    let diatonicLines: Connection[] = []
     const hasExtensionData =
-      originalChordNotes.length > 0 && modifiedChordNotes.length > 0;
+      originalChordNotes.length > 0 && modifiedChordNotes.length > 0
 
     if (hasExtensionData) {
-      const originalSet = new Set(originalChordNotes);
-      const modifiedSet = new Set(modifiedChordNotes);
+      const originalSet = new Set(originalChordNotes)
+      const modifiedSet = new Set(modifiedChordNotes)
 
-      const keptNotes = originalChordNotes.filter((n) => modifiedSet.has(n));
-      const removedNotes = originalChordNotes.filter((n) => !modifiedSet.has(n));
-      const addedNotes = modifiedChordNotes.filter((n) => !originalSet.has(n));
+      const keptNotes = originalChordNotes.filter((n) => modifiedSet.has(n))
+      const removedNotes = originalChordNotes.filter((n) => !modifiedSet.has(n))
+      const addedNotes = modifiedChordNotes.filter((n) => !originalSet.has(n))
 
       const resolveToModeRow = (
         noteList: NoteIndex[],
-        type: LineType,
-      ): LineWithInterval[] =>
+        Ctor: new (from: Point, to: Point, s: number) => IntervalConnection,
+      ): Connection[] =>
         noteList
           .map((note) => {
-            const tIdx = modeNotesWithOverflow.indexOf(note);
-            if (tIdx < 0) return null;
-            return lineToModeTarget(tIdx, type, note);
+            const tIdx = modeNotesWithOverflow.indexOf(note)
+            if (tIdx < 0) return null
+            return lineToModeTarget(tIdx, Ctor, note)
           })
-          .filter((l): l is LineWithInterval => l !== null);
+          .filter((l): l is Connection => l !== null)
 
       const resolveToBaseRow = (
         noteList: NoteIndex[],
-        type: LineType,
-      ): LineWithInterval[] =>
+      ): Connection[] =>
         noteList
-          .map((note) => lineToBaseTarget(note, type))
-          .filter((l): l is LineWithInterval => l !== null);
+          .map((note) => lineToBaseTarget(note))
+          .filter((l): l is Connection => l !== null)
 
       diatonicLines = [
-        ...resolveToModeRow(removedNotes, "removed"),
-        ...resolveToModeRow(keptNotes, "kept"),
-        ...resolveToBaseRow(addedNotes, "added"),
-      ];
+        ...resolveToModeRow(removedNotes, RemovedConnection),
+        ...resolveToModeRow(keptNotes, DiatonicConnection),
+        ...resolveToBaseRow(addedNotes),
+      ]
     } else {
-      const chordNotesArr = getChordNotes(modeNotes, hoveredIndex, "triads");
+      const chordNotesArr = getChordNotes(modeNotes, hoveredIndex)
       const targetIdxs = chordNotesArr
         .map((note) => modeNotesWithOverflow.indexOf(note))
-        .filter((idx) => idx >= 0);
+        .filter((idx) => idx >= 0)
 
       diatonicLines = targetIdxs
         .map((tIdx) => {
-          const noteIdx = modeNotesWithOverflow[tIdx];
-          return lineToModeTarget(tIdx, "diatonic", noteIdx);
+          const noteIdx = modeNotesWithOverflow[tIdx]
+          return lineToModeTarget(tIdx, DiatonicConnection, noteIdx)
         })
-        .filter((l): l is LineWithInterval => l !== null);
+        .filter((l): l is Connection => l !== null)
     }
 
-    const baseLines: LineWithInterval[] = chordHighlightPairs
+    const baseLines: Connection[] = chordHighlightPairs
       .map(({ baseIdx, modeIdx }) => {
         const fromEl = container.querySelector(
           `[data-row="base-row"][data-idx="${baseIdx}"]`,
-        );
+        )
         const toEl = container.querySelector(
           `[data-row="mode-row"][data-idx="${modeIdx}"]`,
-        );
-        if (!fromEl || !toEl) return null;
-        const fromRect = fromEl.getBoundingClientRect();
-        const toRect = toEl.getBoundingClientRect();
-        return {
-          x1: fromRect.left - containerRect.left + fromRect.width / 2,
-          y1: fromRect.bottom - containerRect.top,
-          x2: toRect.left - containerRect.left + toRect.width / 2,
-          y2: toRect.top - containerRect.top,
-          type: "base" as LineType,
-        };
+        )
+        if (!fromEl || !toEl) return null
+        const fromRect = fromEl.getBoundingClientRect()
+        const toRect = toEl.getBoundingClientRect()
+        return new StaticConnection(
+          {
+            x: fromRect.left - containerRect.left + fromRect.width / 2,
+            y: fromRect.bottom - containerRect.top,
+          },
+          {
+            x: toRect.left - containerRect.left + toRect.width / 2,
+            y: toRect.top - containerRect.top,
+          },
+        )
       })
-      .filter((l): l is LineWithInterval => l !== null);
+      .filter((l): l is Connection => l !== null)
 
-    setLines([...diatonicLines, ...baseLines]);
+    // ── Bass line (slash chord) ──────────────────────────────────
+    const bassLines: Connection[] = []
+    if (slashBassNoteIndex !== null) {
+      const bassEl = container.querySelector(
+        `[data-row="base-row"][data-idx="${slashBassNoteIndex}"]`,
+      )
+      if (bassEl) {
+        const bassRect = bassEl.getBoundingClientRect()
+        const intervalSemitones =
+          chordRoot !== undefined
+            ? (((slashBassNoteIndex - chordRoot) % 12) + 12) % 12
+            : undefined
+        const from = { x: sourceX, y: sourceY }
+        const to = {
+          x: bassRect.left - containerRect.left + bassRect.width / 2,
+          y: bassRect.bottom - containerRect.top,
+        }
+        if (intervalSemitones !== undefined) {
+          bassLines.push(new BassConnection(from, to, intervalSemitones))
+        } else {
+          bassLines.push(new StaticConnection(from, to))
+        }
+      }
+    }
+
+    setLines([...diatonicLines, ...baseLines, ...bassLines])
   }, [
     containerRef,
     hoveredIndex,
@@ -213,32 +279,33 @@ export default function HoverLines({
     chordHighlightPairs,
     originalChordNotes,
     modifiedChordNotes,
-  ]);
+    slashBassNoteIndex,
+  ])
 
-  measureRef.current = measure;
+  measureRef.current = measure
 
   useLayoutEffect(() => {
-    measure();
-  }, [measure]);
+    measure()
+  }, [measure])
 
   // Keep ResizeObserver alive across hover changes
   useEffect(() => {
-    const container = containerRef?.current;
-    if (!container) return;
+    const container = containerRef?.current
+    if (!container) return
 
-    const ro = new ResizeObserver(() => measureRef.current?.());
-    ro.observe(container);
+    const ro = new ResizeObserver(() => measureRef.current?.())
+    ro.observe(container)
 
-    const onResize = () => measureRef.current?.();
-    window.addEventListener("resize", onResize);
+    const onResize = () => measureRef.current?.()
+    window.addEventListener("resize", onResize)
 
     return () => {
-      window.removeEventListener("resize", onResize);
-      ro.disconnect();
-    };
-  }, [containerRef]);
+      window.removeEventListener("resize", onResize)
+      ro.disconnect()
+    }
+  }, [containerRef])
 
-  if (!lines.length) return null;
+  if (!lines.length) return null
 
   return (
     <svg
@@ -249,62 +316,36 @@ export default function HoverLines({
         width: "100%",
         height: "100%",
         pointerEvents: "none",
-        zIndex: 1,
+        zIndex: 3,
       }}
     >
       {/* Render all paths first */}
-      {lines.map((line, idx) => {
-        const isRemoved = line.type === "removed";
+      {lines.map((conn, idx) => {
+        const isRemoved = conn instanceof RemovedConnection
         return (
           <path
             key={`p${idx}`}
-            d={buildSplinePath(line)}
+            d={bezierPath(conn.from, conn.to)}
             stroke="#000000"
             strokeWidth={isRemoved ? "1.5" : "2.5"}
             strokeLinecap="round"
             strokeDasharray={isRemoved ? "4 3" : undefined}
             fill="none"
           />
-        );
+        )
       })}
       {/* Render all labels on top */}
-      {lines.map((line, idx) => {
-        const showLabel =
-          line.intervalSemitones !== undefined &&
-          line.type !== "base" &&
-          line.type !== "removed";
-        if (!showLabel) return null;
-        const t = line.type === "added" ? 0.75 : 0.5;
-        const mt = 1 - t;
-        const dy = line.y2 - line.y1;
-        const c1x = line.x1, c1y = line.y1 + dy * 0.45;
-        const c2x = line.x2, c2y = line.y2 - dy * 0.45;
-        const midX = mt*mt*mt*line.x1 + 3*mt*mt*t*c1x + 3*mt*t*t*c2x + t*t*t*line.x2;
-        const midY = mt*mt*mt*line.y1 + 3*mt*mt*t*c1y + 3*mt*t*t*c2y + t*t*t*line.y2;
+      {lines.map((conn, idx) => {
+        if (!(conn instanceof IntervalConnection)) return null
+        if (conn instanceof RemovedConnection) return null
+        const t = conn instanceof AddedConnection ? 0.85 : 0.5
+        const labelPos = bezierPointAt(conn.from, conn.to, t)
         return (
-          <g key={`l${idx}`}>
-            <rect
-              x={midX - 14}
-              y={midY - 8}
-              width="28"
-              height="16"
-              rx="4"
-              fill="#000000"
-            />
-            <text
-              x={midX}
-              y={midY + 4}
-              textAnchor="middle"
-              fill="#ffffff"
-              fontSize="9"
-              fontWeight="600"
-              fontFamily="Inter, system-ui, sans-serif"
-            >
-              {getIntervalLabel(line.intervalSemitones!)}
-            </text>
-          </g>
-        );
+          <IntervalLabel key={`l${idx}`} x={labelPos.x} y={labelPos.y}>
+            {getIntervalLabel(conn.intervalSemitones)}
+          </IntervalLabel>
+        )
       })}
     </svg>
-  );
+  )
 }

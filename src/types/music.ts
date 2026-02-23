@@ -1,20 +1,19 @@
-// ─── Branded type helper ───────────────────────────────────────────
-type Brand<T, B extends string> = T & { readonly __brand: B };
+// ─── Domain type aliases ──────────────────────────────────────────
 
 /** Pitch class 0–11 (C = 0, C# = 1, … B = 11). */
-export type PitchClass = Brand<number, "PitchClass">;
+export type PitchClass = number
 
-/** Absolute index into the global `notes` string array. */
-export type NoteIndex = Brand<number, "NoteIndex">;
+/** Absolute index into the global `notes` array. */
+export type NoteIndex = number
 
 /** Semitone offset from a root (e.g. mode intervals like 0, 2, 4, 5 …). */
-export type Interval = Brand<number, "Interval">;
+export type Interval = number
 
-/** Note name with octave, e.g. "C4", "D#3". */
-export type NoteName = Brand<string, "NoteName">;
+/** One of the 7 natural note letters. */
+export type Letter = "C" | "D" | "E" | "F" | "G" | "A" | "B"
 
-/** Display-only note label without octave, e.g. "C", "Eb". */
-export type NoteLabel = string;
+/** Accidental classification. */
+export type Accidental = "sharp" | "flat" | "natural"
 
 // ─── Unions / Enums ────────────────────────────────────────────────
 
@@ -27,7 +26,8 @@ export type ModeName =
   | "Aeolian (natural minor)"
   | "Locrian"
   | "Harmonic Minor"
-  | "Melodic Minor";
+  | "Melodic Minor"
+  | "Whole Tone"
 
 export type Extension =
   | "maj"
@@ -39,20 +39,31 @@ export type Extension =
   | "7"
   | "maj7"
   | "add9"
-  | "9";
+  | "9"
+  | "6"
+  | "add2"
+  | "add4"
+  | "maj9"
+  | "11"
+  | "13"
 
-export type ChordQuality = "" | "m" | "\u00b0" | "+" | "sus2" | "sus4" | "?";
+export type ChordQuality = "" | "m" | "°" | "+" | "sus2" | "sus4" | "?"
 
-export type ChordType = "triads" | "seventhChords";
+export type ChordType = "triads" | "seventhChords"
 
 // ─── Data structures ───────────────────────────────────────────────
 
-export interface ExtensionOption {
+export type ExtensionOption = {
   value: Extension;
   label: string;
 }
 
-export interface ChordDegree {
-  degree: number;
+export type ChordDegreeState = {
   extensions: Extension[];
+  slashBass: number | null;
+}
+
+export type ModeDataProps = {
+  modeNotesWithOverflow: NoteIndex[];
+  modeLeftOverflowSize: number;
 }

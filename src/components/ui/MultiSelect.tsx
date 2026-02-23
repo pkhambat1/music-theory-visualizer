@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState } from "react"
 
-export interface MultiSelectOption {
+export type MultiSelectOption = {
   value: string;
   label?: string;
 }
 
-export interface MultiSelectProps {
+export type MultiSelectProps = {
   options?: MultiSelectOption[];
   value?: string[];
   onChange?: (value: string[]) => void;
@@ -23,13 +23,13 @@ export default function MultiSelect({
   header,
   disabledValues = new Set(),
 }: MultiSelectProps) {
-  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [focusedIndex, setFocusedIndex] = useState(-1)
 
   const toggle = (val: string) => {
-    const exists = value.includes(val);
-    const next = exists ? value.filter((v) => v !== val) : [...value, val];
-    onChange?.(next);
-  };
+    const exists = value.includes(val)
+    const next = exists ? value.filter((v) => v !== val) : [...value, val]
+    onChange?.(next)
+  }
 
   return (
     <div className="flex min-w-[200px] flex-col gap-2 text-sm">
@@ -53,9 +53,9 @@ export default function MultiSelect({
       ) : (
         <div className="max-h-[200px] overflow-y-auto grid grid-cols-3 gap-0.5">
           {options.map((opt, idx) => {
-            const isSelected = value.includes(opt.value);
-            const isDisabled = disabledValues.has(opt.value);
-            const isFocused = idx === focusedIndex;
+            const isSelected = value.includes(opt.value)
+            const isDisabled = disabledValues.has(opt.value)
+            const isFocused = idx === focusedIndex
             return (
               <label
                 key={opt.value}
@@ -63,13 +63,13 @@ export default function MultiSelect({
                   isDisabled
                     ? "text-gray-300 pointer-events-none"
                     : isSelected
-                    ? "bg-[var(--d3-scaleFill)] text-[var(--d3-primary)] font-medium cursor-pointer"
+                    ? "bg-[var(--d3-primaryFill)] text-[var(--d3-primary)] font-medium cursor-pointer"
                     : isFocused
                     ? "bg-gray-100 text-gray-800 cursor-pointer"
                     : "text-gray-600 hover:bg-gray-50 cursor-pointer"
                 }`}
                 onMouseEnter={() => {
-                  if (!isDisabled) setFocusedIndex(idx);
+                  if (!isDisabled) setFocusedIndex(idx)
                 }}
               >
                 <input
@@ -81,10 +81,10 @@ export default function MultiSelect({
                 />
                 <span>{opt.label ?? opt.value}</span>
               </label>
-            );
+            )
           })}
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -1,4 +1,4 @@
-import VisualizerPanel from "./components/VisualizerPanel";
+import VisualizerPanel from "./components/VisualizerPanel"
 
 export default function App() {
   return (
@@ -7,5 +7,5 @@ export default function App() {
         <VisualizerPanel />
       </div>
     </div>
-  );
+  )
 }

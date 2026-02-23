@@ -1,11 +1,12 @@
-import { useLayoutEffect, useState } from "react";
-import type { Connection } from "../types";
-import { buildSplinePath, type LineCoords } from "../lib/linePath";
-import { colors } from "../lib/colors";
+import { useLayoutEffect, useState } from "react"
+import type { CellLink } from "../types"
+import { StaticConnection } from "../lib/connection"
+import { bezierPath } from "../lib/bezier"
+import { colors } from "../lib/colors"
 
-export interface LineGroupProps {
+export type LineGroupProps = {
   containerRef: React.RefObject<HTMLDivElement | null>;
-  connections?: Connection[];
+  connections?: CellLink[];
   depKey?: string;
 }
 
@@ -14,67 +15,63 @@ export default function LineGroup({
   connections = [],
   depKey = "",
 }: LineGroupProps) {
-  const [lines, setLines] = useState<LineCoords[]>([]);
+  const [lines, setLines] = useState<StaticConnection[]>([])
 
   useLayoutEffect(() => {
-    const container = containerRef?.current;
+    const container = containerRef?.current
 
     const measure = () => {
-      if (!container) return;
-      const containerRect = container.getBoundingClientRect();
-      const nextLines: LineCoords[] = [];
+      if (!container) return
+      const containerRect = container.getBoundingClientRect()
+      const nextLines: StaticConnection[] = []
 
       connections.forEach(({ fromRow, fromIdx, toRow, toIdx }) => {
         const fromEl = container.querySelector(
           `[data-row="${fromRow}"][data-idx="${fromIdx}"]`,
-        );
+        )
         const toEl = container.querySelector(
           `[data-row="${toRow}"][data-idx="${toIdx}"]`,
-        );
-        if (!fromEl || !toEl) return;
+        )
+        if (!fromEl || !toEl) return
 
-        const fromRect = fromEl.getBoundingClientRect();
-        const toRect = toEl.getBoundingClientRect();
-        const scrollLeft = container.scrollLeft;
-        const scrollTop = container.scrollTop;
+        const fromRect = fromEl.getBoundingClientRect()
+        const toRect = toEl.getBoundingClientRect()
+        const scrollLeft = container.scrollLeft
+        const scrollTop = container.scrollTop
 
-        nextLines.push({
-          x1:
-            fromRect.left -
-            containerRect.left +
-            fromRect.width / 2 +
-            scrollLeft,
-          y1: fromRect.bottom - containerRect.top + scrollTop,
-          x2:
-            toRect.left -
-            containerRect.left +
-            toRect.width / 2 +
-            scrollLeft,
-          y2: toRect.top - containerRect.top + scrollTop,
-        });
-      });
+        nextLines.push(new StaticConnection(
+          {
+            x: fromRect.left - containerRect.left + fromRect.width / 2 + scrollLeft,
+            y: fromRect.bottom - containerRect.top + scrollTop,
+          },
+          {
+            x: toRect.left - containerRect.left + toRect.width / 2 + scrollLeft,
+            y: toRect.top - containerRect.top + scrollTop,
+          },
+        ))
+      })
 
-      setLines(nextLines);
-    };
+      setLines(nextLines)
+    }
 
-    measure();
+    measure()
 
-    const ro = new ResizeObserver(() => measure());
-    if (container) ro.observe(container);
+    const ro = new ResizeObserver(() => measure())
+    if (container) ro.observe(container)
 
-    const onResize = () => measure();
-    window.addEventListener("resize", onResize);
+    const onResize = () => measure()
+    window.addEventListener("resize", onResize)
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", onResize)
       if (container) {
-        ro.unobserve(container);
-        ro.disconnect();
+        ro.unobserve(container)
+        ro.disconnect()
       }
-    };
-  }, [containerRef, depKey, connections]);
+    }
+  }, [containerRef, depKey, connections])
 
-  if (!lines.length) return null;
+  if (!lines.length) return null
 
   return (
     <svg
@@ -89,10 +86,10 @@ export default function LineGroup({
         overflow: "visible",
       }}
     >
-      {lines.map((line, idx) => (
+      {lines.map((conn, idx) => (
         <path
           key={idx}
-          d={buildSplinePath(line)}
+          d={bezierPath(conn.from, conn.to)}
           stroke={colors.border}
           strokeWidth="1.5"
 
@@ -100,5 +97,5 @@ export default function LineGroup({
         />
       ))}
     </svg>
-  );
+  )
 }

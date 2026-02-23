@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { cn } from "../../lib/cn";
-import Button from "./Button";
+import { useEffect, useRef, useState } from "react"
+import { cn } from "../../lib/cn"
+import Button from "./Button"
 
-export interface DropdownItem {
+export type DropdownItem = {
   key: string;
   label?: string;
 }
 
-export interface DropdownProps {
+export type DropdownProps = {
   label: string;
   items?: DropdownItem[];
   onSelect?: (key: string) => void;
@@ -18,18 +18,18 @@ export default function Dropdown({
   items = [],
   onSelect,
 }: DropdownProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
+        setOpen(false)
       }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [])
 
   return (
     <div className="relative inline-block" ref={ref}>
@@ -59,8 +59,8 @@ export default function Dropdown({
               key={item.key}
               className="w-full rounded-lg px-3 py-2 text-left text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
               onClick={() => {
-                onSelect?.(item.key);
-                setOpen(false);
+                onSelect?.(item.key)
+                setOpen(false)
               }}
             >
               {item.label ?? item.key}
@@ -69,5 +69,5 @@ export default function Dropdown({
         </div>
       )}
     </div>
-  );
+  )
 }

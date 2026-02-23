@@ -15,45 +15,26 @@ Interactive React app for visualizing music theory — modes, diatonic chords, n
 - **Scrolling:** keen-slider (chromatic scale row, 125ms animation)
 - **Utilities:** clsx + tailwind-merge via `cn()` helper, class-variance-authority for component variants
 
-## Directory Structure
+## Data Model
 
+Two class families in `src/lib/`. All fields are public, no `readonly`.
+
+### `Note` (`src/lib/note.ts`)
+A concrete musical note with letter name, accidental, and octave. Methods: `label()` (e.g. "C#"), `toDisplay()` (e.g. "C#4"), `toToneString()` (ASCII for Tone.js), `equals()`, `isC()`, `isSharp()`, `isFlat()`.
+
+### Connection Hierarchy (`src/lib/connection.ts`)
 ```
-src/
-├── components/           # Feature components
-│   ├── ui/              # Reusable design-system primitives (Button, Card, Dropdown, Tooltip, etc.)
-│   ├── VisualizerPanel  # Main orchestrator — state, layout, mode/key selection, mode descriptions
-│   ├── TriadScale       # Chord tones mapped to chromatic positions
-│   ├── NotesArray       # Container for note rows (caption, subtitle, captionRight, clipContent, zIndex, rowBackground)
-│   ├── NoteCell         # Base note cell (6px radius concentric with 8px NotesArray, showBorder=false default)
-│   ├── ModeNoteCell     # Mode note display (spelling, highlight, click-to-play, optCaption)
-│   ├── DiatonicScaleDegreesRow  # Roman numerals, three-dot extension popover, arpeggiate prop, hover border
-│   ├── LineGroup        # Static SVG connection lines (ResizeObserver)
-│   ├── HoverLines       # Dynamic hover lines (interval labels on bezier curve, paths render before labels)
-│   ├── ChordScaleContext # Chord root's major scale overlay (directional altered note display)
-│   ├── ChordProgressionBuilder  # Drag-and-drop chord progression tool
-│   └── SortableChordCell        # Sortable cell for progression builder
-├── lib/
-│   ├── music/
-│   │   ├── modes.ts     # MODES intervals map, IONIAN reference, OCTAVE constant
-│   │   ├── scale.ts     # Mode building with overflow for line drawing
-│   │   ├── chords.ts    # Chord construction, quality detection, extensions
-│   │   └── spelling.ts  # Enharmonic spelling (minimize accidentals)
-│   ├── audio.ts         # Tone.js sampler, playChord(), playNote(), arpeggiateChord()
-│   ├── cn.ts            # clsx + tailwind-merge utility
-│   ├── linePath.ts      # Cubic bezier SVG path builder
-│   └── notes.tsx        # Chromatic scale, octave generation, note rendering
-├── types/
-│   ├── music.ts         # Branded types (PitchClass, NoteIndex, Interval, NoteName), unions, interfaces
-│   ├── geometry.ts      # Line, Point, Connection, ChordHighlightPair types
-│   └── index.ts         # Barrel re-exports
-├── App.tsx              # Root layout
-├── main.tsx             # React entry point
-└── index.css            # Tailwind directives, Inter font, custom animations (fade-in-up)
+Connection (abstract)             — a directed line between two screen-space points
+├── StaticConnection              — a plain connection with no musical data
+└── IntervalConnection (abstract) — a connection carrying a musical interval (intervalSemitones)
+    ├── DiatonicConnection        — chord tone from diatonic row to mode row (also used for kept tones in extension diffs)
+    ├── RemovedConnection         — chord tone dropped by an extension
+    ├── AddedConnection           — new tone introduced by an extension
+    └── BassConnection            — slash chord bass note
 ```
+Styling and label rendering branch on `instanceof` — no string discriminants. `LineGroup` uses `StaticConnection[]`; `HoverLines` uses the full hierarchy.
 
-## Key Architectural Concepts
-
-### Branded Types
+### Branded Types (`src/types/music.ts`)
 Domain primitives (`PitchClass`, `NoteIndex`, `Interval`, `NoteName`) use TypeScript branded types for compile-time safety — prevents mixing up raw numbers that mean different things.
 
 ### Overflow System
@@ -61,10 +42,8 @@ Mode note arrays are extended with extra notes before and after the visible rang
 
 ### Line Drawing
 Two SVG overlay layers:
-- `LineGroup` — static connections (chromatic → mode), positioned via `getBoundingClientRect()` + `ResizeObserver`
-- `HoverLines` — dynamic connections on chord hover (diatonic → mode, base → mode), with visual diffs for extensions (kept = solid magenta, removed = dashed black, added = solid magenta to base row). All paths render first, then all labels render on top to prevent overlap. Labels sit on the actual bezier curve (not the straight line between endpoints). Added-extension lines place labels at t=0.75, regular lines at t=0.5. HoverLines SVG uses `zIndex: 1`; mode row uses `zIndex: 2` + opaque `rowBackground: "white"` so extension lines pass behind it. ResizeObserver is kept alive across hover changes via ref for performance.
-
-**Important:** Use CSS `drop-shadow` (via `style` prop) for line glow effects, NOT SVG `<filter>`. SVG filters clip based on the element bounding box — vertical lines have near-zero width bounding boxes, causing the filter region to collapse and the line to disappear entirely.
+- `LineGroup` — static `StaticConnection[]` (chromatic → mode), positioned via `getBoundingClientRect()` + `ResizeObserver`
+- `HoverLines` — dynamic connections on chord hover (diatonic → mode, base → mode), using the full Connection hierarchy for extension diffs. All paths render first, then all `IntervalLabel` components render on top to prevent overlap. Labels sit on the actual bezier curve (not the straight line between endpoints). `AddedConnection` labels at t=0.85, others at t=0.5. HoverLines SVG uses `zIndex: 3`; mode row uses `zIndex: 2` + opaque `rowBackground` so extension lines pass behind it. ResizeObserver is kept alive across hover changes via ref for performance.
 
 DOM elements are located via `data-row` and `data-idx` attributes on `NoteCell` components.
 
@@ -90,7 +69,7 @@ Hover state is consolidated into a single `HoverState` object (`{ index, origina
 ### Chord Extension System
 - Base triads are computed from mode intervals using stacked thirds
 - Extensions (`sus2`, `sus4`, `7`, `maj7`, `add9`, `9`) modify or add notes
-- Hover visuals show a diff: kept notes (solid lines), removed notes (dashed), added notes (solid to base row)
+- Hover visuals show a diff: `DiatonicConnection` (solid lines for kept tones), `RemovedConnection` (dashed), `AddedConnection` (solid to base row)
 - Extensions are stored per-degree as `ChordDegree[]`
 - Extension popover triggered by three-dot (ellipsis) icon, grid layout (3 columns), with "Extensions" header and per-chord Clear button
 - "Clear all extensions" button in captionRight of diatonic row

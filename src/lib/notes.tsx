@@ -1,37 +1,45 @@
-import type { NoteName } from "../types";
+import type { Letter, Accidental } from "../types"
+import { Note } from "./note"
+
+const BASE_NOTES: { letter: Letter; accidental: Accidental }[] = [
+  { letter: "C", accidental: "natural" },
+  { letter: "C", accidental: "sharp" },
+  { letter: "D", accidental: "natural" },
+  { letter: "D", accidental: "sharp" },
+  { letter: "E", accidental: "natural" },
+  { letter: "F", accidental: "natural" },
+  { letter: "F", accidental: "sharp" },
+  { letter: "G", accidental: "natural" },
+  { letter: "G", accidental: "sharp" },
+  { letter: "A", accidental: "natural" },
+  { letter: "A", accidental: "sharp" },
+  { letter: "B", accidental: "natural" },
+]
 
 /** The 13-element chromatic scale (C through C, inclusive of octave wrap). */
-export const CHROMATIC_SCALE = [
-  "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C",
-] as const;
+export const CHROMATIC_SCALE: Note[] = [
+  ...BASE_NOTES.map((n) => new Note(n.letter, n.accidental, 0)),
+  new Note("C", "natural", 0),
+]
 
 /**
- * Generate note names across `octaveCount` octaves (starting at octave 1).
- * Returns e.g. ["C1", "C#1", … "B1", "C2", …].
+ * Generate Note objects across `octaveCount` octaves (starting at octave 1).
  */
-export function generateOctaves(octaveCount: number): NoteName[] {
-  const baseScale = [
-    "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-  ];
+export function generateOctaves(octaveCount: number): Note[] {
   return Array.from({ length: octaveCount }, (_, i) => i + 1).flatMap(
-    (octave) => baseScale.map((note) => `${note}${octave}` as NoteName),
-  );
+    (octave) => BASE_NOTES.map((n) => new Note(n.letter, n.accidental, octave)),
+  )
 }
 
 /**
- * Render a note name. For "C" notes with an octave digit, the octave
- * is shown as a subscript; other notes just strip the octave.
+ * Render a Note. For "C" notes the octave is shown as a subscript;
+ * other notes just show the label (no octave).
  */
-export function renderNote(note: string): React.ReactNode {
-  const lastChar = note.charAt(note.length - 1);
-  if (!isNaN(parseInt(lastChar))) {
-    const noteWithoutOctave = note.slice(0, -1);
-    return (
-      <>
-        {noteWithoutOctave}
-        {noteWithoutOctave === "C" && <sub>{note.slice(-1)}</sub>}
-      </>
-    );
-  }
-  return note;
+export function renderNote(note: Note): React.ReactNode {
+  return (
+    <>
+      {note.label()}
+      {note.isC() && <sub>{note.octave}</sub>}
+    </>
+  )
 }

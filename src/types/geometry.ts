@@ -1,28 +1,21 @@
-import type { NoteIndex } from "./music";
+import type { NoteIndex } from "./music"
 
-export type LineType = "diatonic" | "base" | "kept" | "removed" | "added";
-
-export interface Point {
+/** A 2D coordinate used for SVG path calculations. */
+export type Point = {
   x: number;
   y: number;
 }
 
-export interface Line {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  type: LineType;
-}
-
-export interface Connection {
+/** Maps a cell in one row to a cell in another row, resolved to screen coordinates via `data-row` and `data-idx` DOM attributes. */
+export type CellLink = {
   fromRow: string;
   fromIdx: number;
   toRow: string;
   toIdx: number;
 }
 
-export interface ChordHighlightPair {
+/** Pairs a mode row position with a chromatic base row position for chord tone highlighting. */
+export type ChordHighlightPair = {
   modeIdx: number;
   baseIdx: NoteIndex;
 }

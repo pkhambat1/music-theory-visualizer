@@ -1,6 +1,6 @@
-import { cn } from "../../lib/cn";
+import { cn } from "../../lib/cn"
 
-export interface TagProps {
+export type TagProps = {
   children: React.ReactNode;
   className?: string;
 }
@@ -15,5 +15,5 @@ export default function Tag({ children, className }: TagProps) {
     >
       {children}
     </span>
-  );
+  )
 }

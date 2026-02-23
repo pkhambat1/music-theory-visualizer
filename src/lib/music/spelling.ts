@@ -1,40 +1,28 @@
-import type { NoteIndex, NoteName, PitchClass } from "../../types";
+import type { Accidental, Letter, NoteIndex, PitchClass } from "../../types"
+import { Note } from "../note"
 
-const LETTER_ORDER = ["C", "D", "E", "F", "G", "A", "B"] as const;
-const LETTER_TO_PC: Record<string, number> = {
+const LETTER_ORDER: Letter[] = ["C", "D", "E", "F", "G", "A", "B"]
+const LETTER_TO_PC: Record<Letter, number> = {
   C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11,
-};
+}
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
-function hasSharp(note: string | null | undefined): boolean {
-  return note?.includes("#") ?? false;
-}
-
-function hasFlat(note: string | null | undefined): boolean {
-  return note?.toLowerCase().includes("b") ?? false;
-}
-
-export function noteNameToPitchClass(
-  noteName: string | null | undefined,
+function noteNameToPitchClass(
+  note: Note | null | undefined,
 ): PitchClass | null {
-  if (!noteName) return null;
-  const letter = noteName[0]?.toUpperCase();
-  if (!letter) return null;
-  const basePc = LETTER_TO_PC[letter];
-  if (basePc === undefined) return null;
-
-  let offset = 0;
-  if (noteName.includes("#")) offset += 1;
-  if (noteName.includes("b")) offset -= 1;
-
-  return ((basePc + offset + 12) % 12) as PitchClass;
+  if (!note) return null
+  const basePc = LETTER_TO_PC[note.letter]
+  let offset = 0
+  if (note.accidental === "sharp") offset += 1
+  if (note.accidental === "flat") offset -= 1
+  return (basePc + offset + 12) % 12
 }
 
 // ─── Public API ────────────────────────────────────────────────────
 
-interface SpellingCandidate {
-  spelled: string[];
+type SpellingCandidate = {
+  spelled: (Note | null)[];
   maxAbs: number;
   totalAbs: number;
 }
@@ -46,85 +34,91 @@ interface SpellingCandidate {
 export function spellModeNotes(
   modeNotesWithOverflow: NoteIndex[],
   modeLeftOverflowSize: number,
-  notes: NoteName[],
-): string[] {
+  notes: Note[],
+): (Note | null)[] {
   if (
     !Array.isArray(modeNotesWithOverflow) ||
     modeNotesWithOverflow.length === 0 ||
     !Array.isArray(notes)
   ) {
-    return [];
+    return []
   }
 
   const actualPcs = modeNotesWithOverflow.map((noteIdx) =>
     noteNameToPitchClass(notes[noteIdx]),
-  );
+  )
 
-  const rootIdx = modeLeftOverflowSize;
-  const rootNoteName: string = notes[modeNotesWithOverflow[rootIdx]!] ?? "C";
-  const rootLetter = rootNoteName[0]?.toUpperCase() ?? "C";
-  const rootLetterIndex = LETTER_ORDER.indexOf(rootLetter as typeof LETTER_ORDER[number]);
+  const rootIdx = modeLeftOverflowSize
+  const rootNote: Note | undefined = notes[modeNotesWithOverflow[rootIdx]!]
+  const rootLetter: Letter = rootNote?.letter ?? "C"
+  const rootLetterIndex = LETTER_ORDER.indexOf(rootLetter)
 
-  const candidateLetters = new Set<string>();
-  if (rootLetterIndex !== -1) candidateLetters.add(rootLetter);
-  if (hasSharp(rootNoteName)) {
-    const nextLetter = LETTER_ORDER[(rootLetterIndex + 1) % LETTER_ORDER.length];
-    if (nextLetter) candidateLetters.add(nextLetter);
-  } else if (hasFlat(rootNoteName)) {
+  const candidateLetters = new Set<Letter>()
+  if (rootLetterIndex !== -1) candidateLetters.add(rootLetter)
+  if (rootNote?.isSharp()) {
+    const nextLetter = LETTER_ORDER[(rootLetterIndex + 1) % LETTER_ORDER.length]
+    if (nextLetter) candidateLetters.add(nextLetter)
+  } else if (rootNote?.isFlat()) {
     const prevLetter = LETTER_ORDER[
       (rootLetterIndex - 1 + LETTER_ORDER.length) % LETTER_ORDER.length
-    ];
-    if (prevLetter) candidateLetters.add(prevLetter);
+    ]
+    if (prevLetter) candidateLetters.add(prevLetter)
   }
+
+  // Number of unique scale degrees (e.g. 7 for diatonic, 6 for whole tone).
+  // Letters cycle at this rate so the octave note gets the root letter again.
+  const modeDegreesCount =
+    modeNotesWithOverflow.length - 2 * modeLeftOverflowSize - 1
 
   const candidates: SpellingCandidate[] = Array.from(candidateLetters).map(
     (rootLetterCandidate) => {
-      const candidateRootIndex = LETTER_ORDER.indexOf(
-        rootLetterCandidate as typeof LETTER_ORDER[number],
-      );
-      const spelled: string[] = [];
-      let maxAbs = 0;
-      let totalAbs = 0;
+      const candidateRootIndex = LETTER_ORDER.indexOf(rootLetterCandidate)
+      const spelled: (Note | null)[] = []
+      let maxAbs = 0
+      let totalAbs = 0
 
       for (let i = 0; i < modeNotesWithOverflow.length; i++) {
+        // Map each note to a letter by cycling through degrees at the mode's
+        // own period (6 for whole tone, 7 for diatonic, etc.)
+        const degreeInMode =
+          (((i - rootIdx) % modeDegreesCount) + modeDegreesCount) %
+          modeDegreesCount
         const letterIndex =
-          ((candidateRootIndex + (i - rootIdx)) % LETTER_ORDER.length +
-            LETTER_ORDER.length) %
-          LETTER_ORDER.length;
-        const letter = LETTER_ORDER[letterIndex]!;
-        const naturalPc = LETTER_TO_PC[letter]!;
-        const desiredPc = actualPcs[i];
+          (candidateRootIndex + degreeInMode) % LETTER_ORDER.length
+        const letter = LETTER_ORDER[letterIndex]!
+        const naturalPc = LETTER_TO_PC[letter]
+        const desiredPc = actualPcs[i]
 
         if (desiredPc === null || desiredPc === undefined) {
-          spelled.push("");
-          continue;
+          spelled.push(null)
+          continue
         }
 
-        const diff = ((desiredPc - naturalPc + 6) % 12) - 6;
-        const absDiff = Math.abs(diff);
-        maxAbs = Math.max(maxAbs, absDiff);
-        totalAbs += absDiff;
+        const diff = ((desiredPc - naturalPc + 6) % 12) - 6
+        const absDiff = Math.abs(diff)
+        maxAbs = Math.max(maxAbs, absDiff)
+        totalAbs += absDiff
 
         if (absDiff > 2) {
-          maxAbs = Math.max(maxAbs, 10);
-          totalAbs += 10;
+          maxAbs = Math.max(maxAbs, 10)
+          totalAbs += 10
         }
 
-        let accidental = "";
-        if (diff > 0) accidental = "#".repeat(diff);
-        else if (diff < 0) accidental = "\u266d".repeat(-diff);
+        const accidental: Accidental =
+          diff > 0 ? "sharp" : diff < 0 ? "flat" : "natural"
 
-        spelled.push(`${letter}${accidental}`);
+        const noteOctave = Math.floor(modeNotesWithOverflow[i]! / 12) + 1
+        spelled.push(new Note(letter, accidental, noteOctave))
       }
 
-      return { spelled, maxAbs, totalAbs };
+      return { spelled, maxAbs, totalAbs }
     },
-  );
+  )
 
   const sorted = candidates.sort((a, b) => {
-    if (a.maxAbs !== b.maxAbs) return a.maxAbs - b.maxAbs;
-    return a.totalAbs - b.totalAbs;
-  });
+    if (a.maxAbs !== b.maxAbs) return a.maxAbs - b.maxAbs
+    return a.totalAbs - b.totalAbs
+  })
 
-  return sorted[0]?.spelled ?? [];
+  return sorted[0]?.spelled ?? []
 }
