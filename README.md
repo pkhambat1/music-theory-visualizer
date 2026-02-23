@@ -2,7 +2,6 @@
 
 Ever wonder how scales, modes, and chords actually relate to each other? This app makes it click — literally. Pick a key, pick a mode, and watch the connections light up across the chromatic scale. Hover a chord to see exactly which notes build it. Click to hear it on a piano.
 
-No music theory background needed. The visualization does the explaining.
 
 ## Using the app
 
@@ -12,38 +11,38 @@ Use the **Key** tag and **Mode** dropdown in the header. The whole visualization
 
 ### Explore the rows
 
-The visualization is three connected rows, top to bottom:
+The visualization has three connected rows, top to bottom:
 
-1. **Chromatic Scale** — all 12 notes in order. Drag left/right to shift the root note, or tap the arrow buttons. Highlighted cells show which chromatic notes belong to your current mode.
+1. **Chromatic Scale** — all 12 notes in order. Drag left or right to change the root note, or use the arrow buttons. Highlighted cells show which chromatic notes belong to your current mode.
 
-2. **Mode Scale** — the 7 notes of your selected mode, with curved lines connecting each one back up to the chromatic row. Scale degree numbers (1-7) appear below each cell. Click any note to hear it.
+2. **Mode Scale** — the notes of your selected mode, with curved lines connecting each one back up to the chromatic row. Scale degree numbers appear below each cell. Click any note to hear it.
 
-3. **Diatonic Chords** — the chords naturally built from stacking thirds in your mode (I, ii, iii, IV, V, vi, vii). Quality symbols tell you the type: uppercase = major, lowercase = minor, plus special markers for diminished and augmented.
+3. **Diatonic Chords** — chords built by stacking thirds from your mode (I, II, III, IV, V, VI, VII). A suffix after the roman numeral indicates quality: "m" for minor, "°" for diminished, "+" for augmented, and no suffix for major.
 
 ### Hover a chord
 
-Hover over any chord in the bottom row and:
+Hover over any chord in the bottom row to see:
 
-- **Lines appear** connecting the chord down to its component notes in the mode row, with **interval labels** (1, 3, 5, etc.) sitting on each line
-- **A major scale context row** fades in at the top, showing how the chord tones map onto the chord root's major scale — unaltered tones are highlighted, altered tones show the direction of alteration (e.g. `Eb <- E` for a flattened note)
-- Highlighted cells in the chromatic row show the chord tones in context of all 12 notes
+- **Lines** connecting the chord to its component notes in the mode row, with **interval labels** (1, 3, 5, etc.) on each line
+- **A chord scale context row** above the chromatic row, showing how the chord tones relate to the chord root's major scale — altered tones display the direction of alteration (e.g. `E♭ ← E` for a flattened note)
+- **Highlighted cells** in the chromatic row showing the chord tones in context of all 12 notes
 
 ### Play audio
 
-- **Click any note** in the mode row to hear it
-- **Click any chord** in the diatonic row to hear all its notes at once
-- Toggle the **Arpeggiate** button in the header to play chord notes one at a time instead
+- **Click any note** in the mode row to hear it.
+- **Click any chord** in the diatonic row to hear all its notes together.
+- Toggle the **Arpeggiate** button in the header to play chord notes one at a time.
 
 ### Add chord extensions
 
-Click the **three-dot icon** on any chord cell to open the extensions popover. Available extensions: sus2, sus4, 7, maj7, add9, 9, and more.
+Click the **three-dot icon** on any chord cell to open the extensions popover. Available extensions include sus2, sus4, 6, 7, maj7, add9, 9, maj9, 11, and 13.
 
-When extensions modify a chord, the hover lines show a visual diff:
+When an extension modifies a chord, the hover lines show a visual diff:
 - **Solid lines** — notes kept from the original chord
 - **Dashed lines** — notes removed by the extension
 - **New lines** — notes added by the extension
 
-Extension pills appear below the chord numeral so you can see what's applied at a glance. Use **Clear** in the popover to reset one chord, or **Clear all extensions** (top-right of the diatonic row) to reset everything.
+Extension pills appear below the chord numeral. Use **Clear** in the popover to reset a single chord, or **Clear all extensions** (top-right of the diatonic row) to reset all chords.
 
 ---
 
