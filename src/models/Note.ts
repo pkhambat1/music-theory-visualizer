@@ -1,16 +1,6 @@
-import type { Letter, Accidental } from "../types"
-
-const ACCIDENTAL_DISPLAY: Record<Accidental, string> = {
-  sharp: "#",
-  flat: "♭",
-  natural: "",
-}
-
-const ACCIDENTAL_TONE: Record<Accidental, string> = {
-  sharp: "#",
-  flat: "b",
-  natural: "",
-}
+import type { Letter } from "../types"
+import { Accidental } from "./Accidental"
+import { SHARP, FLAT } from "../lib/music/accidentals"
 
 /** A concrete musical note with letter name, accidental, and octave. */
 export class Note {
@@ -26,7 +16,7 @@ export class Note {
 
   /** Note label without octave, e.g. "C#", "E♭", "D" */
   label(): string {
-    return `${this.letter}${ACCIDENTAL_DISPLAY[this.accidental]}`
+    return `${this.letter}${this.accidental.displaySymbol}`
   }
 
   /** Full display string with unicode flat, e.g. "C#4", "E♭3" */
@@ -36,7 +26,7 @@ export class Note {
 
   /** ASCII string for Tone.js, e.g. "C#4", "Eb3" */
   toToneString(): string {
-    return `${this.letter}${ACCIDENTAL_TONE[this.accidental]}${this.octave}`
+    return `${this.letter}${this.accidental.toneSymbol}${this.octave}`
   }
 
   /** Structural equality */
@@ -53,11 +43,10 @@ export class Note {
   }
 
   isSharp(): boolean {
-    return this.accidental === "sharp"
+    return this.accidental === SHARP
   }
 
   isFlat(): boolean {
-    return this.accidental === "flat"
+    return this.accidental === FLAT
   }
-
 }

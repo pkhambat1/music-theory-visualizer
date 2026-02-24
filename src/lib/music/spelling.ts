@@ -1,5 +1,6 @@
-import type { Accidental, Letter, NoteIndex, PitchClass } from "../../types"
-import { Note } from "../note"
+import type { Letter, NoteIndex, PitchClass } from "../../types"
+import { SHARP, FLAT, NATURAL } from "./accidentals"
+import { Note } from "../../models/Note"
 
 const LETTER_ORDER: Letter[] = ["C", "D", "E", "F", "G", "A", "B"]
 const LETTER_TO_PC: Record<Letter, number> = {
@@ -13,18 +14,15 @@ function noteNameToPitchClass(
 ): PitchClass | null {
   if (!note) return null
   const basePc = LETTER_TO_PC[note.letter]
-  let offset = 0
-  if (note.accidental === "sharp") offset += 1
-  if (note.accidental === "flat") offset -= 1
-  return (basePc + offset + 12) % 12
+  return (basePc + note.accidental.semitoneOffset + 12) % 12
 }
 
 // ─── Public API ────────────────────────────────────────────────────
 
 type SpellingCandidate = {
-  spelled: (Note | null)[];
-  maxAbs: number;
-  totalAbs: number;
+  spelled: (Note | null)[],
+  maxAbs: number,
+  totalAbs: number,
 }
 
 /**
@@ -104,8 +102,7 @@ export function spellModeNotes(
           totalAbs += 10
         }
 
-        const accidental: Accidental =
-          diff > 0 ? "sharp" : diff < 0 ? "flat" : "natural"
+        const accidental = diff > 0 ? SHARP : diff < 0 ? FLAT : NATURAL
 
         const noteOctave = Math.floor(modeNotesWithOverflow[i]! / 12) + 1
         spelled.push(new Note(letter, accidental, noteOctave))

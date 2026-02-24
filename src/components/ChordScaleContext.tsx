@@ -1,5 +1,5 @@
 import type { NoteIndex } from "../types"
-import type { Note } from "../lib/note"
+import type { Note } from "../models/Note"
 import { IONIAN } from "../lib/music/modes"
 import { renderNote } from "../lib/notes"
 import NoteCell from "./NoteCell"
@@ -47,17 +47,17 @@ function baseDegreeLabel(degreeIdx: number): string {
 }
 
 type DegreeChordTone = {
-  actualNote: NoteIndex;
-  isAltered: boolean;
-  isFlat: boolean;
+  actualNote: NoteIndex,
+  isAltered: boolean,
+  isFlat: boolean,
   /** e.g. "1", "♭3", "♯5", "9" */
-  degreeLabel: string;
+  degreeLabel: string,
 }
 
 type DegreeMapResult = {
-  map: Map<number, DegreeChordTone>;
+  map: Map<number, DegreeChordTone>,
   /** Highest degree index needed (at least 7 for the octave). */
-  maxDegreeIdx: number;
+  maxDegreeIdx: number,
 }
 
 /**
@@ -66,10 +66,7 @@ type DegreeMapResult = {
  * from the root — intervals beyond the octave get their own extended degree
  * (e.g. the 9th at index 8) rather than being folded back via modulo.
  */
-function buildDegreeMap(
-  chordNotes: NoteIndex[],
-  root: NoteIndex,
-): DegreeMapResult {
+function buildDegreeMap(chordNotes: NoteIndex[], root: NoteIndex): DegreeMapResult {
   const map = new Map<number, DegreeChordTone>()
   let maxDegreeIdx = 7 // always show at least through the octave
 
@@ -95,16 +92,14 @@ function buildDegreeMap(
 
 /** Build the major scale as absolute NoteIndex values up to maxDegreeIdx. */
 function buildMajorScale(root: NoteIndex, maxDegreeIdx: number): NoteIndex[] {
-  return Array.from({ length: maxDegreeIdx + 1 }, (_, i) =>
-    root + naturalInterval(i),
-  )
+  return Array.from({ length: maxDegreeIdx + 1 }, (_, i) => root + naturalInterval(i))
 }
 
 // ─── Component ──────────────────────────────────────────────────────
 
 export type ChordScaleContextProps = {
-  chordNotes: NoteIndex[];
-  notes: Note[];
+  chordNotes: NoteIndex[],
+  notes: Note[],
 }
 
 /**
@@ -114,10 +109,7 @@ export type ChordScaleContextProps = {
  * - Altered chord tones: major scale note struck-through, actual note below
  * - Non-chord-tone degrees: dimmed
  */
-export default function ChordScaleContext({
-  chordNotes,
-  notes,
-}: ChordScaleContextProps) {
+export default function ChordScaleContext({ chordNotes, notes }: ChordScaleContextProps) {
   const isEmpty = chordNotes.length === 0
 
   const root = isEmpty ? 0 : chordNotes[0]!
@@ -130,9 +122,7 @@ export default function ChordScaleContext({
 
   // Caption: e.g. "D Major Scale", or a static placeholder when idle
   const rootNote = isEmpty ? undefined : notes[root]
-  const caption = rootNote
-    ? `${rootNote.label()} Major Scale`
-    : "Root Major Scale"
+  const caption = rootNote ? `${rootNote.label()} Major Scale` : "Root Major Scale"
 
   // Generate a subtle gradient band for chord tone cells
   const chordToneCount = degreeMap.size
@@ -152,7 +142,7 @@ export default function ChordScaleContext({
       }}
     >
       <NotesArray
-                size={majorScale.length}
+        size={majorScale.length}
         caption={caption}
         captionSubtitle={isEmpty ? "Hover a chord to see its scale context" : undefined}
       >
@@ -166,7 +156,7 @@ export default function ChordScaleContext({
               <NoteCell
                 key={idx}
                 idx={idx}
-                                className="text-gray-300 font-normal"
+                className="text-gray-300 font-normal"
                 style={{
                   background: "transparent",
                 }}
@@ -177,11 +167,7 @@ export default function ChordScaleContext({
           // ── Non-chord-tone scale degree ──
           if (!info) {
             return (
-              <NoteCell
-                key={idx}
-                idx={idx}
-                                className="text-gray-400 font-normal"
-              >
+              <NoteCell key={idx} idx={idx} className="text-gray-400 font-normal">
                 {scaleNote && renderNote(scaleNote)}
               </NoteCell>
             )
@@ -193,7 +179,7 @@ export default function ChordScaleContext({
               <NoteCell
                 key={idx}
                 idx={idx}
-                                className="text-gray-900 font-semibold"
+                className="text-gray-900 font-semibold"
                 style={chordToneStyle(idx)}
                 optCaption={info.degreeLabel}
               >
@@ -206,12 +192,7 @@ export default function ChordScaleContext({
           const alteredNote = notes[info.actualNote]
           const arrow = info.isFlat ? "←" : "→"
           return (
-            <NoteCell
-              key={idx}
-              idx={idx}
-                            style={chordToneStyle(idx)}
-              optCaption={info.degreeLabel}
-            >
+            <NoteCell key={idx} idx={idx} style={chordToneStyle(idx)} optCaption={info.degreeLabel}>
               <div className="flex items-center gap-[2px] leading-none">
                 {info.isFlat ? (
                   <>

@@ -1,5 +1,5 @@
 import type { Interval, NoteIndex } from "../../types"
-import { Note } from "../note"
+import { Note } from "../../models/Note"
 import { CHROMATIC_SCALE } from "../notes"
 import { OCTAVE } from "./modes"
 

@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { ChordHighlightPair, ModeDataProps, NoteIndex, Point } from "../types"
-import {
-  Connection,
-  StaticConnection,
-  IntervalConnection,
-  DiatonicConnection,
-  RemovedConnection,
-  AddedConnection,
-  BassConnection,
-} from "../lib/connection"
+import { Connection } from "../models/Connection"
+import { StaticConnection } from "../models/StaticConnection"
+import { IntervalConnection } from "../models/IntervalConnection"
+import { DiatonicConnection } from "../models/DiatonicConnection"
+import { RemovedConnection } from "../models/RemovedConnection"
+import { AddedConnection } from "../models/AddedConnection"
+import { BassConnection } from "../models/BassConnection"
 import { bezierPath, bezierPointAt } from "../lib/bezier"
 import { leftTrimOverflowNotes } from "../lib/music/scale"
 import { getChordNotes } from "../lib/music/chords"
-
 
 // ─── Interval → degree label mapping ────────────────────────────────
 
@@ -47,7 +44,7 @@ function getIntervalLabel(semitones: number): string {
 
 // ─── Interval label pill ─────────────────────────────────────────────
 
-function IntervalLabel({ x, y, children }: { x: number; y: number; children: React.ReactNode }) {
+function IntervalLabel({ x, y, children }: { x: number, y: number, children: React.ReactNode }) {
   return (
     <g>
       <rect
@@ -76,13 +73,13 @@ function IntervalLabel({ x, y, children }: { x: number; y: number; children: Rea
 // ─── Component ──────────────────────────────────────────────────────
 
 export type HoverLinesProps = ModeDataProps & {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  hoveredIndex: number | null;
-  chordHighlightPairs?: ChordHighlightPair[];
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  hoveredIndex: number | null,
+  chordHighlightPairs?: ChordHighlightPair[],
 
-  originalChordNotes?: NoteIndex[];
-  modifiedChordNotes?: NoteIndex[];
-  slashBassNoteIndex?: NoteIndex | null;
+  originalChordNotes?: NoteIndex[],
+  modifiedChordNotes?: NoteIndex[],
+  slashBassNoteIndex?: NoteIndex | null,
 }
 
 export default function HoverLines({

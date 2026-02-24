@@ -3,11 +3,11 @@ import { cn } from "../lib/cn"
 import { SQUARE_SIDE } from "../lib/music/scale"
 
 export type NoteCellProps = {
-  idx?: number;
-  optCaption?: string | number | null;
-  optBackground?: string | null;
-  dataRow?: string;
-  dataIdx?: number;
+  idx?: number,
+  optCaption?: string | number | null,
+  optBackground?: string | null,
+  dataRow?: string,
+  dataIdx?: number,
 } & React.HTMLAttributes<HTMLDivElement>
 
 const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
@@ -55,7 +55,5 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
     )
   },
 )
-
-NoteCell.displayName = "NoteCell"
 
 export default NoteCell

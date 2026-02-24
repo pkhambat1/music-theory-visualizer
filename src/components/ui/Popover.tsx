@@ -3,11 +3,11 @@ import { useEffect, useRef } from "react"
 export type PopoverPosition = "top" | "bottom"
 
 export type PopoverProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  trigger: React.ReactNode;
-  children: React.ReactNode;
-  position?: PopoverPosition;
+  open: boolean,
+  onOpenChange: (open: boolean) => void,
+  trigger: React.ReactNode,
+  children: React.ReactNode,
+  position?: PopoverPosition,
 }
 
 const positionClasses: Record<PopoverPosition, string> = {

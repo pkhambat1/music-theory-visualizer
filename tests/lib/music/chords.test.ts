@@ -5,11 +5,7 @@ import {
   applyExtensions,
   getDisabledExtensions,
 } from "../../../src/lib/music/chords"
-import { MODES } from "../../../src/lib/music/modes"
-
-// ─── IONIAN intervals for reference ──────────────────────────────
-// [0, 2, 4, 5, 7, 9, 11, 12]
-const IONIAN = MODES["Ionian (major)"]
+import { IONIAN } from "../../../src/lib/music/modes"
 
 describe("getChordDescriptor", () => {
   it("returns '' for a major triad (root, major 3rd, perfect 5th)", () => {
@@ -144,7 +140,7 @@ describe("applyExtensions", () => {
   it("9 adds both a major 7th and a 9th", () => {
     const result = applyExtensions(cMajor, ["9"])
     expect(result).toHaveLength(5)
-    expect(result[3]).toBe(11) // B (major 7th)
+    expect(result[3]).toBe(10) // Bb (flat 7th — dominant 9th)
     expect(result[4]).toBe(14) // D (9th)
   })
 

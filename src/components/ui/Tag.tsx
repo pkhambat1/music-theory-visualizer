@@ -1,8 +1,8 @@
 import { cn } from "../../lib/cn"
 
 export type TagProps = {
-  children: React.ReactNode;
-  className?: string;
+  children: React.ReactNode,
+  className?: string,
 }
 
 export default function Tag({ children, className }: TagProps) {

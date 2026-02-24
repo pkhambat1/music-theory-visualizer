@@ -1,18 +1,18 @@
 import { useState } from "react"
 
 export type MultiSelectOption = {
-  value: string;
-  label?: string;
+  value: string,
+  label?: string,
 }
 
 export type MultiSelectProps = {
-  options?: MultiSelectOption[];
-  value?: string[];
-  onChange?: (value: string[]) => void;
-  placeholder?: string;
-  header?: string;
+  options?: MultiSelectOption[],
+  value?: string[],
+  onChange?: (value: string[]) => void,
+  placeholder?: string,
+  header?: string,
   /** Values that should be greyed out and non-interactive (e.g. conflicting options). */
-  disabledValues?: Set<string>;
+  disabledValues?: Set<string>,
 }
 
 export default function MultiSelect({

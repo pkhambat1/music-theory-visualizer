@@ -28,9 +28,10 @@ export default tseslint.config(
       semi: 'off',
       '@stylistic/semi': ['error', 'never'],
       '@stylistic/member-delimiter-style': ['error', {
-        multiline: { delimiter: 'semi' },
-        singleline: { delimiter: 'semi' },
+        multiline: { delimiter: 'comma' },
+        singleline: { delimiter: 'comma' },
       }],
+      'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 0, maxEOF: 0 }],
     },
   },
 )

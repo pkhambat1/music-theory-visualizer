@@ -63,18 +63,25 @@ export function getChordDescriptor(chordNotes: NoteIndex[]): ChordQuality {
 export function getChordNotes(
   modeNotes: NoteIndex[],
   degreeIdx: number,
+  chordType: "triads" | "seventhChords" = "triads",
 ): NoteIndex[] {
-  return [0, 2, 4].map((o) => modeNotes[degreeIdx + o]!)
+  const offsets = chordType === "seventhChords" ? [0, 2, 4, 6] : [0, 2, 4]
+  return offsets.map((o) => modeNotes[degreeIdx + o]!)
 }
 
 // ─── Extension conflict rules ───────────────────────────────────────
 
 /**
  * Mutual exclusion groups: selecting any member disables the rest of its group.
- * - 3rd quality: maj, m, sus2, sus4, dim (all write to the 3rd slot)
- * - 5th quality: aug, dim (both write to the 5th slot; dim spans both groups)
- * - 7th type:    7, maj7, 9 (9 implies a 7th)
- * - 9th type:    add9, 9 (9 implies a 9th)
+ * An extension can appear in multiple groups (e.g. dim spans 3rd + 5th).
+ *
+ * - 3rd quality:  maj, m, sus2, sus4, dim — all write to the 3rd slot
+ * - 5th quality:  aug, dim — both write to the 5th slot
+ * - 7th type:     7, maj7, 9, maj9, 11, 13 — compound chords imply a 7th
+ * - 9th type:     add9, 9, maj9, 11, 13 — compound chords imply a 9th
+ * - 4th vs sus4:  add4, sus4 — both target the 4th
+ * - 2nd vs sus2:  add2, sus2 — both target the 2nd
+ * - 6th vs 13th:  6, 13 — 13 implies the 6th
  */
 const EXCLUSION_GROUPS: Extension[][] = [
   ["maj", "m", "sus2", "sus4", "dim"],
@@ -114,48 +121,44 @@ export function applyExtensions(
   extensions: Extension[],
 ): NoteIndex[] {
   const root = chordNotes[0]!
-  const result = [...chordNotes]
 
+  // Collect per-index replacements from all extensions
+  const replacements = new Map<number, NoteIndex>()
   for (const ext of extensions) {
     switch (ext) {
-      case "sus2":  result[1] = getSecond(root); break
-      case "sus4":  result[1] = getFourth(root); break
-      case "m":     result[1] = flatten(getThird(root)); break
-      case "maj":   result[1] = getThird(root); break
+      case "sus2":  replacements.set(1, getSecond(root)); break
+      case "sus4":  replacements.set(1, getFourth(root)); break
+      case "m":     replacements.set(1, flatten(getThird(root))); break
+      case "maj":   replacements.set(1, getThird(root)); break
       case "dim":
-        result[1] = flatten(getThird(root))
-        result[2] = flatten(getFifth(root))
+        replacements.set(1, flatten(getThird(root)))
+        replacements.set(2, flatten(getFifth(root)))
         break
-      case "aug":   result[2] = sharpen(getFifth(root)); break
-      case "7":     result.push(flatten(getSeventh(root))); break
-      case "maj7":  result.push(getSeventh(root)); break
-      case "6":     result.push(getSixth(root)); break
-      case "add2":  result.push(getSecond(root)); break
-      case "add4":  result.push(getFourth(root)); break
-      case "add9":  result.push(getNinth(root)); break
-      case "9":
-        result.push(flatten(getSeventh(root)))
-        result.push(getNinth(root))
-        break
-      case "maj9":
-        result.push(getSeventh(root))
-        result.push(getNinth(root))
-        break
-      case "11":
-        result.push(flatten(getSeventh(root)))
-        result.push(getNinth(root))
-        result.push(getEleventh(root))
-        break
-      case "13":
-        result.push(flatten(getSeventh(root)))
-        result.push(getNinth(root))
-        result.push(getEleventh(root))
-        result.push(getThirteenth(root))
-        break
+      case "aug":   replacements.set(2, sharpen(getFifth(root))); break
     }
   }
 
-  return result
+  // Apply replacements via map
+  const base = chordNotes.map((note, i) => replacements.get(i) ?? note)
+
+  // Collect added tones from all extensions
+  const added = extensions.flatMap((ext): NoteIndex[] => {
+    switch (ext) {
+      case "7":     return [flatten(getSeventh(root))]
+      case "maj7":  return [getSeventh(root)]
+      case "6":     return [getSixth(root)]
+      case "add2":  return [getSecond(root)]
+      case "add4":  return [getFourth(root)]
+      case "add9":  return [getNinth(root)]
+      case "9":     return [flatten(getSeventh(root)), getNinth(root)]
+      case "maj9":  return [getSeventh(root), getNinth(root)]
+      case "11":    return [flatten(getSeventh(root)), getNinth(root), getEleventh(root)]
+      case "13":    return [flatten(getSeventh(root)), getNinth(root), getEleventh(root), getThirteenth(root)]
+      default:      return []
+    }
+  })
+
+  return [...base, ...added]
 }
 
 /**

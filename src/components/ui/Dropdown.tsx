@@ -3,14 +3,14 @@ import { cn } from "../../lib/cn"
 import Button from "./Button"
 
 export type DropdownItem = {
-  key: string;
-  label?: string;
+  key: string,
+  label?: string,
 }
 
 export type DropdownProps = {
-  label: string;
-  items?: DropdownItem[];
-  onSelect?: (key: string) => void;
+  label: string,
+  items?: DropdownItem[],
+  onSelect?: (key: string) => void,
 }
 
 export default function Dropdown({

@@ -1,5 +1,5 @@
 import * as Tone from "tone"
-import type { Note } from "./note"
+import type { Note } from "../models/Note"
 
 const sampler: Tone.Sampler = new Tone.Sampler({
   urls: {

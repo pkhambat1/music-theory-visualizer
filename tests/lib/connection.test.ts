@@ -1,13 +1,11 @@
 import { describe, it, expect } from "vitest"
-import {
-  Connection,
-  StaticConnection,
-  IntervalConnection,
-  DiatonicConnection,
-  RemovedConnection,
-  AddedConnection,
-  BassConnection,
-} from "../../src/lib/connection"
+import { Connection } from "../../src/models/Connection"
+import { StaticConnection } from "../../src/models/StaticConnection"
+import { IntervalConnection } from "../../src/models/IntervalConnection"
+import { DiatonicConnection } from "../../src/models/DiatonicConnection"
+import { RemovedConnection } from "../../src/models/RemovedConnection"
+import { AddedConnection } from "../../src/models/AddedConnection"
+import { BassConnection } from "../../src/models/BassConnection"
 import { bezierPath, bezierPointAt } from "../../src/lib/bezier"
 
 describe("StaticConnection", () => {

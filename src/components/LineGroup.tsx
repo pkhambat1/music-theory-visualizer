@@ -1,20 +1,16 @@
 import { useLayoutEffect, useState } from "react"
 import type { CellLink } from "../types"
-import { StaticConnection } from "../lib/connection"
+import { StaticConnection } from "../models/StaticConnection"
 import { bezierPath } from "../lib/bezier"
 import { colors } from "../lib/colors"
 
 export type LineGroupProps = {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  connections?: CellLink[];
-  depKey?: string;
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  connections?: CellLink[],
+  depKey?: string,
 }
 
-export default function LineGroup({
-  containerRef,
-  connections = [],
-  depKey = "",
-}: LineGroupProps) {
+export default function LineGroup({ containerRef, connections = [], depKey = "" }: LineGroupProps) {
   const [lines, setLines] = useState<StaticConnection[]>([])
 
   useLayoutEffect(() => {
@@ -23,47 +19,42 @@ export default function LineGroup({
     const measure = () => {
       if (!container) return
       const containerRect = container.getBoundingClientRect()
-      const nextLines: StaticConnection[] = []
+      const scrollLeft = container.scrollLeft
+      const scrollTop = container.scrollTop
 
-      connections.forEach(({ fromRow, fromIdx, toRow, toIdx }) => {
-        const fromEl = container.querySelector(
-          `[data-row="${fromRow}"][data-idx="${fromIdx}"]`,
-        )
-        const toEl = container.querySelector(
-          `[data-row="${toRow}"][data-idx="${toIdx}"]`,
-        )
-        if (!fromEl || !toEl) return
+      const nextLines = connections
+        .map(({ fromRow, fromIdx, toRow, toIdx }) => {
+          const fromEl = container.querySelector(`[data-row="${fromRow}"][data-idx="${fromIdx}"]`)
+          const toEl = container.querySelector(`[data-row="${toRow}"][data-idx="${toIdx}"]`)
+          if (!fromEl || !toEl) return null
 
-        const fromRect = fromEl.getBoundingClientRect()
-        const toRect = toEl.getBoundingClientRect()
-        const scrollLeft = container.scrollLeft
-        const scrollTop = container.scrollTop
+          const fromRect = fromEl.getBoundingClientRect()
+          const toRect = toEl.getBoundingClientRect()
 
-        nextLines.push(new StaticConnection(
-          {
-            x: fromRect.left - containerRect.left + fromRect.width / 2 + scrollLeft,
-            y: fromRect.bottom - containerRect.top + scrollTop,
-          },
-          {
-            x: toRect.left - containerRect.left + toRect.width / 2 + scrollLeft,
-            y: toRect.top - containerRect.top + scrollTop,
-          },
-        ))
-      })
+          return new StaticConnection(
+            {
+              x: fromRect.left - containerRect.left + fromRect.width / 2 + scrollLeft,
+              y: fromRect.bottom - containerRect.top + scrollTop,
+            },
+            {
+              x: toRect.left - containerRect.left + toRect.width / 2 + scrollLeft,
+              y: toRect.top - containerRect.top + scrollTop,
+            },
+          )
+        })
+        .filter((c): c is StaticConnection => c !== null)
 
       setLines(nextLines)
     }
 
     measure()
 
-    const ro = new ResizeObserver(() => measure())
+    const ro = new ResizeObserver(measure)
     if (container) ro.observe(container)
-
-    const onResize = () => measure()
-    window.addEventListener("resize", onResize)
+    window.addEventListener("resize", measure)
 
     return () => {
-      window.removeEventListener("resize", onResize)
+      window.removeEventListener("resize", measure)
       if (container) {
         ro.unobserve(container)
         ro.disconnect()
@@ -92,7 +83,6 @@ export default function LineGroup({
           d={bezierPath(conn.from, conn.to)}
           stroke={colors.border}
           strokeWidth="1.5"
-
           fill="none"
         />
       ))}

@@ -12,22 +12,7 @@ export type Interval = number
 /** One of the 7 natural note letters. */
 export type Letter = "C" | "D" | "E" | "F" | "G" | "A" | "B"
 
-/** Accidental classification. */
-export type Accidental = "sharp" | "flat" | "natural"
-
 // ─── Unions / Enums ────────────────────────────────────────────────
-
-export type ModeName =
-  | "Ionian (major)"
-  | "Dorian"
-  | "Phrygian"
-  | "Lydian"
-  | "Mixolydian"
-  | "Aeolian (natural minor)"
-  | "Locrian"
-  | "Harmonic Minor"
-  | "Melodic Minor"
-  | "Whole Tone"
 
 export type Extension =
   | "maj"
@@ -54,16 +39,16 @@ export type ChordType = "triads" | "seventhChords"
 // ─── Data structures ───────────────────────────────────────────────
 
 export type ExtensionOption = {
-  value: Extension;
-  label: string;
+  value: Extension,
+  label: string,
 }
 
 export type ChordDegreeState = {
-  extensions: Extension[];
-  slashBass: number | null;
+  extensions: Extension[],
+  slashBass: number | null,
 }
 
 export type ModeDataProps = {
-  modeNotesWithOverflow: NoteIndex[];
-  modeLeftOverflowSize: number;
+  modeNotesWithOverflow: NoteIndex[],
+  modeLeftOverflowSize: number,
 }

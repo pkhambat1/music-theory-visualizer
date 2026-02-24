@@ -2,14 +2,14 @@ import { SQUARE_SIDE } from "../lib/music/scale"
 import { colors } from "../lib/colors"
 
 export type NotesArrayProps = {
-  size: number;
-  children: React.ReactNode;
-  caption?: string;
-  captionSubtitle?: string;
-  captionRight?: React.ReactNode;
-  clipContent?: boolean;
-  zIndex?: number;
-  rowBackground?: string;
+  size: number,
+  children: React.ReactNode,
+  caption?: string,
+  captionSubtitle?: string,
+  captionRight?: React.ReactNode,
+  clipContent?: boolean,
+  zIndex?: number,
+  rowBackground?: string,
 }
 
 export default function NotesArray({

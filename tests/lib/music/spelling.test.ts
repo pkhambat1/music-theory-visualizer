@@ -1,18 +1,18 @@
 import { describe, it, expect } from "vitest"
 import { spellModeNotes } from "../../../src/lib/music/spelling"
-import { MODES } from "../../../src/lib/music/modes"
+import { MODES, IONIAN } from "../../../src/lib/music/modes"
 import { generateOctaves } from "../../../src/lib/notes"
 import {
   buildModeNotesWithOverflow,
   getModeLeftOverflowSize,
 } from "../../../src/lib/music/scale"
-import { Note } from "../../../src/lib/note"
+import { Note } from "../../../src/models/Note"
+import { NATURAL } from "../../../src/lib/music/accidentals"
 
 describe("spellModeNotes", () => {
   const notes = generateOctaves(6)
-  const IONIAN = MODES["Ionian (major)"]
-  const C1 = new Note("C", "natural", 1)
-  const D1 = new Note("D", "natural", 1)
+  const C1 = new Note("C", NATURAL, 1)
+  const D1 = new Note("D", NATURAL, 1)
 
   it("returns [] for empty input", () => {
     expect(spellModeNotes([], 0, notes)).toEqual([])
@@ -33,7 +33,7 @@ describe("spellModeNotes", () => {
     const coreNotes = result.slice(leftOverflow, leftOverflow + IONIAN.length)
     for (const note of coreNotes) {
       expect(note).not.toBeNull()
-      expect(note!.accidental).toBe("natural")
+      expect(note!.accidental).toBe(NATURAL)
     }
   })
 
@@ -45,14 +45,14 @@ describe("spellModeNotes", () => {
   })
 
   it("spells D Dorian without accidentals (same notes as C major)", () => {
-    const DORIAN = MODES["Dorian"]
+    const DORIAN = MODES.find(m => m.name === "Dorian")!.intervals
     const modeNotes = buildModeNotesWithOverflow(D1, DORIAN, notes)
     const leftOverflow = getModeLeftOverflowSize(DORIAN)
     const result = spellModeNotes(modeNotes, leftOverflow, notes)
     const coreNotes = result.slice(leftOverflow, leftOverflow + DORIAN.length)
     for (const note of coreNotes) {
       expect(note).not.toBeNull()
-      expect(note!.accidental).toBe("natural")
+      expect(note!.accidental).toBe(NATURAL)
     }
   })
 })

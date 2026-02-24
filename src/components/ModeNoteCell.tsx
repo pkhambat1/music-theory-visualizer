@@ -1,18 +1,18 @@
 import React, { useCallback, useMemo } from "react"
 import NoteCell from "./NoteCell"
 import { renderNote } from "../lib/notes"
-import type { Note } from "../lib/note"
+import type { Note } from "../models/Note"
 
 // ─── Component ─────────────────────────────────────────────────────
 
 export type ModeNoteCellProps = {
-  idx: number;
-  dataIdx: number;
-  noteString: Note | null;
-  newValue: Note | null;
-  onPlay: (note: Note) => void;
-  isHighlighted?: boolean;
-  optCaption?: string | number | null;
+  idx: number,
+  dataIdx: number,
+  noteString: Note | null,
+  newValue: Note | null,
+  onPlay: (note: Note) => void,
+  isHighlighted?: boolean,
+  optCaption?: string | number | null,
 }
 
 const HIGHLIGHT_COLOR = "#000000"

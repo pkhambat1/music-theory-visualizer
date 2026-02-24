@@ -1,25 +1,25 @@
-import type { Letter, Accidental } from "../types"
-import { Note } from "./note"
+import { SHARP, NATURAL } from "./music/accidentals"
+import { Note } from "../models/Note"
 
-const BASE_NOTES: { letter: Letter; accidental: Accidental }[] = [
-  { letter: "C", accidental: "natural" },
-  { letter: "C", accidental: "sharp" },
-  { letter: "D", accidental: "natural" },
-  { letter: "D", accidental: "sharp" },
-  { letter: "E", accidental: "natural" },
-  { letter: "F", accidental: "natural" },
-  { letter: "F", accidental: "sharp" },
-  { letter: "G", accidental: "natural" },
-  { letter: "G", accidental: "sharp" },
-  { letter: "A", accidental: "natural" },
-  { letter: "A", accidental: "sharp" },
-  { letter: "B", accidental: "natural" },
+const BASE_NOTES: Note[] = [
+  new Note("C", NATURAL, 0),
+  new Note("C", SHARP, 0),
+  new Note("D", NATURAL, 0),
+  new Note("D", SHARP, 0),
+  new Note("E", NATURAL, 0),
+  new Note("F", NATURAL, 0),
+  new Note("F", SHARP, 0),
+  new Note("G", NATURAL, 0),
+  new Note("G", SHARP, 0),
+  new Note("A", NATURAL, 0),
+  new Note("A", SHARP, 0),
+  new Note("B", NATURAL, 0),
 ]
 
 /** The 13-element chromatic scale (C through C, inclusive of octave wrap). */
 export const CHROMATIC_SCALE: Note[] = [
-  ...BASE_NOTES.map((n) => new Note(n.letter, n.accidental, 0)),
-  new Note("C", "natural", 0),
+  ...BASE_NOTES,
+  new Note("C", NATURAL, 0),
 ]
 
 /**

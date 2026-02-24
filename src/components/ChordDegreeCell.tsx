@@ -1,0 +1,177 @@
+import type { Extension, ExtensionOption, NoteIndex } from "../types"
+import type { Note } from "../models/Note"
+import NoteCell from "./NoteCell"
+import Popover from "./ui/Popover"
+import Button from "./ui/Button"
+import ExtensionPanel from "./ExtensionPanel"
+import { buildSlashChordVoicing } from "../lib/music/chords"
+import { playChord, arpeggiateChord } from "../lib/audio"
+import { DEGREE_COLORS } from "../lib/colors"
+import { SQUARE_SIDE } from "../lib/music/scale"
+
+const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
+const DATA_ROW = "diatonic-row"
+const HOVER_COLOR = "#000000"
+
+export type ChordDegreeCellProps = {
+  chordNumeralIdx: number,
+  chordNumeral: string,
+  originalNotes: NoteIndex[],
+  chordNotesArr: NoteIndex[],
+  chordDescriptor: string,
+  activeExtensions: Extension[],
+  slashBass: number | null,
+  modeNotes: NoteIndex[],
+  notes: Note[],
+  arpeggiate: boolean,
+  hoveredIndex: number | null,
+  isPopoverOpen: boolean,
+  onPopoverOpenChange: (open: boolean) => void,
+  selectedExtensions: Extension[],
+  extensionOptions: ExtensionOption[],
+  onExtensionChange?: (degreeIdx: number, value: string[]) => void,
+  onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
+  onHover: (idx: number, original: NoteIndex[], modified: NoteIndex[]) => void,
+  onHoverClear: () => void,
+}
+
+export default function ChordDegreeCell({
+  chordNumeralIdx,
+  chordNumeral,
+  originalNotes,
+  chordNotesArr,
+  chordDescriptor,
+  activeExtensions,
+  slashBass,
+  modeNotes,
+  notes,
+  arpeggiate,
+  hoveredIndex,
+  isPopoverOpen,
+  onPopoverOpenChange,
+  selectedExtensions,
+  extensionOptions,
+  onExtensionChange,
+  onSlashBassChange,
+  onHover,
+  onHoverClear,
+}: ChordDegreeCellProps) {
+  const degreeBg = DEGREE_COLORS[chordNumeralIdx % DEGREE_COLORS.length]!
+
+  return (
+    <div
+      className="relative"
+      style={{
+        width: `${SQUARE_SIDE}px`,
+        height: `${SQUARE_SIDE}px`,
+        overflow: "visible",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <NoteCell
+        idx={chordNumeralIdx}
+        dataRow={DATA_ROW}
+        dataIdx={chordNumeralIdx}
+        optBackground={degreeBg}
+        className="group cursor-pointer hover:bg-black/[0.08] transition-colors"
+        style={
+          hoveredIndex === chordNumeralIdx
+            ? { border: `2px solid ${HOVER_COLOR}` }
+            : { border: "2px solid transparent" }
+        }
+        onMouseEnter={() => onHover(chordNumeralIdx, originalNotes, chordNotesArr)}
+        onMouseLeave={() => onHoverClear()}
+        onClick={() => {
+          const voicing =
+            slashBass !== null
+              ? buildSlashChordVoicing(chordNotesArr, modeNotes, chordNumeralIdx, slashBass)
+              : chordNotesArr
+          const chordNotes = voicing.map((idx) => notes[idx]!)
+          if (arpeggiate) {
+            arpeggiateChord(chordNotes)
+          } else {
+            playChord(chordNotes)
+          }
+        }}
+      >
+        <span
+          className={activeExtensions.length > 0 || slashBass !== null ? "-translate-y-1" : ""}
+          style={{ color: "#000000" }}
+        >
+          {chordNumeral}
+          {chordDescriptor}
+          {slashBass !== null && (
+            <span className="text-[9px]">/{ROMAN_BASE[slashBass] ?? ""}</span>
+          )}
+        </span>
+
+        {/* Extension pills */}
+        {(activeExtensions.length > 0 || slashBass !== null) && (
+          <div className="absolute bottom-0.5 inset-x-0 flex flex-wrap justify-center gap-[2px] px-0.5">
+            {activeExtensions.map((ext) => (
+              <span
+                key={ext}
+                className="rounded bg-[var(--d3-primaryFill)] px-1 text-[9px] font-medium text-[var(--d3-primary)] leading-[14px]"
+              >
+                {ext}
+              </span>
+            ))}
+            {slashBass !== null && (
+              <span className="rounded bg-gray-200 px-1 text-[9px] font-medium text-gray-600 leading-[14px]">
+                /{ROMAN_BASE[slashBass]}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Controls */}
+        <div
+          className="absolute right-1 bottom-1 z-10 opacity-30 transition-opacity pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+          onMouseEnter={(e) => {
+            e.stopPropagation()
+            onHoverClear()
+          }}
+          onMouseLeave={(e) => {
+            e.stopPropagation()
+            const related = e.relatedTarget as Element | null
+            if (related?.closest?.("[data-popover-panel]")) return
+            onHover(chordNumeralIdx, originalNotes, chordNotesArr)
+          }}
+        >
+          <Popover
+            open={isPopoverOpen}
+            onOpenChange={onPopoverOpenChange}
+            position="top"
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 rounded-full border border-[var(--d3-border)] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                aria-label="Add extensions"
+              >
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="1.5" />
+                  <circle cx="8" cy="8" r="1.5" />
+                  <circle cx="13" cy="8" r="1.5" />
+                </svg>
+              </Button>
+            }
+          >
+            <ExtensionPanel
+              chordNumeralIdx={chordNumeralIdx}
+              extensionOptions={extensionOptions}
+              selectedExtensions={selectedExtensions}
+              activeExtensions={activeExtensions}
+              slashBass={slashBass}
+              onExtensionChange={onExtensionChange}
+              onSlashBassChange={onSlashBassChange}
+            />
+          </Popover>
+        </div>
+      </NoteCell>
+    </div>
+  )
+}

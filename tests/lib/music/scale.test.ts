@@ -6,11 +6,10 @@ import {
   buildModeNotesWithOverflow,
   leftTrimOverflowNotes,
 } from "../../../src/lib/music/scale"
-import { MODES, OCTAVE } from "../../../src/lib/music/modes"
+import { MODES, IONIAN, OCTAVE } from "../../../src/lib/music/modes"
 import { generateOctaves } from "../../../src/lib/notes"
-import { Note } from "../../../src/lib/note"
-
-const IONIAN = MODES["Ionian (major)"]
+import { Note } from "../../../src/models/Note"
+import { NATURAL } from "../../../src/lib/music/accidentals"
 
 describe("addOverflowToModeIntervals", () => {
   it("output length = input length + 10", () => {
@@ -44,9 +43,9 @@ describe("addOverflowToModeIntervals", () => {
   })
 
   it("works for all modes", () => {
-    for (const [, intervals] of Object.entries(MODES)) {
-      const result = addOverflowToModeIntervals(intervals)
-      expect(result).toHaveLength(intervals.length + 10)
+    for (const mode of MODES) {
+      const result = addOverflowToModeIntervals(mode.intervals)
+      expect(result).toHaveLength(mode.intervals.length + 10)
     }
   })
 })
@@ -57,16 +56,16 @@ describe("getModeLeftOverflowSize", () => {
   })
 
   it("returns the same value for all standard modes", () => {
-    for (const [, intervals] of Object.entries(MODES)) {
-      expect(getModeLeftOverflowSize(intervals)).toBe(5)
+    for (const mode of MODES) {
+      expect(getModeLeftOverflowSize(mode.intervals)).toBe(5)
     }
   })
 })
 
 describe("modeIntervalsToMode", () => {
   const notes = generateOctaves(6)
-  const C1 = new Note("C", "natural", 1)
-  const D1 = new Note("D", "natural", 1)
+  const C1 = new Note("C", NATURAL, 1)
+  const D1 = new Note("D", NATURAL, 1)
 
   it("converts root + Ionian intervals to correct absolute NoteIndex array", () => {
     const result = modeIntervalsToMode(C1, IONIAN, notes)
@@ -76,7 +75,7 @@ describe("modeIntervalsToMode", () => {
   })
 
   it("returns [] when root is not found in notes", () => {
-    const bogus = new Note("C", "natural", 9)
+    const bogus = new Note("C", NATURAL, 9)
     const result = modeIntervalsToMode(bogus, IONIAN, notes)
     expect(result).toEqual([])
   })
@@ -91,7 +90,7 @@ describe("modeIntervalsToMode", () => {
 
 describe("buildModeNotesWithOverflow", () => {
   const notes = generateOctaves(6)
-  const C1 = new Note("C", "natural", 1)
+  const C1 = new Note("C", NATURAL, 1)
 
   it("returns a full array with overflow", () => {
     const result = buildModeNotesWithOverflow(C1, IONIAN, notes)
@@ -109,7 +108,7 @@ describe("buildModeNotesWithOverflow", () => {
   })
 
   it("returns [] when root is not found", () => {
-    const bogus = new Note("C", "natural", 9)
+    const bogus = new Note("C", NATURAL, 9)
     const result = buildModeNotesWithOverflow(bogus, IONIAN, notes)
     expect(result).toEqual([])
   })
