@@ -35,14 +35,14 @@ Hover over any chord in the bottom row to see:
 
 ### Add chord extensions
 
-Click the **three-dot icon** on any chord cell to open the extensions popover. Available extensions include sus2, sus4, 6, 7, maj7, add9, 9, maj9, 11, and 13.
+Click the **three-dot icon** on any chord cell to open the extensions popover. Available extensions include maj, m, dim, aug, sus2, sus4, 6, 7, maj7, add2, add4, add9, 9, maj9, 11, and 13. Conflicting extensions are automatically disabled (e.g. selecting sus2 disables m and maj).
 
 When an extension modifies a chord, the hover lines show a visual diff:
 - **Solid lines** — notes kept from the original chord
 - **Dashed lines** — notes removed by the extension
 - **New lines** — notes added by the extension
 
-Extension pills appear below the chord numeral. Use **Clear** in the popover to reset a single chord, or **Clear all extensions** (top-right of the diatonic row) to reset all chords.
+Extension pills appear below the chord numeral. You can also pick a **bass note** (slash chord) from the popover — e.g. selecting V as bass on a I chord creates I/V. Use **Clear** in the popover to reset a single chord, or **Clear all extensions** (top-right of the diatonic row) to reset all chords.
 
 ---
 
@@ -71,22 +71,24 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ### Tech stack
 
-React 18, TypeScript 5.6 (strict mode), Vite 5, Tailwind CSS 3, Tone.js (Salamander piano samples), keen-slider
+React 18, TypeScript 5.6 (strict mode), Vite 5, Tailwind CSS 3, Tone.js (Salamander piano samples), keen-slider, d3-scale-chromatic
 
 ### Project layout
 
-- `src/components/` — React components. `VisualizerPanel` is the main orchestrator. `ui/` has reusable primitives (Button, Dropdown, MultiSelect, Popover, Tag).
-- `src/lib/` — Pure logic. `music/` has mode, chord, scale, and spelling functions. `connection.ts` and `note.ts` define the core data model classes. `bezier.ts` handles SVG path math. `colors.ts` centralizes the color palette.
-- `src/types/` — Branded types (`PitchClass`, `NoteIndex`, `Interval`, `NoteName`) and geometry types (`Point`, `CellLink`, `ChordHighlightPair`). Barrel-exported from `index.ts`.
+- `src/components/` — React components. `VisualizerPanel` is the main orchestrator. `ui/` has reusable primitives (Button, Dropdown, MultiSelect, Popover, Pill, Tag).
+- `src/models/` — Core data model classes: `Note`, `Accidental`, `Mode`, and the `Connection` hierarchy (`Connection`, `StaticConnection`, `IntervalConnection`, `DiatonicConnection`, `RemovedConnection`, `AddedConnection`, `BassConnection`). Barrel-exported from `index.ts`.
+- `src/lib/` — Pure logic. `music/` has mode, chord, scale, interval, and spelling functions. `hoverConnections.ts` builds hover line connections. `bezier.ts` handles SVG path math. `colors.ts` centralizes the d3-derived color palette. `notes.tsx` defines the chromatic scale and note rendering.
+- `src/hooks/` — Custom hooks: `useModeTones` (mode note computation + spelling), `useChordExtensions` (extension/slash bass state), `useChordHover` (hover state + highlight pairs), `useContainerMeasure` (ResizeObserver wrapper).
+- `src/types/` — Type aliases (`PitchClass`, `NoteIndex`, `Interval`, `Letter`) and geometry types (`Point`, `CellLink`, `ChordHighlightPair`). Also defines `Extension`, `ChordQuality`, `ChordDegreeState`, etc. Barrel-exported from `index.ts`.
 - `tests/` — Unit tests (vitest).
 
 ### Data model
 
 Two class families in `src/lib/`.
 
-#### `Note` (`src/lib/note.ts`)
+#### `Note` (`src/models/Note.ts`)
 
-A musical note: letter (`A`–`G`), accidental (`sharp` | `flat` | `natural`), and octave (integer).
+A musical note: letter (`Letter` type: `A`–`G`), accidental (`Accidental` class instance — `SHARP`, `FLAT`, or `NATURAL`), and octave (integer).
 
 | Method | Returns | Example |
 |---|---|---|
@@ -95,7 +97,7 @@ A musical note: letter (`A`–`G`), accidental (`sharp` | `flat` | `natural`), a
 | `toToneString()` | ASCII for Tone.js playback | `"C#4"`, `"Eb3"` |
 | `equals(other)` | Structural equality | — |
 
-#### Connection hierarchy (`src/lib/connection.ts`)
+#### Connection hierarchy (`src/models/`)
 
 Lines drawn between UI elements in the SVG overlay. Rendering branches on `instanceof`, no string discriminants.
 
@@ -111,7 +113,7 @@ Lines drawn between UI elements in the SVG overlay. Rendering branches on `insta
 
 ### Architecture notes
 
-See [CLAUDE.md](./CLAUDE.md) for detailed docs on the overflow system, line drawing, hover state management, extension system, and color system.
+See [CLAUDE.md](./CLAUDE.md) for detailed architecture docs: overflow system, line drawing, hover state management, extension system, color system, and code conventions.
 
 ## License
 
