@@ -4,7 +4,7 @@ import "keen-slider/keen-slider.min.css"
 import type { ExtensionOption, Interval } from "../types"
 import { Note } from "../models/Note"
 import { NATURAL } from "../lib/music/accidentals"
-import { generateOctaves, renderNote } from "../lib/notes"
+import { notes } from "../lib/notes"
 import { playNote } from "../lib/audio"
 import { MODES, Mode } from "../lib/music/modes"
 import {
@@ -16,8 +16,7 @@ import { useModeTones } from "../hooks/useModeTones"
 import { useChordExtensions } from "../hooks/useChordExtensions"
 import { useChordHover } from "../hooks/useChordHover"
 
-import Tag from "./ui/Tag"
-import Dropdown from "./ui/Dropdown"
+import ControlsBar from "./ControlsBar"
 import LineGroup from "./LineGroup"
 import HoverLines from "./HoverLines"
 import DiatonicScaleDegreesRow from "./DiatonicScaleDegreesRow"
@@ -28,7 +27,6 @@ import ModeScaleRow from "./ModeScaleRow"
 // ─── Constants ─────────────────────────────────────────────────────
 
 const DEFAULT_ROOT_NOTE = new Note("C", NATURAL, 3)
-export const notes: Note[] = generateOctaves(6)
 
 const EXTENSION_OPTIONS: ExtensionOption[] = [
   { value: "maj", label: "maj" },
@@ -49,18 +47,12 @@ const EXTENSION_OPTIONS: ExtensionOption[] = [
   { value: "13", label: "13" },
 ]
 
-const MODE_ITEMS = MODES.map((mode) => ({
-  key: mode.name,
-  label: mode.name,
-}))
-
 // ─── Component ─────────────────────────────────────────────────────
 
 export default function VisualizerPanel() {
   const [selectedMode, setSelectedMode] = useState<Mode>(MODES[0]!)
   const [rootNote, setRootNote] = useState<Note>(DEFAULT_ROOT_NOTE)
   const [arpeggiate, setArpeggiate] = useState(false)
-  const [showKeyHint, setShowKeyHint] = useState(false)
 
   const modeIntervals = useMemo((): Interval[] => selectedMode.intervals, [selectedMode])
 
@@ -131,50 +123,13 @@ export default function VisualizerPanel() {
         </p>
       </div>
 
-      {/* Controls */}
-      <div className="flex flex-wrap items-center gap-5">
-        <div className="flex items-center gap-2.5">
-          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Key</span>
-          <div
-            className="relative cursor-pointer"
-            onClick={() => {
-              setShowKeyHint(true)
-              setTimeout(() => setShowKeyHint(false), 2500)
-            }}
-          >
-            <Tag>{renderNote(rootNote)}</Tag>
-            {showKeyHint && (
-              <div className="absolute left-0 top-full z-30 mt-2 whitespace-nowrap rounded-md bg-[var(--d3-grayText)] px-2.5 py-1.5 text-xs font-medium text-white">
-                Drag the chromatic row to change key
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Mode</span>
-          <Dropdown
-            label={selectedMode.name}
-            items={MODE_ITEMS}
-            onSelect={(key) => {
-              const mode = MODES.find((m) => m.name === key)
-              if (mode) setSelectedMode(mode)
-            }}
-          />
-        </div>
-        <button
-          className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${
-            arpeggiate
-              ? "border-[var(--d3-primary)] bg-[var(--d3-primaryFill)] text-[var(--d3-primary)]"
-              : "border-[var(--d3-border)] bg-white text-gray-500 hover:text-gray-700"
-          }`}
-          onClick={() => setArpeggiate((v) => !v)}
-        >
-          Arpeggiate
-        </button>
-      </div>
-      {selectedMode.description && (
-        <p className="text-sm text-gray-500">{selectedMode.description}</p>
-      )}
+      <ControlsBar
+        rootNote={rootNote}
+        selectedMode={selectedMode}
+        arpeggiate={arpeggiate}
+        onModeChange={setSelectedMode}
+        onArpeggiateToggle={() => setArpeggiate((v) => !v)}
+      />
 
       {/* Visualization rows */}
       <div

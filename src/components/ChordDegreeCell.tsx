@@ -2,8 +2,8 @@ import type { Extension, ExtensionOption, NoteIndex } from "../types"
 import type { Note } from "../models/Note"
 import NoteCell from "./NoteCell"
 import Popover from "./ui/Popover"
-import Button from "./ui/Button"
 import ExtensionPanel from "./ExtensionPanel"
+import Pill from "./ui/Pill"
 import { buildSlashChordVoicing } from "../lib/music/chords"
 import { playChord, arpeggiateChord } from "../lib/audio"
 import { DEGREE_COLORS } from "../lib/colors"
@@ -107,21 +107,13 @@ export default function ChordDegreeCell({
           )}
         </span>
 
-        {/* Extension pills */}
         {(activeExtensions.length > 0 || slashBass !== null) && (
           <div className="absolute bottom-0.5 inset-x-0 flex flex-wrap justify-center gap-[2px] px-0.5">
             {activeExtensions.map((ext) => (
-              <span
-                key={ext}
-                className="rounded bg-[var(--d3-primaryFill)] px-1 text-[9px] font-medium text-[var(--d3-primary)] leading-[14px]"
-              >
-                {ext}
-              </span>
+              <Pill key={ext} label={ext} variant="accent" />
             ))}
             {slashBass !== null && (
-              <span className="rounded bg-gray-200 px-1 text-[9px] font-medium text-gray-600 leading-[14px]">
-                /{ROMAN_BASE[slashBass]}
-              </span>
+              <Pill label={`/${ROMAN_BASE[slashBass]}`} variant="muted" />
             )}
           </div>
         )}
@@ -145,20 +137,6 @@ export default function ChordDegreeCell({
             open={isPopoverOpen}
             onOpenChange={onPopoverOpenChange}
             position="top"
-            trigger={
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5 rounded-full border border-[var(--d3-border)] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
-                aria-label="Add extensions"
-              >
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
-                  <circle cx="3" cy="8" r="1.5" />
-                  <circle cx="8" cy="8" r="1.5" />
-                  <circle cx="13" cy="8" r="1.5" />
-                </svg>
-              </Button>
-            }
           >
             <ExtensionPanel
               chordNumeralIdx={chordNumeralIdx}

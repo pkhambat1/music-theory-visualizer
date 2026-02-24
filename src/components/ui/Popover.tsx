@@ -1,11 +1,27 @@
 import { useEffect, useRef } from "react"
+import Button from "./Button"
 
 export type PopoverPosition = "top" | "bottom"
+
+const DEFAULT_TRIGGER = (
+  <Button
+    variant="ghost"
+    size="icon"
+    className="h-5 w-5 rounded-full border border-[var(--d3-border)] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+    aria-label="Open menu"
+  >
+    <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+      <circle cx="3" cy="8" r="1.5" />
+      <circle cx="8" cy="8" r="1.5" />
+      <circle cx="13" cy="8" r="1.5" />
+    </svg>
+  </Button>
+)
 
 export type PopoverProps = {
   open: boolean,
   onOpenChange: (open: boolean) => void,
-  trigger: React.ReactNode,
+  trigger?: React.ReactNode,
   children: React.ReactNode,
   position?: PopoverPosition,
 }
@@ -18,7 +34,7 @@ const positionClasses: Record<PopoverPosition, string> = {
 export default function Popover({
   open,
   onOpenChange,
-  trigger,
+  trigger = DEFAULT_TRIGGER,
   children,
   position = "bottom",
 }: PopoverProps) {

@@ -31,6 +31,9 @@ export function generateOctaves(octaveCount: number): Note[] {
   )
 }
 
+/** Pre-built array of notes spanning 6 octaves (used throughout the app). */
+export const notes: Note[] = generateOctaves(6)
+
 /**
  * Render a Note. For "C" notes the octave is shown as a subscript;
  * other notes just show the label (no octave).
