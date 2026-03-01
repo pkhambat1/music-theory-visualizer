@@ -49,8 +49,6 @@ export function useChordHover(
     }
   }, [])
 
-  // ── Slash bass note for hover lines ──────────────────────────────
-
   const slashBassNoteIndex = useMemo<NoteIndex | null>(() => {
     if (hoveredTriadIndex === null) return null
     const slashBass = slashBasses[hoveredTriadIndex]
@@ -58,8 +56,6 @@ export function useChordHover(
     const modeNotes = leftTrimOverflowNotes(modeNotesWithOverflow, modeLeftOverflowSize)
     return getSlashBassNote(modeNotes, hoveredTriadIndex, slashBass)
   }, [hoveredTriadIndex, slashBasses, modeNotesWithOverflow, modeLeftOverflowSize])
-
-  // ── Voiced hover notes (slash chords rearrange octaves) ─────────
 
   const hoveredSlashBass = useMemo(() => {
     if (hoveredTriadIndex === null) return null

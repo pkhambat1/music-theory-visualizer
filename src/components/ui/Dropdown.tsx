@@ -9,13 +9,13 @@ export type DropdownItem = {
 
 export type DropdownProps = {
   label: string,
-  items?: DropdownItem[],
+  items: DropdownItem[],
   onSelect?: (key: string) => void,
 }
 
 export default function Dropdown({
   label,
-  items = [],
+  items,
   onSelect,
 }: DropdownProps) {
   const [open, setOpen] = useState(false)
@@ -33,7 +33,7 @@ export default function Dropdown({
 
   return (
     <div className="relative inline-block" ref={ref}>
-      <Button variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
+      <Button variant="outline" size="sm" asChild={false} onClick={() => setOpen((o) => !o)}>
         <span className="text-gray-700">{label}</span>
         <svg
           className={cn(

@@ -6,22 +6,22 @@ export type MultiSelectOption = {
 }
 
 export type MultiSelectProps = {
-  options?: MultiSelectOption[],
-  value?: string[],
+  options: MultiSelectOption[],
+  value: string[],
   onChange?: (value: string[]) => void,
-  placeholder?: string,
+  placeholder: string,
   header?: string,
   /** Values that should be greyed out and non-interactive (e.g. conflicting options). */
-  disabledValues?: Set<string>,
+  disabledValues: Set<string>,
 }
 
 export default function MultiSelect({
-  options = [],
-  value = [],
+  options,
+  value,
   onChange,
-  placeholder = "Select",
+  placeholder,
   header,
-  disabledValues = new Set(),
+  disabledValues,
 }: MultiSelectProps) {
   const [focusedIndex, setFocusedIndex] = useState(-1)
 

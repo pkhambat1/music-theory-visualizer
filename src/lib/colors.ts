@@ -17,13 +17,13 @@ export function shade(color: RGBColor, t: number): RGBColor {
 /**
  * Sample a narrow band of the rainbow around `center`, producing `count` colors
  * with subtle hue variation. `spread` controls how wide the band is (0.06 = ±3%).
- * Each color is tinted to pastel. Returns hex strings for direct DOM use.
+ * Each color is tinted to pastel. Returns `RGBColor[]` — call `.formatHex()` at DOM boundaries.
  */
-export function hueBand(center: number, count: number, spread: number, tintAmt: number): string[] {
-  if (count <= 1) return [tint(rgb(interpolateRainbow(center)), tintAmt).formatHex()]
+export function hueBand(center: number, count: number, spread: number, tintAmt: number): RGBColor[] {
+  if (count <= 1) return [tint(rgb(interpolateRainbow(center)), tintAmt)]
   const start = center - spread / 2
   return Array.from({ length: count }, (_, i) => {
     const t = start + (spread * i) / (count - 1)
-    return tint(rgb(interpolateRainbow(t)), tintAmt).formatHex()
+    return tint(rgb(interpolateRainbow(t)), tintAmt)
   })
 }

@@ -1,8 +1,6 @@
 import type { ChordQuality, Extension, NoteIndex } from "./types"
 import { IONIAN, OCTAVE } from "./modes"
 
-// ─── Interval helpers (relative to the Ionian/major scale) ────────
-
 export function getSecond(root: NoteIndex): NoteIndex {
   return IONIAN[1]! + root
 }
@@ -37,8 +35,6 @@ export function sharpen(note: NoteIndex): NoteIndex {
   return note + 1
 }
 
-// ─── Public API ────────────────────────────────────────────────────
-
 /**
  * Determine the chord quality from absolute note indices.
  * Compares the 3rd and 5th against the major-scale reference.
@@ -63,13 +59,11 @@ export function getChordDescriptor(chordNotes: NoteIndex[]): ChordQuality {
 export function getChordNotes(
   modeNotes: NoteIndex[],
   degreeIdx: number,
-  chordType: "triads" | "seventhChords" = "triads",
+  chordType: "triads" | "seventhChords",
 ): NoteIndex[] {
   const offsets = chordType === "seventhChords" ? [0, 2, 4, 6] : [0, 2, 4]
   return offsets.map((o) => modeNotes[degreeIdx + o]!)
 }
-
-// ─── Extension conflict rules ───────────────────────────────────────
 
 /**
  * Mutual exclusion groups: selecting any member disables the rest of its group.

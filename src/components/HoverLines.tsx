@@ -8,15 +8,13 @@ import { getIntervalLabel } from "../lib/music"
 import { useContainerMeasure } from "../hooks"
 import IntervalLabel from "./IntervalLabel"
 
-// ─── Component ──────────────────────────────────────────────────────
-
 export type HoverLinesProps = ModeDataProps & {
   containerRef: React.RefObject<HTMLDivElement | null>,
   hoveredIndex: number | null,
-  chordHighlightPairs?: ChordHighlightPair[],
-  originalChordNotes?: NoteIndex[],
-  modifiedChordNotes?: NoteIndex[],
-  slashBassNoteIndex?: NoteIndex | null,
+  chordHighlightPairs: ChordHighlightPair[],
+  originalChordNotes: NoteIndex[],
+  modifiedChordNotes: NoteIndex[],
+  slashBassNoteIndex: NoteIndex | null,
 }
 
 export default function HoverLines({
@@ -24,10 +22,10 @@ export default function HoverLines({
   hoveredIndex,
   modeNotesWithOverflow,
   modeLeftOverflowSize,
-  chordHighlightPairs = [],
-  originalChordNotes = [],
-  modifiedChordNotes = [],
-  slashBassNoteIndex = null,
+  chordHighlightPairs,
+  originalChordNotes,
+  modifiedChordNotes,
+  slashBassNoteIndex,
 }: HoverLinesProps) {
   const [lines, setLines] = useState<Connection[]>([])
 

@@ -2,10 +2,11 @@ import type { Extension, ExtensionOption, NoteIndex } from "../lib/music"
 import type { Note } from "../models"
 import { buildSlashChordVoicing, SQUARE_SIDE } from "../lib/music"
 import { playChord, arpeggiateChord } from "../lib/audio"
-import { DEGREE_COLORS } from "../lib/theme"
+import { degreeColor } from "../lib/theme"
 import NoteCell from "./NoteCell"
 import ExtensionPanel from "./ExtensionPanel"
 import { Popover, Pill } from "./ui"
+import { DEFAULT_TRIGGER } from "./ui/Popover"
 
 const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
 const DATA_ROW = "diatonic-row"
@@ -54,7 +55,7 @@ export default function ChordDegreeCell({
   onHover,
   onHoverClear,
 }: ChordDegreeCellProps) {
-  const degreeBg = DEGREE_COLORS[chordNumeralIdx % DEGREE_COLORS.length]!
+  const degreeBg = degreeColor(chordNumeralIdx)
 
   return (
     <div
@@ -134,6 +135,7 @@ export default function ChordDegreeCell({
           <Popover
             open={isPopoverOpen}
             onOpenChange={onPopoverOpenChange}
+            trigger={DEFAULT_TRIGGER}
             position="top"
           >
             <ExtensionPanel

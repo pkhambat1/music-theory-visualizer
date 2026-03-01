@@ -1,5 +1,3 @@
-// ─── Domain type aliases ──────────────────────────────────────────
-
 /** Pitch class 0–11 (C = 0, C# = 1, … B = 11). */
 export type PitchClass = number
 
@@ -11,8 +9,6 @@ export type Interval = number
 
 /** One of the 7 natural note letters. */
 export type Letter = "C" | "D" | "E" | "F" | "G" | "A" | "B"
-
-// ─── Unions / Enums ────────────────────────────────────────────────
 
 export type Extension =
   | "maj"
@@ -35,8 +31,6 @@ export type Extension =
 export type ChordQuality = "" | "m" | "°" | "+" | "sus2" | "sus4" | "?"
 
 export type ChordType = "triads" | "seventhChords"
-
-// ─── Data structures ───────────────────────────────────────────────
 
 export type ExtensionOption = {
   value: Extension,

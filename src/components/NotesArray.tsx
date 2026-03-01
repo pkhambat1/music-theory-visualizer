@@ -7,7 +7,7 @@ export type NotesArrayProps = {
   caption?: string,
   captionSubtitle?: string,
   captionRight?: React.ReactNode,
-  clipContent?: boolean,
+  clipContent: boolean,
   zIndex?: number,
   rowBackground?: string,
 }
@@ -18,7 +18,7 @@ export default function NotesArray({
   caption,
   captionSubtitle,
   captionRight,
-  clipContent = false,
+  clipContent,
   zIndex,
   rowBackground,
 }: NotesArrayProps) {

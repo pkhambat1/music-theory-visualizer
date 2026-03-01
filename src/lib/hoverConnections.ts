@@ -6,8 +6,6 @@ import {
 } from "../models"
 import { leftTrimOverflowNotes, getChordNotes } from "./music"
 
-// ─── Position resolution (DOM → coordinates) ────────────────────────
-
 export type ElementPosition = { cx: number, top: number, bottom: number }
 
 export function resolveElement(
@@ -25,8 +23,6 @@ export function resolveElement(
     bottom: rect.bottom - containerRect.top,
   }
 }
-
-// ─── Line builders (pure once positions are resolved) ────────────────
 
 export function buildModeTargetLine(
   source: Point,
@@ -67,8 +63,6 @@ export function buildBaseTargetLine(
   }
   return new StaticConnection(source, to)
 }
-
-// ─── Diatonic lines (kept / removed / added) ────────────────────────
 
 export function buildDiatonicLines(
   source: Point,
@@ -118,7 +112,7 @@ export function buildDiatonicLines(
 
   // No extensions — plain triad lines to mode row
   const modeNotes = leftTrimOverflowNotes(modeNotesWithOverflow, modeLeftOverflowSize)
-  const chordNotesArr = getChordNotes(modeNotes, hoveredIndex)
+  const chordNotesArr = getChordNotes(modeNotes, hoveredIndex, "triads")
   return chordNotesArr
     .map((note) => {
       const tIdx = modeNotesWithOverflow.indexOf(note)
@@ -130,8 +124,6 @@ export function buildDiatonicLines(
     })
     .filter((l): l is Connection => l !== null)
 }
-
-// ─── Chromatic ↔ mode highlight lines ────────────────────────────────
 
 export function buildHighlightLines(
   container: HTMLElement,
@@ -150,8 +142,6 @@ export function buildHighlightLines(
     })
     .filter((l): l is Connection => l !== null)
 }
-
-// ─── Bass line (slash chord) ─────────────────────────────────────────
 
 export function buildBassLine(
   source: Point,
@@ -172,8 +162,6 @@ export function buildBassLine(
   }
   return new StaticConnection(source, to)
 }
-
-// ─── Top-level entry point ───────────────────────────────────────────
 
 export type HoverConnectionsInput = {
   container: HTMLElement,

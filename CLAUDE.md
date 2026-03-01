@@ -91,13 +91,13 @@ The `Mode` class (`src/models/Mode.ts`) has a `description` field. All 10 modes 
 Highlighted cells always reserve border space with `2px solid transparent` in default state. On highlight, only the border color changes — no layout shift. All colored NoteCells use `2px` borders consistently. No `boxShadow` glow (removed to prevent clipping artifacts from `overflow: hidden` containers).
 
 ### Color System
-All colors are derived from d3's `interpolateRainbow` and `schemeSet3` in `src/lib/colors.ts`. Internally colors are `RGBColor` objects (from `d3-color`); `.formatHex()` is called at DOM boundaries (theme tokens, `hueBand` output). Colors are computed via `tint()` (toward white) and `shade()` (toward black) helpers at specific rainbow positions:
-- **Root:** `tint(rb(0.68), 0.45)` fill / `shade(rb(0.68), 0.25)` border (teal-green)
-- **Scale membership:** `tint(rb(0.40), 0.45)` fill / `shade(rb(0.40), 0.25)` border (yellow-ochre), via `hueBand(BASE_SCALE, count)` for subtle hue variation across cells
-- **UI accent (buttons, focus rings):** `shade(rb(0.85), 0.20)` / `shade(rb(0.85), 0.35)` hover (blue)
-- **Respelling text:** `shade(rb(0.70), 0.40)` (teal)
+All colors are derived from d3's `interpolateRainbow` and `schemeSet3`. Internally colors are `RGBColor` objects (from `d3-color`); `.formatHex()` is called at DOM boundaries (theme tokens, `hueBand` output). `tint()` mixes toward white, `shade()` mixes toward black — both in `src/lib/colors.ts`. Rainbow positions are named constants in `src/lib/theme.ts` (`RAINBOW_ROOT`, `RAINBOW_SCALE`, `RAINBOW_UI`, `RAINBOW_RESPELLING`):
+- **Root:** `tint(…RAINBOW_ROOT…, 0.45)` fill / `shade(…, 0.25)` border (teal-green, 0.68)
+- **Scale membership:** `tint(…RAINBOW_SCALE…, 0.45)` fill / `shade(…, 0.25)` border (yellow-ochre, 0.40), via `hueBand(RAINBOW_SCALE, count, 0.10, 0.45)` for subtle hue variation across cells
+- **UI accent (buttons, focus rings):** `shade(…RAINBOW_UI…, 0.20)` / `shade(…, 0.35)` hover (blue, 0.85)
+- **Respelling text:** `shade(…RAINBOW_RESPELLING…, 0.40)` (teal, 0.70)
 - **Degree cells:** `DEGREE_COLORS` — 8 rainbow-sampled pastels, one per scale degree
-- **ChordScaleContext chord tones:** `hueBand(BASE_SCALE, count)` (same ochre band as scale cells)
+- **ChordScaleContext chord tones:** `hueBand(RAINBOW_SCALE, count, 0.10, 0.45)` (same ochre band as scale cells)
 - **Hover/highlight borders:** `#000000` (black) — used on chord degree hover, mode cell highlights, chromatic highlights
 - **Hover lines (all types):** `#000000` stroke, strokeWidth 2.5 (removed: 1.5 dashed)
 - **Static connection lines:** `colors.border` (tinted Set3 gray), strokeWidth 1.5
@@ -116,6 +116,7 @@ All colors are derived from d3's `interpolateRainbow` and `schemeSet3` in `src/l
 - **Music logic:** Pure functions in `src/lib/music/`. No side effects except `audio.ts`.
 - **Types:** Colocated in `src/lib/music/types.ts`, barrel-exported via `src/lib/music/index.ts`.
 - **Animations:** NoteCell transitions are instant (`duration-0`). Keep all transitions snappy. No CSS keyframes currently defined.
+- **No default arguments:** Never use default values in function parameters or destructured props. All values must be passed explicitly by callers. No decorated section-divider comments (e.g. `// ── ... ──`).
 
 ## Commands
 

@@ -33,7 +33,7 @@ const buttonVariants = cva(
 )
 
 export type ButtonProps = {
-  asChild?: boolean,
+  asChild: boolean,
 } & React.ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants>
 
@@ -42,7 +42,7 @@ export default function Button({
   className,
   variant,
   size,
-  asChild = false,
+  asChild,
   ...props
 }: ButtonProps) {
   const Comp = asChild ? "span" : "button"

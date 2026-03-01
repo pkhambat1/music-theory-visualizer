@@ -34,6 +34,7 @@ export default function ExtensionPanel({
         options={extensionOptions}
         value={selectedExtensions}
         onChange={(value) => onExtensionChange?.(chordNumeralIdx, value)}
+        placeholder="Select"
         disabledValues={getDisabledExtensions(activeExtensions)}
       />
       <div className="flex flex-col gap-1.5">

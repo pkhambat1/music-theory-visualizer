@@ -3,10 +3,11 @@ import Button from "./Button"
 
 export type PopoverPosition = "top" | "bottom"
 
-const DEFAULT_TRIGGER = (
+export const DEFAULT_TRIGGER = (
   <Button
     variant="ghost"
     size="icon"
+    asChild={false}
     className="h-5 w-5 rounded-full border border-[var(--app-border)] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
     aria-label="Open menu"
   >
@@ -21,9 +22,9 @@ const DEFAULT_TRIGGER = (
 export type PopoverProps = {
   open: boolean,
   onOpenChange: (open: boolean) => void,
-  trigger?: React.ReactNode,
+  trigger: React.ReactNode,
   children: React.ReactNode,
-  position?: PopoverPosition,
+  position: PopoverPosition,
 }
 
 const positionClasses: Record<PopoverPosition, string> = {
@@ -34,9 +35,9 @@ const positionClasses: Record<PopoverPosition, string> = {
 export default function Popover({
   open,
   onOpenChange,
-  trigger = DEFAULT_TRIGGER,
+  trigger,
   children,
-  position = "bottom",
+  position,
 }: PopoverProps) {
   const ref = useRef<HTMLDivElement>(null)
 

@@ -2,12 +2,11 @@ import type { NoteIndex } from "../lib/music"
 import type { Note } from "../models"
 import { IONIAN } from "../lib/music"
 import { renderNote } from "./NoteLabel"
+import Strikethrough from "./Strikethrough"
 import { hueBand } from "../lib/colors"
-import { RAINBOW_SCALE } from "../lib/theme"
+import { RAINBOW_SCALE, MUTED_TEXT } from "../lib/theme"
 import NoteCell from "./NoteCell"
 import NotesArray from "./NotesArray"
-
-// ─── Helpers ────────────────────────────────────────────────────────
 
 /**
  * Maps a semitone interval (0-11) to its major-scale degree index (0-6).
@@ -96,8 +95,6 @@ function buildMajorScale(root: NoteIndex, maxDegreeIdx: number): NoteIndex[] {
   return Array.from({ length: maxDegreeIdx + 1 }, (_, i) => root + naturalInterval(i))
 }
 
-// ─── Component ──────────────────────────────────────────────────────
-
 export type ChordScaleContextProps = {
   chordNotes: NoteIndex[],
   notes: Note[],
@@ -133,7 +130,7 @@ export default function ChordScaleContext({ chordNotes, notes }: ChordScaleConte
   const chordToneStyle = (degreeIdx: number) => {
     const bandIdx = chordToneDegrees.indexOf(degreeIdx)
     const bg = bandIdx >= 0 ? chordToneBand[bandIdx]! : chordToneBand[0]!
-    return { background: bg }
+    return { background: bg.formatHex() }
   }
 
   return (
@@ -146,12 +143,12 @@ export default function ChordScaleContext({ chordNotes, notes }: ChordScaleConte
         size={majorScale.length}
         caption={caption}
         captionSubtitle={isEmpty ? "Hover a chord to see its scale context" : undefined}
+        clipContent={false}
       >
         {majorScale.map((scaleNoteIdx, idx) => {
           const scaleNote = notes[scaleNoteIdx]
           const info = degreeMap.get(idx)
 
-          // ── Empty state: ghost cells ──
           if (isEmpty) {
             return (
               <NoteCell
@@ -165,16 +162,14 @@ export default function ChordScaleContext({ chordNotes, notes }: ChordScaleConte
             )
           }
 
-          // ── Non-chord-tone scale degree ──
           if (!info) {
             return (
-              <NoteCell key={idx} idx={idx} className="text-gray-400 font-normal">
+              <NoteCell key={idx} idx={idx} className={`${MUTED_TEXT} font-normal`}>
                 {scaleNote && renderNote(scaleNote)}
               </NoteCell>
             )
           }
 
-          // ── Unaltered chord tone ──
           if (!info.isAltered) {
             return (
               <NoteCell
@@ -189,33 +184,20 @@ export default function ChordScaleContext({ chordNotes, notes }: ChordScaleConte
             )
           }
 
-          // ── Altered chord tone ──
           const alteredNote = notes[info.actualNote]
           const arrow = info.isFlat ? "←" : "→"
+          const actual = <span className="text-sm font-semibold text-gray-900">{alteredNote?.label()}</span>
+          const natural = (
+            <span className={`relative inline-block text-sm ${MUTED_TEXT} font-normal`}>
+              {scaleNote?.label()}
+              <Strikethrough />
+            </span>
+          )
+          const sep = <span className={`text-[9px] ${MUTED_TEXT}`}>{arrow}</span>
           return (
             <NoteCell key={idx} idx={idx} style={chordToneStyle(idx)} optCaption={info.degreeLabel}>
               <div className="flex items-center gap-[2px] leading-none">
-                {info.isFlat ? (
-                  <>
-                    <span className="text-[12px] font-semibold text-gray-900">
-                      {alteredNote?.label()}
-                    </span>
-                    <span className="text-[9px] text-gray-400">{arrow}</span>
-                    <span className="text-[10px] text-gray-400 line-through">
-                      {scaleNote?.label()}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-[10px] text-gray-400 line-through">
-                      {scaleNote?.label()}
-                    </span>
-                    <span className="text-[9px] text-gray-400">{arrow}</span>
-                    <span className="text-[12px] font-semibold text-gray-900">
-                      {alteredNote?.label()}
-                    </span>
-                  </>
-                )}
+                {info.isFlat ? <>{actual}{sep}{natural}</> : <>{natural}{sep}{actual}</>}
               </div>
             </NoteCell>
           )

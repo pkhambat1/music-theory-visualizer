@@ -27,9 +27,8 @@ src/
 │
 ├── lib/
 │   ├── cn.ts                         (fn cn)
-│   ├── colors.ts                     (fn tint, fn shade, fn hueBand,
-│   │                                  re-export fn rgb, re-export type RGBColor)
-│   ├── theme.ts                      (const BASE_SCALE, const colors, const DEGREE_COLORS,
+│   ├── colors.ts                     (fn tint, fn shade, fn hueBand)
+│   ├── theme.ts                      (const RAINBOW_SCALE, const colors, const DEGREE_COLORS,
 │   │                                  fn registerCssColors)
 │   ├── bezier.ts                     (fn bezierPath, fn bezierPointAt)
 │   ├── notes.ts                      (const CHROMATIC_SCALE, fn generateOctaves, const notes)

@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from "react"
 import type { Note } from "../models"
 import { renderNote } from "./NoteLabel"
+import Strikethrough from "./Strikethrough"
 import NoteCell from "./NoteCell"
-
-// ─── Component ─────────────────────────────────────────────────────
+import { MUTED_TEXT } from "../lib/theme"
 
 export type ModeNoteCellProps = {
   idx: number,
@@ -11,7 +11,7 @@ export type ModeNoteCellProps = {
   noteString: Note | null,
   newValue: Note | null,
   onPlay: (note: Note) => void,
-  isHighlighted?: boolean,
+  isHighlighted: boolean,
   optCaption?: string | number | null,
 }
 
@@ -23,7 +23,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
   noteString,
   newValue,
   onPlay,
-  isHighlighted = false,
+  isHighlighted,
   optCaption,
 }: ModeNoteCellProps) {
   const noteLabel = useMemo(
@@ -67,11 +67,9 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
         renderNote(noteString)
       ) : isDifferent && newValue ? (
         <div className="flex flex-col items-center gap-0 leading-none">
-          <span className="relative text-[9px] text-gray-400">
+          <span className={`relative text-sm font-normal ${MUTED_TEXT}`}>
             {noteLabel}
-            <span className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-              <span className="block h-px w-[140%] bg-gray-400 rotate-[-45deg]" />
-            </span>
+            <Strikethrough />
           </span>
           <span className="text-[13px] font-semibold text-black">
             {newLabel}

@@ -23,7 +23,7 @@ export function useModeTones(
     setModeNotesWithOverflow(
       modeIntervalsToMode(rootNote, modeWithOverflowIntervalsRef.current, notes),
     )
-  }, [rootNote, modeIntervals])
+  }, [rootNote, modeIntervals, notes])
 
   const [modeNotesWithOverflow, setModeNotesWithOverflow] = useState<NoteIndex[]>(() =>
     buildModeNotesWithOverflow(rootNote, modeIntervals, notes),
@@ -31,7 +31,7 @@ export function useModeTones(
 
   const spelledModeNotes = useMemo(
     () => spellModeNotes(modeNotesWithOverflow, modeLeftOverflowSize, notes),
-    [modeNotesWithOverflow, modeLeftOverflowSize],
+    [modeNotesWithOverflow, modeLeftOverflowSize, notes],
   )
 
   const modeConnections = useMemo<CellLink[]>(

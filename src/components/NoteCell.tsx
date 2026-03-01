@@ -19,8 +19,8 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
       optBackground,
       dataRow,
       dataIdx,
-      className = "",
-      style: customStyle = {},
+      className,
+      style: customStyle,
       ...props
     },
     ref,
@@ -33,7 +33,7 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
         data-idx={dataIdx}
         className={cn(
           "flex items-center justify-center text-sm font-semibold box-border relative select-none transition-colors duration-0 text-gray-800 hover:bg-black/[0.08]",
-          className,
+          className ?? "",
         )}
         style={{
           width: `${SQUARE_SIDE}px`,
@@ -41,7 +41,7 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
           background: optBackground || undefined,
           borderRadius: "6px",
           fontFamily: "'JetBrains Mono', monospace",
-          ...customStyle,
+          ...(customStyle ?? {}),
         }}
         {...props}
       >

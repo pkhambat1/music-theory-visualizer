@@ -3,15 +3,11 @@ import { Note } from "../../models"
 import { CHROMATIC_SCALE } from "../notes"
 import { OCTAVE } from "./modes"
 
-// ─── Layout constants ──────────────────────────────────────────────
-
 export const BASE_SCALE_LEFT_OVERFLOW = 5
 export const BASE_SCALE_WITH_OVERFLOW_SIZE =
   CHROMATIC_SCALE.length + 2 * BASE_SCALE_LEFT_OVERFLOW
 
 export const SQUARE_SIDE = 60
-
-// ─── Overflow helpers ──────────────────────────────────────────────
 
 /** Extend mode intervals with overflow on both sides for line-drawing. */
 export function addOverflowToModeIntervals(
@@ -36,8 +32,6 @@ export function getModeLeftOverflowSize(modeIntervals: Interval[]): number {
     2
   )
 }
-
-// ─── Mode building ─────────────────────────────────────────────────
 
 /** Convert root + intervals into absolute NoteIndex values. */
 export function modeIntervalsToMode(

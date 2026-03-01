@@ -14,40 +14,36 @@ export type DiatonicScaleDegreesRowProps = ModeDataProps & {
   setHoveredChordIndex: (idx: number | null) => void,
   notes: Note[],
   selectedExtensions: Extension[][],
-  extensionOptions?: ExtensionOption[],
+  extensionOptions: ExtensionOption[],
   onExtensionChange?: (degreeIdx: number, value: string[]) => void,
-  slashBasses?: (number | null)[],
+  slashBasses: (number | null)[],
   onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
-  modeLength?: number,
+  modeLength: number,
   onChordHoverChange?: (data: ChordHoverData) => void,
   captionRight?: React.ReactNode,
-  arpeggiate?: boolean,
-  hoveredIndex?: number | null,
+  arpeggiate: boolean,
+  hoveredIndex: number | null,
 }
-
-// ─── Constants ──────────────────────────────────────────────────────
 
 const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
 const CAPTION = "Diatonic Chords"
 const CAPTION_SUBTITLE = "Chords built from the mode"
-
-// ─── Component ──────────────────────────────────────────────────────
 
 export default function DiatonicScaleDegreesRow({
   modeNotesWithOverflow,
   setHoveredChordIndex,
   notes,
   selectedExtensions,
-  extensionOptions = [],
+  extensionOptions,
   onExtensionChange,
-  slashBasses = [],
+  slashBasses,
   onSlashBassChange,
   modeLeftOverflowSize,
-  modeLength = 0,
+  modeLength,
   onChordHoverChange,
   captionRight,
-  arpeggiate = false,
-  hoveredIndex = null,
+  arpeggiate,
+  hoveredIndex,
 }: DiatonicScaleDegreesRowProps) {
   const degreeCount = modeLength > 0 ? modeLength : ROMAN_BASE.length + 1
   const chordNumerals = Array.from({ length: degreeCount }, (_, idx) =>
@@ -63,7 +59,7 @@ export default function DiatonicScaleDegreesRow({
   const chordData = useMemo(
     () =>
       chordNumerals.map((_, chordNumeralIdx) => {
-        const originalNotes = getChordNotes(modeNotes, chordNumeralIdx)
+        const originalNotes = getChordNotes(modeNotes, chordNumeralIdx, "triads")
         const activeExtensions = selectedExtensions[chordNumeralIdx] ?? []
         const chordNotesArr = applyExtensions(originalNotes, activeExtensions)
         const chordDescriptor = getChordDescriptor(chordNotesArr)
@@ -93,6 +89,7 @@ export default function DiatonicScaleDegreesRow({
       caption={CAPTION}
       captionSubtitle={CAPTION_SUBTITLE}
       captionRight={captionRight}
+      clipContent={false}
       zIndex={openIdx !== null ? 4 : undefined}
     >
       {chordNumerals.map((chordNumeral, chordNumeralIdx) => {

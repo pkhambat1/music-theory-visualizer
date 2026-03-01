@@ -19,8 +19,6 @@ import ChordScaleContext from "./ChordScaleContext"
 import ChromaticScaleRow from "./ChromaticScaleRow"
 import ModeScaleRow from "./ModeScaleRow"
 
-// ─── Constants ─────────────────────────────────────────────────────
-
 const DEFAULT_ROOT_NOTE = new Note("C", NATURAL, 3)
 
 const EXTENSION_OPTIONS: ExtensionOption[] = [
@@ -42,16 +40,12 @@ const EXTENSION_OPTIONS: ExtensionOption[] = [
   { value: "13", label: "13" },
 ]
 
-// ─── Component ─────────────────────────────────────────────────────
-
 export default function VisualizerPanel() {
   const [selectedMode, setSelectedMode] = useState<Mode>(MODES[0]!)
   const [rootNote, setRootNote] = useState<Note>(DEFAULT_ROOT_NOTE)
   const [arpeggiate, setArpeggiate] = useState(false)
 
   const modeIntervals = useMemo((): Interval[] => selectedMode.intervals, [selectedMode])
-
-  // ── Custom hooks ────────────────────────────────────────────────
 
   const { modeNotesWithOverflow, modeLeftOverflowSize, spelledModeNotes, modeConnections } =
     useModeTones(modeIntervals, rootNote, notes)
@@ -78,11 +72,7 @@ export default function VisualizerPanel() {
     handleChordHoverChange,
   } = useChordHover(modeNotesWithOverflow, modeLeftOverflowSize, slashBasses, notes.length)
 
-  // ── Callbacks ───────────────────────────────────────────────────
-
   const handlePlayNote = useCallback((note: Note) => playNote(note), [])
-
-  // ── Keen Slider ─────────────────────────────────────────────────
 
   const [sliderRef, sliderInstanceRef] = useKeenSlider({
     slides: {
@@ -99,11 +89,7 @@ export default function VisualizerPanel() {
   const handlePrev = useCallback(() => sliderInstanceRef.current?.prev(), [sliderInstanceRef])
   const handleNext = useCallback(() => sliderInstanceRef.current?.next(), [sliderInstanceRef])
 
-  // ── Diagram ref ─────────────────────────────────────────────────
-
   const diagramRef = useRef<HTMLDivElement>(null)
-
-  // ── Render ──────────────────────────────────────────────────────
 
   return (
     <div className="max-w-[1600px] w-full mx-auto flex flex-col gap-4">
@@ -134,7 +120,6 @@ export default function VisualizerPanel() {
         <FixedLines
           containerRef={diagramRef}
           connections={modeConnections}
-          depKey={`${rootNote.toDisplay()}-${selectedMode.name}`}
         />
 
         <HoverLines

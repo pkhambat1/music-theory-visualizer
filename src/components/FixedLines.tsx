@@ -7,11 +7,10 @@ import { useContainerMeasure } from "../hooks"
 
 export type FixedLinesProps = {
   containerRef: React.RefObject<HTMLDivElement | null>,
-  connections?: CellLink[],
-  depKey?: string,
+  connections: CellLink[],
 }
 
-export default function FixedLines({ containerRef, connections = [], depKey = "" }: FixedLinesProps) {
+export default function FixedLines({ containerRef, connections }: FixedLinesProps) {
   const [lines, setLines] = useState<StaticConnection[]>([])
 
   const measure = useCallback(() => {
@@ -47,7 +46,7 @@ export default function FixedLines({ containerRef, connections = [], depKey = ""
       .filter((c): c is StaticConnection => c !== null)
 
     setLines(nextLines)
-  }, [containerRef, connections, depKey])
+  }, [containerRef, connections])
 
   useContainerMeasure(containerRef, measure)
 

@@ -50,7 +50,7 @@ export default function ChromaticScaleRow({
             (i) => i > 0 && modeIntervals.includes(i),
           )
           const scaleBand = hueBand(RAINBOW_SCALE, scaleIdxs.length, 0.10, 0.45)
-          const scaleBandMap = new Map(scaleIdxs.map((si, bi) => [si, scaleBand[bi]!]))
+          const scaleBandMap = new Map(scaleIdxs.map((si, bi) => [si, scaleBand[bi]!.formatHex()]))
 
           return CHROMATIC_SCALE.map((_, idx) => {
             let background: string | null = null
