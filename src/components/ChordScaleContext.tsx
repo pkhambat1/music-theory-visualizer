@@ -1,6 +1,6 @@
 import type { NoteIndex } from "../lib/music"
 import type { Note } from "../models"
-import { IONIAN } from "../lib/music"
+import { IONIAN, SQUARE_SIDE } from "../lib/music"
 import { renderNote } from "./NoteLabel"
 import Strikethrough from "./Strikethrough"
 import { hueBand } from "../lib/colors"
@@ -141,6 +141,7 @@ export default function ChordScaleContext({ chordNotes, notes }: ChordScaleConte
     >
       <NotesArray
         size={majorScale.length}
+        cellWidth={SQUARE_SIDE}
         caption={caption}
         captionSubtitle={isEmpty ? "Hover a chord to see its scale context" : undefined}
         clipContent={false}

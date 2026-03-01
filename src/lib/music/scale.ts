@@ -8,6 +8,7 @@ export const BASE_SCALE_WITH_OVERFLOW_SIZE =
   CHROMATIC_SCALE.length + 2 * BASE_SCALE_LEFT_OVERFLOW
 
 export const SQUARE_SIDE = 60
+export const CHORD_CELL_WIDTH = Math.round(SQUARE_SIDE * 1.5)
 
 /** Extend mode intervals with overflow on both sides for line-drawing. */
 export function addOverflowToModeIntervals(

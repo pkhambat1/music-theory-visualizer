@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import type { Extension, ExtensionOption, ModeDataProps, NoteIndex } from "../lib/music"
 import type { Note } from "../models"
-import { getChordDescriptor, getChordNotes, applyExtensions, leftTrimOverflowNotes } from "../lib/music"
+import { getChordDescriptor, getChordNotes, applyExtensions, leftTrimOverflowNotes, CHORD_CELL_WIDTH } from "../lib/music"
 import NotesArray from "./NotesArray"
 import ChordDegreeCell from "./ChordDegreeCell"
 
@@ -86,6 +86,7 @@ export default function DiatonicScaleDegreesRow({
   return (
     <NotesArray
       size={chordNumerals.length}
+      cellWidth={CHORD_CELL_WIDTH}
       caption={CAPTION}
       captionSubtitle={CAPTION_SUBTITLE}
       captionRight={captionRight}

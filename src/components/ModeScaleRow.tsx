@@ -1,4 +1,5 @@
 import type { Interval, NoteIndex } from "../lib/music"
+import { SQUARE_SIDE } from "../lib/music"
 import type { Note } from "../models"
 import { colors } from "../lib/theme"
 import NotesArray from "./NotesArray"
@@ -29,6 +30,7 @@ export default function ModeScaleRow({
   return (
     <NotesArray
       size={modeNotesWithOverflow.length}
+      cellWidth={SQUARE_SIDE}
       clipContent
       zIndex={2}
       rowBackground={colors.rowBg}

@@ -1,6 +1,6 @@
 import type { Extension, ExtensionOption, NoteIndex } from "../lib/music"
 import type { Note } from "../models"
-import { buildSlashChordVoicing, SQUARE_SIDE } from "../lib/music"
+import { buildSlashChordVoicing, SQUARE_SIDE, CHORD_CELL_WIDTH } from "../lib/music"
 import { playChord, arpeggiateChord } from "../lib/audio"
 import { degreeColor } from "../lib/theme"
 import NoteCell from "./NoteCell"
@@ -61,7 +61,7 @@ export default function ChordDegreeCell({
     <div
       className="relative"
       style={{
-        width: `${SQUARE_SIDE}px`,
+        width: `${CHORD_CELL_WIDTH}px`,
         height: `${SQUARE_SIDE}px`,
         overflow: "visible",
         display: "flex",
@@ -75,11 +75,12 @@ export default function ChordDegreeCell({
         dataIdx={chordNumeralIdx}
         optBackground={degreeBg}
         className="group cursor-pointer hover:bg-black/[0.08] transition-colors"
-        style={
-          hoveredIndex === chordNumeralIdx
+        style={{
+          width: `${CHORD_CELL_WIDTH}px`,
+          ...(hoveredIndex === chordNumeralIdx
             ? { border: `2px solid ${HOVER_COLOR}` }
-            : { border: "2px solid transparent" }
-        }
+            : { border: "2px solid transparent" }),
+        }}
         onMouseEnter={() => onHover(chordNumeralIdx, originalNotes, chordNotesArr)}
         onMouseLeave={() => onHoverClear()}
         onClick={() => {
@@ -109,10 +110,10 @@ export default function ChordDegreeCell({
         {(activeExtensions.length > 0 || slashBass !== null) && (
           <div className="absolute bottom-0.5 inset-x-0 flex flex-wrap justify-center gap-[2px] px-0.5">
             {activeExtensions.map((ext) => (
-              <Pill key={ext} label={ext} variant="accent" />
+              <Pill key={ext} label={ext} />
             ))}
             {slashBass !== null && (
-              <Pill label={`/${ROMAN_BASE[slashBass]}`} variant="muted" />
+              <Pill label={`/${ROMAN_BASE[slashBass]}`} />
             )}
           </div>
         )}

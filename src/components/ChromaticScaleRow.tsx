@@ -2,7 +2,7 @@ import type { Interval } from "../lib/music"
 import type { Note } from "../models"
 import { CHROMATIC_SCALE } from "../lib/notes"
 import { renderNote } from "./NoteLabel"
-import { BASE_SCALE_LEFT_OVERFLOW, BASE_SCALE_WITH_OVERFLOW_SIZE } from "../lib/music"
+import { BASE_SCALE_LEFT_OVERFLOW, BASE_SCALE_WITH_OVERFLOW_SIZE, SQUARE_SIDE } from "../lib/music"
 import { hueBand } from "../lib/colors"
 import { colors, RAINBOW_SCALE } from "../lib/theme"
 import NotesArray from "./NotesArray"
@@ -34,6 +34,7 @@ export default function ChromaticScaleRow({
   return (
     <NotesArray
       size={BASE_SCALE_WITH_OVERFLOW_SIZE}
+      cellWidth={SQUARE_SIDE}
       clipContent
       zIndex={1}
       caption="Chromatic Scale"

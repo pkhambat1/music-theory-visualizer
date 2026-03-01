@@ -1,8 +1,8 @@
-import { SQUARE_SIDE } from "../lib/music"
 import { colors } from "../lib/theme"
 
 export type NotesArrayProps = {
   size: number,
+  cellWidth: number,
   children: React.ReactNode,
   caption?: string,
   captionSubtitle?: string,
@@ -14,6 +14,7 @@ export type NotesArrayProps = {
 
 export default function NotesArray({
   size,
+  cellWidth,
   children,
   caption,
   captionSubtitle,
@@ -37,7 +38,7 @@ export default function NotesArray({
     >
       {(caption || captionRight) && (
         <div
-          style={{ width: `${SQUARE_SIDE * size}px` }}
+          style={{ width: `${cellWidth * size}px` }}
           className="mb-2 flex items-center justify-between"
         >
           <div>
@@ -57,8 +58,8 @@ export default function NotesArray({
       )}
       <div
         style={{
-          width: `${SQUARE_SIDE * size}px`,
-          height: `${SQUARE_SIDE}px`,
+          width: `${cellWidth * size}px`,
+          height: `${cellWidth}px`,
           position: "relative",
           boxSizing: "content-box",
           background: rowBackground ?? colors.rowBg,
