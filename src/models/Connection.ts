@@ -1,4 +1,4 @@
-import type { Point } from "../types"
+import type { Point } from "./Point"
 
 /**
  * A directed line between two screen-space points.

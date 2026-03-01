@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react"
-import type { ChordHighlightPair, NoteIndex } from "../types"
+import type { NoteIndex } from "../lib/music"
+import type { ChordHighlightPair } from "../lib/geometry"
 import type { ChordHoverData } from "../components/DiatonicScaleDegreesRow"
-import { getSlashBassNote, buildSlashChordVoicing } from "../lib/music/chords"
-import { leftTrimOverflowNotes } from "../lib/music/scale"
+import { getSlashBassNote, buildSlashChordVoicing, leftTrimOverflowNotes } from "../lib/music"
 
 type HoverState = {
   index: number | null,

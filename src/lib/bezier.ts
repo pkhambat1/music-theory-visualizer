@@ -1,4 +1,4 @@
-import type { Point } from "../types"
+import type { Point } from "../models"
 
 const TENSION = 0.45
 

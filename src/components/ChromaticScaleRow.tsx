@@ -1,11 +1,10 @@
-import type { Interval } from "../types"
-import type { Note } from "../models/Note"
-import { CHROMATIC_SCALE, renderNote } from "../lib/notes"
-import {
-  BASE_SCALE_LEFT_OVERFLOW,
-  BASE_SCALE_WITH_OVERFLOW_SIZE,
-} from "../lib/music/scale"
-import { colors, rainbowBand, BAND_SCALE } from "../lib/colors"
+import type { Interval } from "../lib/music"
+import type { Note } from "../models"
+import { CHROMATIC_SCALE } from "../lib/notes"
+import { renderNote } from "./NoteLabel"
+import { BASE_SCALE_LEFT_OVERFLOW, BASE_SCALE_WITH_OVERFLOW_SIZE } from "../lib/music"
+import { hueBand } from "../lib/colors"
+import { colors, RAINBOW_SCALE } from "../lib/theme"
 import NotesArray from "./NotesArray"
 import NoteCell from "./NoteCell"
 
@@ -50,7 +49,7 @@ export default function ChromaticScaleRow({
           const scaleIdxs = CHROMATIC_SCALE.map((_, i) => i).filter(
             (i) => i > 0 && modeIntervals.includes(i),
           )
-          const scaleBand = rainbowBand(BAND_SCALE, scaleIdxs.length)
+          const scaleBand = hueBand(RAINBOW_SCALE, scaleIdxs.length, 0.10, 0.45)
           const scaleBandMap = new Map(scaleIdxs.map((si, bi) => [si, scaleBand[bi]!]))
 
           return CHROMATIC_SCALE.map((_, idx) => {
@@ -98,7 +97,7 @@ export default function ChromaticScaleRow({
       {/* Arrow buttons */}
       <button
         onClick={onPrev}
-        className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--d3-border)]"
+        className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--app-border)]"
         aria-label="Scroll left"
       >
         <svg
@@ -116,7 +115,7 @@ export default function ChromaticScaleRow({
       </button>
       <button
         onClick={onNext}
-        className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--d3-border)]"
+        className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--app-border)]"
         aria-label="Scroll right"
       >
         <svg

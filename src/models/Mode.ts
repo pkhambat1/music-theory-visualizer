@@ -1,4 +1,4 @@
-import type { Interval } from "../types"
+import type { Interval } from "../lib/music/types"
 
 export class Mode {
   constructor(

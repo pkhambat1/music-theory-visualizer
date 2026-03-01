@@ -1,23 +1,18 @@
 import { useCallback, useMemo, useRef, useState } from "react"
 import { useKeenSlider } from "keen-slider/react"
 import "keen-slider/keen-slider.min.css"
-import type { ExtensionOption, Interval } from "../types"
-import { Note } from "../models/Note"
-import { NATURAL } from "../lib/music/accidentals"
+import type { ExtensionOption, Interval } from "../lib/music"
+import { Note } from "../models"
+import {
+  NATURAL, MODES, Mode,
+  BASE_SCALE_LEFT_OVERFLOW, BASE_SCALE_WITH_OVERFLOW_SIZE,
+} from "../lib/music"
 import { notes } from "../lib/notes"
 import { playNote } from "../lib/audio"
-import { MODES, Mode } from "../lib/music/modes"
-import {
-  BASE_SCALE_LEFT_OVERFLOW,
-  BASE_SCALE_WITH_OVERFLOW_SIZE,
-} from "../lib/music/scale"
-
-import { useModeTones } from "../hooks/useModeTones"
-import { useChordExtensions } from "../hooks/useChordExtensions"
-import { useChordHover } from "../hooks/useChordHover"
+import { useModeTones, useChordExtensions, useChordHover } from "../hooks"
 
 import ControlsBar from "./ControlsBar"
-import LineGroup from "./LineGroup"
+import FixedLines from "./FixedLines"
 import HoverLines from "./HoverLines"
 import DiatonicScaleDegreesRow from "./DiatonicScaleDegreesRow"
 import ChordScaleContext from "./ChordScaleContext"
@@ -136,7 +131,7 @@ export default function VisualizerPanel() {
         ref={diagramRef}
         className="relative w-full flex flex-col items-center gap-8 overflow-x-auto pb-2 mt-4"
       >
-        <LineGroup
+        <FixedLines
           containerRef={diagramRef}
           connections={modeConnections}
           depKey={`${rootNote.toDisplay()}-${selectedMode.name}`}

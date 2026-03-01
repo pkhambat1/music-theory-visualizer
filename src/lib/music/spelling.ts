@@ -1,6 +1,6 @@
-import type { Letter, NoteIndex, PitchClass } from "../../types"
+import type { Letter, NoteIndex, PitchClass } from "./types"
 import { SHARP, FLAT, NATURAL } from "./accidentals"
-import { Note } from "../../models/Note"
+import { Note } from "../../models"
 
 const LETTER_ORDER: Letter[] = ["C", "D", "E", "F", "G", "A", "B"]
 const LETTER_TO_PC: Record<Letter, number> = {
@@ -9,7 +9,7 @@ const LETTER_TO_PC: Record<Letter, number> = {
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
-function noteNameToPitchClass(
+export function noteNameToPitchClass(
   note: Note | null | undefined,
 ): PitchClass | null {
   if (!note) return null
@@ -19,7 +19,7 @@ function noteNameToPitchClass(
 
 // ─── Public API ────────────────────────────────────────────────────
 
-type SpellingCandidate = {
+export type SpellingCandidate = {
   spelled: (Note | null)[],
   maxAbs: number,
   totalAbs: number,

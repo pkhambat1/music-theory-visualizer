@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import type { Interval, NoteIndex } from "../types"
-import type { Note } from "../models/Note"
-import type { CellLink } from "../types/geometry"
+import type { Interval, NoteIndex } from "../lib/music"
+import type { CellLink } from "../lib/geometry"
+import type { Note } from "../models"
 import {
   addOverflowToModeIntervals,
   buildModeNotesWithOverflow,
   getModeLeftOverflowSize,
   modeIntervalsToMode,
-} from "../lib/music/scale"
-import { spellModeNotes } from "../lib/music/spelling"
+  spellModeNotes,
+} from "../lib/music"
 
 export function useModeTones(
   modeIntervals: Interval[],

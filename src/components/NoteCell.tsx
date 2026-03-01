@@ -1,6 +1,6 @@
 import React from "react"
 import { cn } from "../lib/cn"
-import { SQUARE_SIDE } from "../lib/music/scale"
+import { SQUARE_SIDE } from "../lib/music"
 
 export type NoteCellProps = {
   idx?: number,

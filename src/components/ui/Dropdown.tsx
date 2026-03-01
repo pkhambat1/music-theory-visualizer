@@ -53,7 +53,7 @@ export default function Dropdown({
         </svg>
       </Button>
       {open && (
-        <div className="absolute left-0 z-30 mt-2 max-h-64 min-w-[180px] overflow-y-auto rounded-lg border border-[var(--d3-border)] bg-white p-1 shadow-sm">
+        <div className="absolute left-0 z-30 mt-2 max-h-64 min-w-[180px] overflow-y-auto rounded-lg border border-[var(--app-border)] bg-white p-1 shadow-sm">
           {items.map((item) => (
             <button
               key={item.key}

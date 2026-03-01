@@ -1,6 +1,6 @@
-import { Accidental } from "../../models/Accidental"
+import { Accidental } from "../../models"
 
-export { Accidental } from "../../models/Accidental"
+export { Accidental } from "../../models"
 
 export const SHARP = new Accidental("sharp", "#", "#", 1)
 export const FLAT = new Accidental("flat", "♭", "b", -1)

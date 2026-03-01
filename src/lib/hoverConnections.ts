@@ -1,19 +1,16 @@
-import type { ChordHighlightPair, NoteIndex, Point } from "../types"
-import { Connection } from "../models/Connection"
-import { StaticConnection } from "../models/StaticConnection"
-import { IntervalConnection } from "../models/IntervalConnection"
-import { DiatonicConnection } from "../models/DiatonicConnection"
-import { RemovedConnection } from "../models/RemovedConnection"
-import { AddedConnection } from "../models/AddedConnection"
-import { BassConnection } from "../models/BassConnection"
-import { leftTrimOverflowNotes } from "./music/scale"
-import { getChordNotes } from "./music/chords"
+import type { NoteIndex } from "./music"
+import type { ChordHighlightPair } from "./geometry"
+import {
+  type Point, Connection, StaticConnection, IntervalConnection,
+  DiatonicConnection, RemovedConnection, AddedConnection, BassConnection,
+} from "../models"
+import { leftTrimOverflowNotes, getChordNotes } from "./music"
 
 // ─── Position resolution (DOM → coordinates) ────────────────────────
 
-type ElementPosition = { cx: number, top: number, bottom: number }
+export type ElementPosition = { cx: number, top: number, bottom: number }
 
-function resolveElement(
+export function resolveElement(
   container: HTMLElement,
   containerRect: DOMRect,
   row: string,
@@ -31,7 +28,7 @@ function resolveElement(
 
 // ─── Line builders (pure once positions are resolved) ────────────────
 
-function buildModeTargetLine(
+export function buildModeTargetLine(
   source: Point,
   container: HTMLElement,
   containerRect: DOMRect,
@@ -53,7 +50,7 @@ function buildModeTargetLine(
   return new StaticConnection(source, to)
 }
 
-function buildBaseTargetLine(
+export function buildBaseTargetLine(
   source: Point,
   container: HTMLElement,
   containerRect: DOMRect,
@@ -73,7 +70,7 @@ function buildBaseTargetLine(
 
 // ─── Diatonic lines (kept / removed / added) ────────────────────────
 
-function buildDiatonicLines(
+export function buildDiatonicLines(
   source: Point,
   container: HTMLElement,
   containerRect: DOMRect,
@@ -136,7 +133,7 @@ function buildDiatonicLines(
 
 // ─── Chromatic ↔ mode highlight lines ────────────────────────────────
 
-function buildHighlightLines(
+export function buildHighlightLines(
   container: HTMLElement,
   containerRect: DOMRect,
   chordHighlightPairs: ChordHighlightPair[],
@@ -156,7 +153,7 @@ function buildHighlightLines(
 
 // ─── Bass line (slash chord) ─────────────────────────────────────────
 
-function buildBassLine(
+export function buildBassLine(
   source: Point,
   container: HTMLElement,
   containerRect: DOMRect,

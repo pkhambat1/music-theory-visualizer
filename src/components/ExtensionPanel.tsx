@@ -1,6 +1,6 @@
-import type { Extension, ExtensionOption } from "../types"
-import { getDisabledExtensions } from "../lib/music/chords"
-import MultiSelect from "./ui/MultiSelect"
+import type { Extension, ExtensionOption } from "../lib/music"
+import { getDisabledExtensions } from "../lib/music"
+import { MultiSelect } from "./ui"
 
 const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
 
@@ -62,7 +62,7 @@ export default function ExtensionPanel({
                   isOwn
                     ? "text-gray-300 cursor-not-allowed"
                     : isSelected
-                    ? "bg-[var(--d3-primaryFill)] text-[var(--d3-primary)]"
+                    ? "bg-[var(--app-primaryFill)] text-[var(--app-primary)]"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
                 onClick={() =>

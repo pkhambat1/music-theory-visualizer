@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import type { ChordDegreeState, Extension } from "../types"
+import type { ChordDegreeState, Extension } from "../lib/music"
 
 const EMPTY_DEGREE_STATE: ChordDegreeState = { extensions: [], slashBass: null }
 

@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react"
-import type { Extension, ExtensionOption, ModeDataProps, NoteIndex } from "../types"
-import type { Note } from "../models/Note"
+import type { Extension, ExtensionOption, ModeDataProps, NoteIndex } from "../lib/music"
+import type { Note } from "../models"
+import { getChordDescriptor, getChordNotes, applyExtensions, leftTrimOverflowNotes } from "../lib/music"
 import NotesArray from "./NotesArray"
-import { getChordDescriptor, getChordNotes, applyExtensions } from "../lib/music/chords"
-import { leftTrimOverflowNotes } from "../lib/music/scale"
 import ChordDegreeCell from "./ChordDegreeCell"
 
 export type ChordHoverData = {

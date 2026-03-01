@@ -1,5 +1,5 @@
-import { SQUARE_SIDE } from "../lib/music/scale"
-import { colors } from "../lib/colors"
+import { SQUARE_SIDE } from "../lib/music"
+import { colors } from "../lib/theme"
 
 export type NotesArrayProps = {
   size: number,

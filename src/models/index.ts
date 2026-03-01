@@ -1,3 +1,4 @@
+export { Point } from "./Point"
 export { Accidental } from "./Accidental"
 export { Note } from "./Note"
 export { Connection } from "./Connection"

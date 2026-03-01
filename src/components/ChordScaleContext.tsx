@@ -1,10 +1,11 @@
-import type { NoteIndex } from "../types"
-import type { Note } from "../models/Note"
-import { IONIAN } from "../lib/music/modes"
-import { renderNote } from "../lib/notes"
+import type { NoteIndex } from "../lib/music"
+import type { Note } from "../models"
+import { IONIAN } from "../lib/music"
+import { renderNote } from "./NoteLabel"
+import { hueBand } from "../lib/colors"
+import { RAINBOW_SCALE } from "../lib/theme"
 import NoteCell from "./NoteCell"
 import NotesArray from "./NotesArray"
-import { rainbowBand, BAND_SCALE } from "../lib/colors"
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -126,7 +127,7 @@ export default function ChordScaleContext({ chordNotes, notes }: ChordScaleConte
 
   // Generate a subtle gradient band for chord tone cells
   const chordToneCount = degreeMap.size
-  const chordToneBand = rainbowBand(BAND_SCALE, chordToneCount)
+  const chordToneBand = hueBand(RAINBOW_SCALE, chordToneCount, 0.10, 0.45)
   // Map each degree index that is a chord tone to its band color (in insertion order)
   const chordToneDegrees = [...degreeMap.keys()]
   const chordToneStyle = (degreeIdx: number) => {

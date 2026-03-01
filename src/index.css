@@ -18,11 +18,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--d3-border);
+    background: var(--app-border);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--d3-muted);
+    background: var(--app-muted);
   }
 }
 

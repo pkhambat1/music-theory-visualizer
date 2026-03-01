@@ -1,39 +1,39 @@
-import type { ChordQuality, Extension, NoteIndex } from "../../types"
+import type { ChordQuality, Extension, NoteIndex } from "./types"
 import { IONIAN, OCTAVE } from "./modes"
 
 // ─── Interval helpers (relative to the Ionian/major scale) ────────
 
-function getSecond(root: NoteIndex): NoteIndex {
+export function getSecond(root: NoteIndex): NoteIndex {
   return IONIAN[1]! + root
 }
-function getThird(root: NoteIndex): NoteIndex {
+export function getThird(root: NoteIndex): NoteIndex {
   return IONIAN[2]! + root
 }
-function getFourth(root: NoteIndex): NoteIndex {
+export function getFourth(root: NoteIndex): NoteIndex {
   return IONIAN[3]! + root
 }
-function getFifth(root: NoteIndex): NoteIndex {
+export function getFifth(root: NoteIndex): NoteIndex {
   return IONIAN[4]! + root
 }
-function getSeventh(root: NoteIndex): NoteIndex {
+export function getSeventh(root: NoteIndex): NoteIndex {
   return IONIAN[6]! + root
 }
-function getSixth(root: NoteIndex): NoteIndex {
+export function getSixth(root: NoteIndex): NoteIndex {
   return IONIAN[5]! + root
 }
-function getNinth(root: NoteIndex): NoteIndex {
+export function getNinth(root: NoteIndex): NoteIndex {
   return IONIAN[1]! + root + OCTAVE
 }
-function getEleventh(root: NoteIndex): NoteIndex {
+export function getEleventh(root: NoteIndex): NoteIndex {
   return IONIAN[3]! + root + OCTAVE
 }
-function getThirteenth(root: NoteIndex): NoteIndex {
+export function getThirteenth(root: NoteIndex): NoteIndex {
   return IONIAN[5]! + root + OCTAVE
 }
-function flatten(note: NoteIndex): NoteIndex {
+export function flatten(note: NoteIndex): NoteIndex {
   return note - 1
 }
-function sharpen(note: NoteIndex): NoteIndex {
+export function sharpen(note: NoteIndex): NoteIndex {
   return note + 1
 }
 
@@ -83,7 +83,7 @@ export function getChordNotes(
  * - 2nd vs sus2:  add2, sus2 — both target the 2nd
  * - 6th vs 13th:  6, 13 — 13 implies the 6th
  */
-const EXCLUSION_GROUPS: Extension[][] = [
+export const EXCLUSION_GROUPS: Extension[][] = [
   ["maj", "m", "sus2", "sus4", "dim"],
   ["aug", "dim"],
   ["7", "maj7", "9", "maj9", "11", "13"],

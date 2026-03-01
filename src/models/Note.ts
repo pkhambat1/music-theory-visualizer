@@ -1,4 +1,4 @@
-import type { Letter } from "../types"
+import type { Letter } from "../lib/music/types"
 import { Accidental } from "./Accidental"
 import { SHARP, FLAT } from "../lib/music/accidentals"
 

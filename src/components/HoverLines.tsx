@@ -1,14 +1,12 @@
 import { useCallback, useState } from "react"
-import type { ChordHighlightPair, ModeDataProps, NoteIndex } from "../types"
-import { Connection } from "../models/Connection"
-import { IntervalConnection } from "../models/IntervalConnection"
-import { RemovedConnection } from "../models/RemovedConnection"
-import { AddedConnection } from "../models/AddedConnection"
+import type { ModeDataProps, NoteIndex } from "../lib/music"
+import type { ChordHighlightPair } from "../lib/geometry"
+import { Connection, IntervalConnection, RemovedConnection, AddedConnection } from "../models"
 import { bezierPath, bezierPointAt } from "../lib/bezier"
 import { buildHoverConnections } from "../lib/hoverConnections"
-import { useContainerMeasure } from "../hooks/useContainerMeasure"
+import { getIntervalLabel } from "../lib/music"
+import { useContainerMeasure } from "../hooks"
 import IntervalLabel from "./IntervalLabel"
-import { getIntervalLabel } from "../lib/music/intervals"
 
 // ─── Component ──────────────────────────────────────────────────────
 

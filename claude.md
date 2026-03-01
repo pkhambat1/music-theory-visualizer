@@ -4,6 +4,10 @@
 
 Interactive React app for visualizing music theory — modes, diatonic chords, note relationships, and chord extensions. Users select a root note and mode, then explore how chromatic, mode, and chord tones relate through connected visual rows with SVG line overlays. Audio playback is powered by Tone.js with a lazy-loaded piano sampler (supports arpeggiated playback). Designed for **beginners** with contextual labels, mode descriptions, and interval labels on hover lines.
 
+## Code Structure
+
+See `.claude/docs/code-structure.md` for the full file tree, dependency diagram, and layer stack.
+
 ## Tech Stack
 
 - **Framework:** React 18 with functional components and hooks
@@ -32,9 +36,9 @@ Connection (abstract)             — a directed line between two screen-space p
     ├── AddedConnection           — new tone introduced by an extension
     └── BassConnection            — slash chord bass note
 ```
-Styling and label rendering branch on `instanceof` — no string discriminants. `LineGroup` uses `StaticConnection[]`; `HoverLines` uses the full hierarchy.
+Styling and label rendering branch on `instanceof` — no string discriminants. `FixedLines` uses `StaticConnection[]`; `HoverLines` uses the full hierarchy.
 
-### Type Aliases (`src/types/music.ts`)
+### Type Aliases (`src/lib/music/types.ts`)
 Domain type aliases (`PitchClass`, `NoteIndex`, `Interval`, `Letter`) are plain `number` or string-union aliases for readability — they don't use TypeScript branded types but serve as documentation of intent. Also defines `Extension`, `ChordQuality`, `ChordType`, `ExtensionOption`, `ChordDegreeState`, and `ModeDataProps`.
 
 ### Overflow System
@@ -42,7 +46,7 @@ Mode note arrays are extended with extra notes before and after the visible rang
 
 ### Line Drawing
 Two SVG overlay layers:
-- `LineGroup` — static `StaticConnection[]` (chromatic → mode), positioned via `getBoundingClientRect()` + `ResizeObserver`
+- `FixedLines` — static `StaticConnection[]` (chromatic → mode), positioned via `getBoundingClientRect()` + `ResizeObserver`
 - `HoverLines` — dynamic connections on chord hover (diatonic → mode, base → mode), using the full Connection hierarchy for extension diffs. All paths render first, then all `IntervalLabel` components render on top to prevent overlap. Labels sit on the actual bezier curve (not the straight line between endpoints). `AddedConnection` labels at t=0.85, others at t=0.5. HoverLines SVG uses `zIndex: 3`; mode row uses `zIndex: 2` + opaque `rowBackground` (`colors.rowBg`) so extension lines pass behind it. Measurement is handled by `useContainerMeasure` hook which keeps a ResizeObserver alive across dependency changes via ref.
 
 DOM elements are located via `data-row` and `data-idx` attributes on `NoteCell` components.
@@ -87,13 +91,13 @@ The `Mode` class (`src/models/Mode.ts`) has a `description` field. All 10 modes 
 Highlighted cells always reserve border space with `2px solid transparent` in default state. On highlight, only the border color changes — no layout shift. All colored NoteCells use `2px` borders consistently. No `boxShadow` glow (removed to prevent clipping artifacts from `overflow: hidden` containers).
 
 ### Color System
-All colors are derived from d3's `interpolateRainbow` and `schemeSet3` in `src/lib/colors.ts`. Colors are computed via `tint()` (toward white) and `shade()` (toward black) helpers at specific rainbow positions:
+All colors are derived from d3's `interpolateRainbow` and `schemeSet3` in `src/lib/colors.ts`. Internally colors are `RGBColor` objects (from `d3-color`); `.formatHex()` is called at DOM boundaries (theme tokens, `hueBand` output). Colors are computed via `tint()` (toward white) and `shade()` (toward black) helpers at specific rainbow positions:
 - **Root:** `tint(rb(0.68), 0.45)` fill / `shade(rb(0.68), 0.25)` border (teal-green)
-- **Scale membership:** `tint(rb(0.40), 0.45)` fill / `shade(rb(0.40), 0.25)` border (yellow-ochre), via `rainbowBand(BAND_SCALE, count)` for subtle hue variation across cells
+- **Scale membership:** `tint(rb(0.40), 0.45)` fill / `shade(rb(0.40), 0.25)` border (yellow-ochre), via `hueBand(BASE_SCALE, count)` for subtle hue variation across cells
 - **UI accent (buttons, focus rings):** `shade(rb(0.85), 0.20)` / `shade(rb(0.85), 0.35)` hover (blue)
 - **Respelling text:** `shade(rb(0.70), 0.40)` (teal)
 - **Degree cells:** `DEGREE_COLORS` — 8 rainbow-sampled pastels, one per scale degree
-- **ChordScaleContext chord tones:** `rainbowBand(BAND_SCALE, count)` (same ochre band as scale cells)
+- **ChordScaleContext chord tones:** `hueBand(BASE_SCALE, count)` (same ochre band as scale cells)
 - **Hover/highlight borders:** `#000000` (black) — used on chord degree hover, mode cell highlights, chromatic highlights
 - **Hover lines (all types):** `#000000` stroke, strokeWidth 2.5 (removed: 1.5 dashed)
 - **Static connection lines:** `colors.border` (tinted Set3 gray), strokeWidth 1.5
@@ -101,7 +105,7 @@ All colors are derived from d3's `interpolateRainbow` and `schemeSet3` in `src/l
 - **Row bg:** `colors.rowBg` (tinted Set3 gray, `tint(schemeSet3[8], 0.55)`)
 - **Page bg:** `bg-white`
 - **Hover bg:** `bg-black/[0.08]` on all interactive cells
-- CSS custom properties registered at startup via `registerCssColors()` as `--d3-*` tokens (e.g. `--d3-primary`, `--d3-border`)
+- CSS custom properties registered at startup via `registerCssColors()` as `--app-*` tokens (e.g. `--app-primary`, `--app-border`)
 
 ## Code Conventions
 
@@ -110,7 +114,7 @@ All colors are derived from d3's `interpolateRainbow` and `schemeSet3` in `src/l
 - **Styling:** Tailwind utilities via `className`. Dynamic values use inline `style`. Conditional classes via `cn()`.
 - **Exports:** Named exports for types and utilities. Default exports for components.
 - **Music logic:** Pure functions in `src/lib/music/`. No side effects except `audio.ts`.
-- **Types:** Centralized in `src/types/`, barrel-exported from `index.ts`.
+- **Types:** Colocated in `src/lib/music/types.ts`, barrel-exported via `src/lib/music/index.ts`.
 - **Animations:** NoteCell transitions are instant (`duration-0`). Keep all transitions snappy. No CSS keyframes currently defined.
 
 ## Commands

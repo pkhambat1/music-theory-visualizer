@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react"
+import type { Note } from "../models"
+import { renderNote } from "./NoteLabel"
 import NoteCell from "./NoteCell"
-import { renderNote } from "../lib/notes"
-import type { Note } from "../models/Note"
 
 // ─── Component ─────────────────────────────────────────────────────
 

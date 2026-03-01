@@ -7,7 +7,7 @@ const DEFAULT_TRIGGER = (
   <Button
     variant="ghost"
     size="icon"
-    className="h-5 w-5 rounded-full border border-[var(--d3-border)] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+    className="h-5 w-5 rounded-full border border-[var(--app-border)] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
     aria-label="Open menu"
   >
     <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
@@ -66,7 +66,7 @@ export default function Popover({
       {open && (
         <div
           data-popover-panel
-          className={`absolute left-1/2 z-30 -translate-x-1/2 rounded-lg border border-[var(--d3-border)] bg-white p-2 shadow-sm ${positionClasses[position]}`}
+          className={`absolute left-1/2 z-30 -translate-x-1/2 rounded-lg border border-[var(--app-border)] bg-white p-2 shadow-sm ${positionClasses[position]}`}
         >
           {children}
         </div>

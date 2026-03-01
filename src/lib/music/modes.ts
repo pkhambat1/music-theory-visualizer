@@ -1,6 +1,6 @@
-import { Mode } from "../../models/Mode"
+import { Mode } from "../../models"
 
-export { Mode } from "../../models/Mode"
+export { Mode } from "../../models"
 
 /** All supported modes with their intervals (including the octave wrap) and descriptions. */
 export const MODES: Mode[] = [
