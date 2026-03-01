@@ -6,7 +6,7 @@ Interactive React app for visualizing music theory — modes, diatonic chords, n
 
 ## Code Structure
 
-See `.claude/docs/code-structure.md` for the full file tree, dependency diagram, and layer stack.
+See `docs/code-structure.md` for the full file tree, dependency diagram, and layer stack.
 
 ## Tech Stack
 
