@@ -15,7 +15,7 @@ import ControlsBar from "./ControlsBar"
 import FixedLines from "./FixedLines"
 import HoverLines from "./HoverLines"
 import DiatonicScaleDegreesRow from "./DiatonicScaleDegreesRow"
-import ChordScaleContext from "./ChordScaleContext"
+import ChordMajorScaleRow from "./ChordMajorScaleRow"
 import ChromaticScaleRow from "./ChromaticScaleRow"
 import ModeScaleRow from "./ModeScaleRow"
 
@@ -134,7 +134,7 @@ export default function VisualizerPanel() {
         />
 
         {/* Chord root's major scale — content appears on chord hover */}
-        <ChordScaleContext chordNotes={modifiedHoverNotes} notes={notes} />
+        <ChordMajorScaleRow chordNotes={modifiedHoverNotes} notes={notes} />
 
         <ChromaticScaleRow
           sliderRef={sliderRef}
@@ -175,7 +175,7 @@ export default function VisualizerPanel() {
           captionRight={
             hasAnyExtensionsOrSlash ? (
               <button
-                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                className="rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border border-[var(--app-border)] bg-white text-gray-500 hover:text-gray-700"
                 onClick={clearAll}
               >
                 Clear all extensions

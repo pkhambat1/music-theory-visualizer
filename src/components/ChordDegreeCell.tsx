@@ -1,12 +1,11 @@
 import type { Extension, ExtensionOption, NoteIndex } from "../lib/music"
 import type { Note } from "../models"
-import { buildSlashChordVoicing, SQUARE_SIDE, CHORD_CELL_WIDTH } from "../lib/music"
+import { buildSlashChordVoicing, CHORD_CELL_SIDE } from "../lib/music"
 import { playChord, arpeggiateChord } from "../lib/audio"
 import { degreeColor } from "../lib/theme"
 import NoteCell from "./NoteCell"
 import ExtensionPanel from "./ExtensionPanel"
-import { Popover, Pill } from "./ui"
-import { DEFAULT_TRIGGER } from "./ui/Popover"
+import { Popover, PopoverTrigger, Pill } from "./ui"
 
 const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
 const DATA_ROW = "diatonic-row"
@@ -61,8 +60,8 @@ export default function ChordDegreeCell({
     <div
       className="relative"
       style={{
-        width: `${CHORD_CELL_WIDTH}px`,
-        height: `${SQUARE_SIDE}px`,
+        width: `${CHORD_CELL_SIDE}px`,
+        height: `${CHORD_CELL_SIDE}px`,
         overflow: "visible",
         display: "flex",
         justifyContent: "center",
@@ -76,10 +75,11 @@ export default function ChordDegreeCell({
         optBackground={degreeBg}
         className="group cursor-pointer hover:bg-black/[0.08] transition-colors"
         style={{
-          width: `${CHORD_CELL_WIDTH}px`,
+          width: `${CHORD_CELL_SIDE}px`,
+          height: `${CHORD_CELL_SIDE}px`,
           ...(hoveredIndex === chordNumeralIdx
             ? { border: `2px solid ${HOVER_COLOR}` }
-            : { border: "2px solid transparent" }),
+            : {}),
         }}
         onMouseEnter={() => onHover(chordNumeralIdx, originalNotes, chordNotesArr)}
         onMouseLeave={() => onHoverClear()}
@@ -136,7 +136,7 @@ export default function ChordDegreeCell({
           <Popover
             open={isPopoverOpen}
             onOpenChange={onPopoverOpenChange}
-            trigger={DEFAULT_TRIGGER}
+            trigger={<PopoverTrigger />}
             position="top"
           >
             <ExtensionPanel

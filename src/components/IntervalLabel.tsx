@@ -7,20 +7,18 @@ export type IntervalLabelProps = {
 export default function IntervalLabel({ x, y, children }: IntervalLabelProps) {
   return (
     <g>
-      <rect
-        x={x - 14}
-        y={y - 8}
-        width="28"
-        height="16"
-        rx="4"
-        fill="#000000"
+      <circle
+        cx={x}
+        cy={y}
+        r={8}
+        fill="#ffffff"
       />
       <text
         x={x}
         y={y + 4}
         textAnchor="middle"
-        fill="#ffffff"
-        fontSize="9"
+        fill="#000000"
+        fontSize="11"
         fontWeight="600"
         fontFamily="Inter, system-ui, sans-serif"
       >

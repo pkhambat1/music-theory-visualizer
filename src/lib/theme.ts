@@ -1,10 +1,10 @@
 import { schemeSet3, interpolateRainbow } from "d3-scale-chromatic"
 import { rgb } from "d3-color"
 import type { RGBColor } from "d3-color"
-import { tint, shade } from "./colors"
+import { tint, shade, hueBand } from "./colors"
 
 const RAINBOW_ROOT = 0.68 // teal green
-export const RAINBOW_SCALE = 0.40 // yellow ochre
+const RAINBOW_SCALE = 0.40 // yellow ochre
 const RAINBOW_UI = 0.85 // blue (UI buttons / focus rings)
 const RAINBOW_RESPELLING = 0.70 // teal
 
@@ -43,6 +43,11 @@ export const DEGREE_COLORS: RGBColor[] = Array.from({ length: 8 }, (_, i) =>
 /** Return the pastel background hex color for a given scale degree index. */
 export function degreeColor(index: number): string {
   return DEGREE_COLORS[index % DEGREE_COLORS.length]!.formatHex()
+}
+
+/** Generate `count` scale-tone background hex colors as a subtle hue-varied band. */
+export function scaleToneBand(count: number): string[] {
+  return hueBand(RAINBOW_SCALE, count, 0.10, 0.45).map((c) => c.formatHex())
 }
 
 /** Register `--app-*` CSS custom properties on `:root`. Call once at startup before React renders. */

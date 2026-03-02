@@ -82,7 +82,7 @@ export default function HoverLines({
             key={`p${idx}`}
             d={bezierPath(conn.from, conn.to)}
             stroke="#000000"
-            strokeWidth={isRemoved ? "1.5" : "2.5"}
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeDasharray={isRemoved ? "4 3" : undefined}
             fill="none"

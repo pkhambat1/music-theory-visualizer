@@ -41,6 +41,7 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
           background: optBackground || undefined,
           borderRadius: "6px",
           fontFamily: "'JetBrains Mono', monospace",
+          border: optBackground ? "2px solid rgba(0,0,0,0.12)" : "2px solid transparent",
           ...(customStyle ?? {}),
         }}
         {...props}

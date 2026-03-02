@@ -3,8 +3,7 @@ import type { Note } from "../models"
 import { CHROMATIC_SCALE } from "../lib/notes"
 import { renderNote } from "./NoteLabel"
 import { BASE_SCALE_LEFT_OVERFLOW, BASE_SCALE_WITH_OVERFLOW_SIZE, SQUARE_SIDE } from "../lib/music"
-import { hueBand } from "../lib/colors"
-import { colors, RAINBOW_SCALE } from "../lib/theme"
+import { colors, scaleToneBand } from "../lib/theme"
 import NotesArray from "./NotesArray"
 import NoteCell from "./NoteCell"
 
@@ -50,8 +49,8 @@ export default function ChromaticScaleRow({
           const scaleIdxs = CHROMATIC_SCALE.map((_, i) => i).filter(
             (i) => i > 0 && modeIntervals.includes(i),
           )
-          const scaleBand = hueBand(RAINBOW_SCALE, scaleIdxs.length, 0.10, 0.45)
-          const scaleBandMap = new Map(scaleIdxs.map((si, bi) => [si, scaleBand[bi]!.formatHex()]))
+          const scaleBand = scaleToneBand(scaleIdxs.length)
+          const scaleBandMap = new Map(scaleIdxs.map((si, bi) => [si, scaleBand[bi]!]))
 
           return CHROMATIC_SCALE.map((_, idx) => {
             let background: string | null = null

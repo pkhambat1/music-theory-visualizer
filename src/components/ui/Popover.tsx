@@ -1,23 +1,6 @@
 import { useEffect, useRef } from "react"
-import Button from "./Button"
 
 export type PopoverPosition = "top" | "bottom"
-
-export const DEFAULT_TRIGGER = (
-  <Button
-    variant="ghost"
-    size="icon"
-    asChild={false}
-    className="h-5 w-5 rounded-full border border-[var(--app-border)] bg-gray-50 p-0 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
-    aria-label="Open menu"
-  >
-    <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
-      <circle cx="3" cy="8" r="1.5" />
-      <circle cx="8" cy="8" r="1.5" />
-      <circle cx="13" cy="8" r="1.5" />
-    </svg>
-  </Button>
-)
 
 export type PopoverProps = {
   open: boolean,
