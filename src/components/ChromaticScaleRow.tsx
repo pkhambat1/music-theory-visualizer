@@ -3,13 +3,13 @@ import type { Note } from "../models"
 import { CHROMATIC_SCALE } from "../lib/notes"
 import { renderNote } from "./NoteLabel"
 import { BASE_SCALE_LEFT_OVERFLOW, BASE_SCALE_WITH_OVERFLOW_SIZE, SQUARE_SIDE } from "../lib/music"
-import { colors, scaleToneBand } from "../lib/theme"
+import { scaleToneBand } from "../lib/theme"
 import NotesArray from "./NotesArray"
 import NoteCell from "./NoteCell"
 
-const HIGHLIGHTED_BASE_STYLE = (color: string) => ({
-  border: `2px solid ${color}`,
-})
+const HIGHLIGHTED_BASE_STYLE = {
+  border: "2px solid var(--app-borderHighlight)",
+}
 
 export type ChromaticScaleRowProps = {
   sliderRef: (node: HTMLDivElement) => void,
@@ -55,7 +55,7 @@ export default function ChromaticScaleRow({
           return CHROMATIC_SCALE.map((_, idx) => {
             let background: string | null = null
             if (idx === 0) {
-              background = colors.rootFill
+              background = "var(--app-rootFill)"
             } else {
               background = scaleBandMap.get(idx) ?? null
             }
@@ -81,10 +81,10 @@ export default function ChromaticScaleRow({
             idx={idx}
             dataRow="base-row"
             dataIdx={idx}
-            className="keen-slider__slide cursor-pointer hover:bg-black/[0.08]"
+            className="keen-slider__slide cursor-pointer text-[var(--app-textOnSurface)]"
             style={
               highlightedBaseIdxs.has(idx)
-                ? HIGHLIGHTED_BASE_STYLE("#000000")
+                ? HIGHLIGHTED_BASE_STYLE
                 : { border: "2px solid transparent" }
             }
             onClick={() => onPlayNote(note)}
@@ -97,7 +97,7 @@ export default function ChromaticScaleRow({
       {/* Arrow buttons */}
       <button
         onClick={onPrev}
-        className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--app-border)]"
+        className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-[var(--app-surfaceBase)] hover:bg-[var(--app-surfaceHover)] text-[var(--app-textMuted)] hover:text-[var(--app-textSecondary)] transition-colors border border-[var(--app-border)]"
         aria-label="Scroll left"
       >
         <svg
@@ -115,7 +115,7 @@ export default function ChromaticScaleRow({
       </button>
       <button
         onClick={onNext}
-        className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--app-border)]"
+        className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-[var(--app-surfaceBase)] hover:bg-[var(--app-surfaceHover)] text-[var(--app-textMuted)] hover:text-[var(--app-textSecondary)] transition-colors border border-[var(--app-border)]"
         aria-label="Scroll right"
       >
         <svg

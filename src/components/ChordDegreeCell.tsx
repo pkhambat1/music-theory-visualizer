@@ -9,7 +9,6 @@ import { Popover, PopoverTrigger, Pill } from "./ui"
 
 const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
 const DATA_ROW = "diatonic-row"
-const HOVER_COLOR = "#000000"
 
 export type ChordDegreeCellProps = {
   chordNumeralIdx: number,
@@ -73,12 +72,12 @@ export default function ChordDegreeCell({
         dataRow={DATA_ROW}
         dataIdx={chordNumeralIdx}
         optBackground={degreeBg}
-        className="group cursor-pointer hover:bg-black/[0.08] transition-colors"
+        className="group cursor-pointer transition-colors"
         style={{
           width: `${CHORD_CELL_SIDE}px`,
           height: `${CHORD_CELL_SIDE}px`,
           ...(hoveredIndex === chordNumeralIdx
-            ? { border: `2px solid ${HOVER_COLOR}` }
+            ? { border: "2px solid var(--app-borderHighlight)" }
             : {}),
         }}
         onMouseEnter={() => onHover(chordNumeralIdx, originalNotes, chordNotesArr)}
@@ -101,7 +100,7 @@ export default function ChordDegreeCell({
       >
         <span
           className={activeExtensions.length > 0 || slashBass !== null ? "-translate-y-1" : ""}
-          style={{ color: "#000000" }}
+          style={{ color: "var(--app-textOnSurface)" }}
         >
           {chordNumeral}
           {chordDescriptor}

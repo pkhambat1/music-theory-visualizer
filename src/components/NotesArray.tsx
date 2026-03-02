@@ -1,5 +1,3 @@
-import { colors } from "../lib/theme"
-
 export type NotesArrayProps = {
   size: number,
   cellWidth: number,
@@ -43,12 +41,12 @@ export default function NotesArray({
         >
           <div>
             {caption && (
-              <span className="pointer-events-none select-none whitespace-nowrap text-[13px] font-semibold tracking-wide text-gray-500">
+              <span className="pointer-events-none select-none whitespace-nowrap text-[13px] font-semibold tracking-wide text-[var(--app-textTertiary)]">
                 {caption}
               </span>
             )}
             {captionSubtitle && (
-              <span className="pointer-events-none select-none whitespace-nowrap text-[11px] text-gray-400 ml-2">
+              <span className="pointer-events-none select-none whitespace-nowrap text-[11px] text-[var(--app-textMuted)] ml-2">
                 {captionSubtitle}
               </span>
             )}
@@ -62,7 +60,7 @@ export default function NotesArray({
           height: `${cellWidth}px`,
           position: "relative",
           boxSizing: "content-box",
-          background: rowBackground ?? colors.rowBg,
+          background: rowBackground ?? "var(--app-rowBg)",
           border: "2px solid transparent",
           display: "flex",
           alignItems: "center",

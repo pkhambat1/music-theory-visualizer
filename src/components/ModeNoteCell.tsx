@@ -15,8 +15,6 @@ export type ModeNoteCellProps = {
   optCaption?: string | number | null,
 }
 
-const HIGHLIGHT_COLOR = "#000000"
-
 const ModeNoteCell = React.memo(function ModeNoteCell({
   idx,
   dataIdx,
@@ -51,12 +49,12 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
       dataRow="mode-row"
       dataIdx={dataIdx}
       onClick={handleClick}
-      className="cursor-pointer hover:bg-black/[0.08]"
+      className="cursor-pointer"
       optCaption={optCaption}
       style={
         isHighlighted
           ? {
-              border: `2px solid ${HIGHLIGHT_COLOR}`,
+              border: "2px solid var(--app-borderHighlight)",
             }
           : {
               border: "2px solid transparent",
@@ -71,7 +69,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
             {noteLabel}
             <Strikethrough />
           </span>
-          <span className="text-[13px] font-semibold text-black">
+          <span className="text-[13px] font-semibold text-[var(--app-textOnSurface)]">
             {newLabel}
           </span>
         </div>

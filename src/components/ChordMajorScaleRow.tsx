@@ -186,7 +186,7 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex, notes }
               <NoteCell
                 key={idx}
                 idx={idx}
-                className="text-gray-300 font-normal"
+                className="text-[var(--app-textDisabled)] font-normal"
                 style={{
                   background: "transparent",
                 }}
@@ -207,7 +207,7 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex, notes }
               <NoteCell
                 key={idx}
                 idx={idx}
-                className="text-gray-900 font-semibold"
+                className="font-semibold"
                 optBackground={chordToneBg(degreeIdx)}
                 optCaption={info.degreeLabel}
               >
@@ -218,7 +218,7 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex, notes }
 
           const alteredNote = notes[info.actualNote]
           const arrow = info.isFlat ? "←" : "→"
-          const actual = <span className="text-sm font-semibold text-gray-900">{alteredNote?.label()}</span>
+          const actual = <span className="text-sm font-semibold">{alteredNote?.label()}</span>
           const natural = (
             <span className={`relative inline-block text-sm ${MUTED_TEXT} font-normal`}>
               {scaleNote?.label()}

@@ -9,12 +9,12 @@ const buttonVariants = cva(
         default:
           "bg-[var(--app-primary)] text-white font-semibold hover:bg-[var(--app-primaryHover)] active:bg-[var(--app-primary)]",
         ghost:
-          "bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+          "bg-transparent text-[var(--app-textSecondary)] hover:bg-[var(--app-surfaceHover)] hover:text-[var(--app-textPrimary)]",
         destructive:
           "bg-red-500/80 text-white hover:bg-red-500",
         outline:
-          "border border-[var(--app-border)] bg-white hover:bg-gray-50 text-gray-700",
-        secondary: "bg-gray-100 text-gray-700 hover:bg-gray-200",
+          "border border-[var(--app-border)] bg-[var(--app-surfaceBase)] hover:bg-[var(--app-surfaceSubtle)] text-[var(--app-textSecondary)]",
+        secondary: "bg-[var(--app-surfaceHover)] text-[var(--app-textSecondary)] hover:bg-[var(--app-surfaceSubtle)]",
         link: "text-[var(--app-primary)] underline-offset-4 hover:underline",
       },
       size: {

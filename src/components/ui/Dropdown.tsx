@@ -34,10 +34,10 @@ export default function Dropdown({
   return (
     <div className="relative inline-block" ref={ref}>
       <Button variant="outline" size="sm" asChild={false} onClick={() => setOpen((o) => !o)}>
-        <span className="text-gray-700">{label}</span>
+        <span className="text-[var(--app-textSecondary)]">{label}</span>
         <svg
           className={cn(
-            "ml-2 h-3.5 w-3.5 text-gray-400 transition-transform duration-100",
+            "ml-2 h-3.5 w-3.5 text-[var(--app-textMuted)] transition-transform duration-100",
             open && "rotate-180",
           )}
           fill="none"
@@ -53,11 +53,11 @@ export default function Dropdown({
         </svg>
       </Button>
       {open && (
-        <div className="absolute left-0 z-30 mt-2 max-h-64 min-w-[180px] overflow-y-auto rounded-lg border border-[var(--app-border)] bg-white p-1 shadow-sm">
+        <div className="absolute left-0 z-30 mt-2 max-h-64 min-w-[180px] overflow-y-auto rounded-lg border border-[var(--app-border)] bg-[var(--app-surfaceBase)] p-1 shadow-sm">
           {items.map((item) => (
             <button
               key={item.key}
-              className="w-full rounded-lg px-3 py-2 text-left text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              className="w-full rounded-lg px-3 py-2 text-left text-sm text-[var(--app-textSecondary)] transition-colors hover:bg-[var(--app-surfaceHover)] hover:text-[var(--app-textPrimary)]"
               onClick={() => {
                 onSelect?.(item.key)
                 setOpen(false)

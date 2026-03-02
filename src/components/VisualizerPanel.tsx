@@ -96,10 +96,10 @@ export default function VisualizerPanel() {
     <div className="max-w-[1600px] w-full mx-auto flex flex-col gap-4">
       {/* Title + subtitle */}
       <div>
-        <h1 className="text-3xl font-normal tracking-tight text-gray-900">
+        <h1 className="text-3xl font-normal tracking-tight text-[var(--app-textPrimary)]">
           Music Theory Visualizer
         </h1>
-        <p className="mt-1.5 text-sm text-gray-500">
+        <p className="mt-1.5 text-sm text-[var(--app-textTertiary)]">
           Pick a key and mode, then trace how scales produce chords and why each chord sounds the
           way it does.
         </p>
@@ -175,7 +175,7 @@ export default function VisualizerPanel() {
           captionRight={
             hasAnyExtensionsOrSlash ? (
               <button
-                className="rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border border-[var(--app-border)] bg-white text-gray-500 hover:text-gray-700"
+                className="rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border border-[var(--app-border)] bg-[var(--app-surfaceBase)] text-[var(--app-textTertiary)] hover:text-[var(--app-textSecondary)]"
                 onClick={clearAll}
               >
                 Clear all extensions

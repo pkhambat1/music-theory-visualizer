@@ -36,11 +36,11 @@ export default function MultiSelect({
       {(header || value.length > 0) && (
         <div className="flex items-center justify-between">
           {header && (
-            <span className="text-[11px] font-medium uppercase tracking-wider text-gray-500">{header}</span>
+            <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--app-textTertiary)]">{header}</span>
           )}
           {value.length > 0 && (
             <button
-              className="rounded-lg px-2 py-1 text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              className="rounded-lg px-2 py-1 text-xs text-[var(--app-textMuted)] hover:text-[var(--app-textSecondary)] hover:bg-[var(--app-surfaceHover)] transition-colors"
               onClick={() => onChange?.([])}
             >
               Clear
@@ -49,7 +49,7 @@ export default function MultiSelect({
         </div>
       )}
       {options.length === 0 ? (
-        <span className="text-gray-400">{placeholder}</span>
+        <span className="text-[var(--app-textMuted)]">{placeholder}</span>
       ) : (
         <div className="max-h-[200px] overflow-y-auto grid grid-cols-3 gap-0.5">
           {options.map((opt, idx) => {
@@ -61,12 +61,12 @@ export default function MultiSelect({
                 key={opt.value}
                 className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs transition-colors ${
                   isDisabled
-                    ? "text-gray-300 pointer-events-none"
+                    ? "text-[var(--app-textDisabled)] pointer-events-none"
                     : isSelected
                     ? "bg-[var(--app-primaryFill)] text-[var(--app-primary)] font-medium cursor-pointer"
                     : isFocused
-                    ? "bg-gray-100 text-gray-800 cursor-pointer"
-                    : "text-gray-600 hover:bg-gray-50 cursor-pointer"
+                    ? "bg-[var(--app-surfaceHover)] text-[var(--app-textPrimary)] cursor-pointer"
+                    : "text-[var(--app-textSecondary)] hover:bg-[var(--app-surfaceSubtle)] cursor-pointer"
                 }`}
                 onMouseEnter={() => {
                   if (!isDisabled) setFocusedIndex(idx)
@@ -74,7 +74,7 @@ export default function MultiSelect({
               >
                 <input
                   type="checkbox"
-                  className={`h-3 w-3 rounded border-gray-300 bg-white text-[var(--app-primary)] focus:ring-[var(--app-primary)] ${isDisabled ? "opacity-40" : ""}`}
+                  className={`h-3 w-3 rounded border-[var(--app-border)] bg-[var(--app-surfaceBase)] text-[var(--app-primary)] focus:ring-[var(--app-primary)] ${isDisabled ? "opacity-40" : ""}`}
                   checked={isSelected}
                   disabled={isDisabled}
                   onChange={() => toggle(opt.value)}

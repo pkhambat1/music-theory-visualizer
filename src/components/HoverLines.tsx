@@ -94,7 +94,7 @@ export default function HoverLines({
           <path
             key={`p${idx}`}
             d={bezierPath(conn.from, conn.to)}
-            stroke="#000000"
+            stroke="var(--app-strokeHover)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeDasharray={isRemoved ? "4 3" : undefined}

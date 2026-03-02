@@ -11,13 +11,13 @@ export default function IntervalLabel({ x, y, children }: IntervalLabelProps) {
         cx={x}
         cy={y}
         r={8}
-        fill="#ffffff"
+        fill="var(--app-intervalLabelBg)"
       />
       <text
         x={x}
         y={y + 4}
         textAnchor="middle"
-        fill="#000000"
+        fill="var(--app-intervalLabelText)"
         fontSize="11"
         fontWeight="600"
         fontFamily="Inter, system-ui, sans-serif"

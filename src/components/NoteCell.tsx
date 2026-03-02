@@ -32,7 +32,8 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
         data-row={dataRow}
         data-idx={dataIdx}
         className={cn(
-          "flex items-center justify-center text-sm font-semibold box-border relative select-none transition-colors duration-0 text-gray-800 hover:bg-black/[0.08]",
+          "flex items-center justify-center text-sm font-semibold box-border relative select-none transition-colors duration-0",
+          optBackground ? "text-[var(--app-textOnSurface)]" : "text-[var(--app-textPrimary)]",
           className ?? "",
         )}
         style={{
@@ -41,14 +42,14 @@ const NoteCell = React.forwardRef<HTMLDivElement, NoteCellProps>(
           background: optBackground || undefined,
           borderRadius: "6px",
           fontFamily: "'JetBrains Mono', monospace",
-          border: optBackground ? "2px solid rgba(0,0,0,0.12)" : "2px solid transparent",
+          border: optBackground ? "2px solid var(--app-borderDefault)" : "2px solid transparent",
           ...(customStyle ?? {}),
         }}
         {...props}
       >
         {children}
         {optCaption != null && (
-          <div className="absolute -bottom-5 text-[10px] font-normal text-gray-400">
+          <div className="absolute -bottom-5 text-[10px] font-normal text-[var(--app-textMuted)]">
             {optCaption}
           </div>
         )}

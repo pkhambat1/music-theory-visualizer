@@ -126,4 +126,9 @@ npm run build    # TypeScript check + Vite production build
 npm run lint     # ESLint
 npm run preview  # Preview production build
 npm run test     # Run unit tests
+vercel --prod    # Deploy to production (Vercel)
 ```
+
+## Deployment
+
+Production releases are managed via Vercel. Run `vercel --prod` to deploy, or push to `main` for automatic deployments. Production URL: https://music-theory-visualizer.vercel.app

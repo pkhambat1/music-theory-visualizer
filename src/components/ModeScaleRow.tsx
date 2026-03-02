@@ -1,7 +1,6 @@
 import type { Interval, NoteRef } from "../lib/music"
 import { SQUARE_SIDE } from "../lib/music"
 import type { Note } from "../models"
-import { colors } from "../lib/theme"
 import NotesArray from "./NotesArray"
 import NoteCell from "./NoteCell"
 import ModeNoteCell from "./ModeNoteCell"
@@ -31,7 +30,7 @@ export default function ModeScaleRow({
       cellWidth={SQUARE_SIDE}
       clipContent
       zIndex={2}
-      rowBackground={colors.rowBg}
+      rowBackground="var(--app-rowBg)"
       caption={`${selectedModeName} Scale`}
       captionSubtitle="Notes in the selected mode"
     >

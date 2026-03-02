@@ -2,7 +2,6 @@ import { useCallback, useState } from "react"
 import type { CellLink } from "../lib/geometry"
 import { StaticConnection } from "../models"
 import { bezierPath } from "../lib/bezier"
-import { colors } from "../lib/theme"
 import { useContainerMeasure } from "../hooks"
 
 export type FixedLinesProps = {
@@ -69,7 +68,7 @@ export default function FixedLines({ containerRef, connections }: FixedLinesProp
         <path
           key={idx}
           d={bezierPath(conn.from, conn.to)}
-          stroke={colors.border}
+          stroke="var(--app-border)"
           strokeWidth="1.5"
           fill="none"
         />

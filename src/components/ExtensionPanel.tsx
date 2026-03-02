@@ -39,12 +39,12 @@ export default function ExtensionPanel({
       />
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--app-textTertiary)]">
             Bass Note
           </span>
           {slashBass !== null && (
             <button
-              className="rounded-lg px-2 py-1 text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              className="rounded-lg px-2 py-1 text-xs text-[var(--app-textMuted)] hover:text-[var(--app-textSecondary)] hover:bg-[var(--app-surfaceHover)] transition-colors"
               onClick={() => onSlashBassChange?.(chordNumeralIdx, null)}
             >
               Clear
@@ -61,10 +61,10 @@ export default function ExtensionPanel({
                 disabled={isOwn}
                 className={`flex-1 rounded px-1 py-1 text-[10px] font-medium transition-colors ${
                   isOwn
-                    ? "text-gray-300 cursor-not-allowed"
+                    ? "text-[var(--app-textDisabled)] cursor-not-allowed"
                     : isSelected
                     ? "bg-[var(--app-primaryFill)] text-[var(--app-primary)]"
-                    : "text-gray-600 hover:bg-gray-100"
+                    : "text-[var(--app-textSecondary)] hover:bg-[var(--app-surfaceHover)]"
                 }`}
                 onClick={() =>
                   onSlashBassChange?.(chordNumeralIdx, isSelected ? null : degIdx)

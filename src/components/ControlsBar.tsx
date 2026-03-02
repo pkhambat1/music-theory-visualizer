@@ -1,7 +1,9 @@
 import { useState } from "react"
+import { Sun, Moon } from "lucide-react"
 import type { Note } from "../models"
 import { renderNote } from "./NoteLabel"
 import { MODES, Mode } from "../lib/music"
+import { useTheme } from "../hooks"
 import { Tag, Dropdown } from "./ui"
 
 const MODE_ITEMS = MODES.map((mode) => ({
@@ -25,12 +27,13 @@ export default function ControlsBar({
   onArpeggiateToggle,
 }: ControlsBarProps) {
   const [showKeyHint, setShowKeyHint] = useState(false)
+  const { mode, toggle } = useTheme()
 
   return (
     <>
       <div className="flex flex-wrap items-center gap-5">
         <div className="flex items-center gap-2.5">
-          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Key</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-[var(--app-textTertiary)]">Key</span>
           <div
             className="relative cursor-pointer"
             onClick={() => {
@@ -47,7 +50,7 @@ export default function ControlsBar({
           </div>
         </div>
         <div className="flex items-center gap-2.5">
-          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Mode</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-[var(--app-textTertiary)]">Mode</span>
           <Dropdown
             label={selectedMode.name}
             items={MODE_ITEMS}
@@ -61,15 +64,22 @@ export default function ControlsBar({
           className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${
             arpeggiate
               ? "border-[var(--app-primary)] bg-[var(--app-primaryFill)] text-[var(--app-primary)]"
-              : "border-[var(--app-border)] bg-white text-gray-500 hover:text-gray-700"
+              : "border-[var(--app-border)] bg-[var(--app-surfaceBase)] text-[var(--app-textTertiary)] hover:text-[var(--app-textSecondary)]"
           }`}
           onClick={onArpeggiateToggle}
         >
           Arpeggiate
         </button>
+        <button
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border border-[var(--app-border)] bg-[var(--app-surfaceBase)] text-[var(--app-textTertiary)] hover:text-[var(--app-textSecondary)]"
+          onClick={toggle}
+          aria-label={mode === "light" ? "Switch to dark mode" : "Switch to light mode"}
+        >
+          {mode === "light" ? <Moon size={14} /> : <Sun size={14} />}
+        </button>
       </div>
       {selectedMode.description && (
-        <p className="text-sm text-gray-500">{selectedMode.description}</p>
+        <p className="text-sm text-[var(--app-textTertiary)]">{selectedMode.description}</p>
       )}
     </>
   )

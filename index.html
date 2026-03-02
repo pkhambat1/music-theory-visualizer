@@ -19,6 +19,14 @@
     <title>Music Theory Visualizer</title>
   </head>
   <body>
+    <script>
+      // Prevent flash of wrong theme before CSS loads
+      (function(){
+        var s = localStorage.getItem("theme-mode");
+        var d = (!s && window.matchMedia("(prefers-color-scheme: dark)").matches) || s === "dark";
+        if (d) document.documentElement.classList.add("dark");
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
