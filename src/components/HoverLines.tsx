@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react"
 import type { ModeDataProps, NoteIndex, NoteRef } from "../lib/music"
 import type { ChordHighlightPair } from "../lib/geometry"
-import { Connection, IntervalConnection, RemovedConnection, AddedConnection } from "../models"
+import { Connection, IntervalConnection, RemovedConnection, AddedConnection, BassConnection } from "../models"
 import { bezierPath, bezierPointAt } from "../lib/bezier"
 import { buildHoverConnections } from "../lib/hoverConnections"
 import { getIntervalLabel } from "../lib/music"
@@ -106,7 +106,7 @@ export default function HoverLines({
       {lines.map((conn, idx) => {
         if (!(conn instanceof IntervalConnection)) return null
         if (conn instanceof RemovedConnection) return null
-        const t = conn instanceof AddedConnection ? 0.85 : 0.5
+        const t = conn instanceof AddedConnection || conn instanceof BassConnection ? 0.85 : 0.5
         const labelPos = bezierPointAt(conn.from, conn.to, t)
         return (
           <IntervalLabel key={`l${idx}`} x={labelPos.x} y={labelPos.y}>
