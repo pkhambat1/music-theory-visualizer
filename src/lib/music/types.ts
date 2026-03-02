@@ -1,8 +1,13 @@
+import type { Note } from "../../models/Note"
+
 /** Pitch class 0–11 (C = 0, C# = 1, … B = 11). */
 export type PitchClass = number
 
 /** Absolute index into the global `notes` array. */
 export type NoteIndex = number
+
+/** A note index paired with the resolved Note object, for use at hook/component boundaries. */
+export type NoteRef = { index: NoteIndex, note: Note }
 
 /** Semitone offset from a root (e.g. mode intervals like 0, 2, 4, 5 …). */
 export type Interval = number
@@ -43,6 +48,6 @@ export type ChordDegreeState = {
 }
 
 export type ModeDataProps = {
-  modeNotesWithOverflow: NoteIndex[],
+  modeNotesWithOverflow: NoteRef[],
   modeLeftOverflowSize: number,
 }

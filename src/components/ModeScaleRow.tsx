@@ -1,4 +1,4 @@
-import type { Interval, NoteIndex } from "../lib/music"
+import type { Interval, NoteRef } from "../lib/music"
 import { SQUARE_SIDE } from "../lib/music"
 import type { Note } from "../models"
 import { colors } from "../lib/theme"
@@ -8,12 +8,11 @@ import ModeNoteCell from "./ModeNoteCell"
 
 export type ModeScaleRowProps = {
   selectedModeName: string,
-  modeNotesWithOverflow: NoteIndex[],
+  modeNotesWithOverflow: NoteRef[],
   modeIntervals: Interval[],
   modeLeftOverflowSize: number,
   spelledModeNotes: (Note | null)[],
   highlightedModeIdxs: Set<number>,
-  notes: Note[],
   onPlayNote: (note: Note) => void,
 }
 
@@ -24,7 +23,6 @@ export default function ModeScaleRow({
   modeLeftOverflowSize,
   spelledModeNotes,
   highlightedModeIdxs,
-  notes,
   onPlayNote,
 }: ModeScaleRowProps) {
   return (
@@ -48,8 +46,8 @@ export default function ModeScaleRow({
         ))}
       </div>
 
-      {modeNotesWithOverflow.map((noteIdx, idx) => {
-        const noteObj = notes[noteIdx] ?? null
+      {modeNotesWithOverflow.map((noteRef, idx) => {
+        const noteObj = noteRef.note
         const isHighlighted = highlightedModeIdxs.has(idx)
         const visibleDegree = idx - modeLeftOverflowSize
         const scaleDegreeCaption =

@@ -8,6 +8,7 @@ import {
   getModeLeftOverflowSize,
   modeIntervalsToMode,
   spellModeNotes,
+  toNoteRefs,
 } from "../lib/music"
 
 export function useModeTones(
@@ -20,18 +21,23 @@ export function useModeTones(
 
   useEffect(() => {
     modeWithOverflowIntervalsRef.current = addOverflowToModeIntervals(modeIntervals)
-    setModeNotesWithOverflow(
+    setModeIndicesWithOverflow(
       modeIntervalsToMode(rootNote, modeWithOverflowIntervalsRef.current, notes),
     )
   }, [rootNote, modeIntervals, notes])
 
-  const [modeNotesWithOverflow, setModeNotesWithOverflow] = useState<NoteIndex[]>(() =>
+  const [modeIndicesWithOverflow, setModeIndicesWithOverflow] = useState<NoteIndex[]>(() =>
     buildModeNotesWithOverflow(rootNote, modeIntervals, notes),
   )
 
+  const modeNotesWithOverflow = useMemo(
+    () => toNoteRefs(modeIndicesWithOverflow, notes),
+    [modeIndicesWithOverflow, notes],
+  )
+
   const spelledModeNotes = useMemo(
-    () => spellModeNotes(modeNotesWithOverflow, modeLeftOverflowSize, notes),
-    [modeNotesWithOverflow, modeLeftOverflowSize, notes],
+    () => spellModeNotes(modeIndicesWithOverflow, modeLeftOverflowSize, notes),
+    [modeIndicesWithOverflow, modeLeftOverflowSize, notes],
   )
 
   const modeConnections = useMemo<CellLink[]>(

@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react"
-import type { Extension, ExtensionOption, ModeDataProps, NoteIndex } from "../lib/music"
+import type { Extension, ExtensionOption, ModeDataProps, NoteRef } from "../lib/music"
 import type { Note } from "../models"
-import { getChordDescriptor, getChordNotes, applyExtensions, leftTrimOverflowNotes, CHORD_CELL_SIDE } from "../lib/music"
+import { getChordDescriptor, getChordNotes, applyExtensions, toNoteRefs, CHORD_CELL_SIDE } from "../lib/music"
 import NotesArray from "./NotesArray"
 import ChordDegreeCell from "./ChordDegreeCell"
 
 export type ChordHoverData = {
-  original: NoteIndex[],
-  modified: NoteIndex[],
+  original: NoteRef[],
+  modified: NoteRef[],
 }
 
 export type DiatonicScaleDegreesRowProps = ModeDataProps & {
@@ -52,27 +52,34 @@ export default function DiatonicScaleDegreesRow({
   const [openIdx, setOpenIdx] = useState<number | null>(null)
 
   const modeNotes = useMemo(
-    () => leftTrimOverflowNotes(modeNotesWithOverflow, modeLeftOverflowSize),
+    () => modeNotesWithOverflow.slice(modeLeftOverflowSize),
     [modeNotesWithOverflow, modeLeftOverflowSize],
+  )
+
+  const modeIndices = useMemo(
+    () => modeNotes.map((r) => r.index),
+    [modeNotes],
   )
 
   const chordData = useMemo(
     () =>
       chordNumerals.map((_, chordNumeralIdx) => {
-        const originalNotes = getChordNotes(modeNotes, chordNumeralIdx, "triads")
+        const originalIndices = getChordNotes(modeIndices, chordNumeralIdx, "triads")
         const activeExtensions = selectedExtensions[chordNumeralIdx] ?? []
-        const chordNotesArr = applyExtensions(originalNotes, activeExtensions)
-        const chordDescriptor = getChordDescriptor(chordNotesArr)
+        const chordIndices = applyExtensions(originalIndices, activeExtensions)
+        const chordDescriptor = getChordDescriptor(chordIndices)
         const slashBass = slashBasses[chordNumeralIdx] ?? null
+        const originalNotes = toNoteRefs(originalIndices, notes)
+        const chordNotesArr = toNoteRefs(chordIndices, notes)
         return { originalNotes, chordNotesArr, chordDescriptor, activeExtensions, slashBass }
       }),
-    [chordNumerals, modeNotes, selectedExtensions, slashBasses],
+    [chordNumerals, modeIndices, selectedExtensions, slashBasses, notes],
   )
 
   const emitHover = (
     chordNumeralIdx: number,
-    originalNotes: NoteIndex[],
-    modifiedNotes: NoteIndex[],
+    originalNotes: NoteRef[],
+    modifiedNotes: NoteRef[],
   ) => {
     setHoveredChordIndex(chordNumeralIdx)
     onChordHoverChange?.({ original: originalNotes, modified: modifiedNotes })

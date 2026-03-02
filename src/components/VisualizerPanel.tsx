@@ -61,7 +61,8 @@ export default function VisualizerPanel() {
 
   const {
     hoveredTriadIndex,
-    modifiedHoverNotes,
+    fullVoicedModified,
+    chordRootIndex,
     voicedOriginal,
     voicedModified,
     slashBassNoteIndex,
@@ -70,7 +71,7 @@ export default function VisualizerPanel() {
     highlightedBaseIdxs,
     setHoveredTriadIndex,
     handleChordHoverChange,
-  } = useChordHover(modeNotesWithOverflow, modeLeftOverflowSize, slashBasses, notes.length)
+  } = useChordHover(modeNotesWithOverflow, modeLeftOverflowSize, slashBasses, notes)
 
   const handlePlayNote = useCallback((note: Note) => playNote(note), [])
 
@@ -134,7 +135,7 @@ export default function VisualizerPanel() {
         />
 
         {/* Chord root's major scale — content appears on chord hover */}
-        <ChordMajorScaleRow chordNotes={modifiedHoverNotes} notes={notes} />
+        <ChordMajorScaleRow chordNotes={fullVoicedModified} chordRootIndex={chordRootIndex} notes={notes} />
 
         <ChromaticScaleRow
           sliderRef={sliderRef}
@@ -153,7 +154,6 @@ export default function VisualizerPanel() {
           modeLeftOverflowSize={modeLeftOverflowSize}
           spelledModeNotes={spelledModeNotes}
           highlightedModeIdxs={highlightedModeIdxs}
-          notes={notes}
           onPlayNote={handlePlayNote}
         />
 

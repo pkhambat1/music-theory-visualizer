@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react"
-import type { ModeDataProps, NoteIndex } from "../lib/music"
+import { useCallback, useMemo, useState } from "react"
+import type { ModeDataProps, NoteIndex, NoteRef } from "../lib/music"
 import type { ChordHighlightPair } from "../lib/geometry"
 import { Connection, IntervalConnection, RemovedConnection, AddedConnection } from "../models"
 import { bezierPath, bezierPointAt } from "../lib/bezier"
@@ -12,8 +12,8 @@ export type HoverLinesProps = ModeDataProps & {
   containerRef: React.RefObject<HTMLDivElement | null>,
   hoveredIndex: number | null,
   chordHighlightPairs: ChordHighlightPair[],
-  originalChordNotes: NoteIndex[],
-  modifiedChordNotes: NoteIndex[],
+  originalChordNotes: NoteRef[],
+  modifiedChordNotes: NoteRef[],
   slashBassNoteIndex: NoteIndex | null,
 }
 
@@ -29,6 +29,19 @@ export default function HoverLines({
 }: HoverLinesProps) {
   const [lines, setLines] = useState<Connection[]>([])
 
+  const modeIndices = useMemo(
+    () => modeNotesWithOverflow.map((r) => r.index),
+    [modeNotesWithOverflow],
+  )
+  const originalIndices = useMemo(
+    () => originalChordNotes.map((r) => r.index),
+    [originalChordNotes],
+  )
+  const modifiedIndices = useMemo(
+    () => modifiedChordNotes.map((r) => r.index),
+    [modifiedChordNotes],
+  )
+
   const measure = useCallback(() => {
     const container = containerRef?.current
     if (!container || hoveredIndex === null) {
@@ -39,22 +52,22 @@ export default function HoverLines({
       buildHoverConnections({
         container,
         hoveredIndex,
-        modeNotesWithOverflow,
+        modeNotesWithOverflow: modeIndices,
         modeLeftOverflowSize,
         chordHighlightPairs,
-        originalChordNotes,
-        modifiedChordNotes,
+        originalChordNotes: originalIndices,
+        modifiedChordNotes: modifiedIndices,
         slashBassNoteIndex,
       }),
     )
   }, [
     containerRef,
     hoveredIndex,
-    modeNotesWithOverflow,
+    modeIndices,
     modeLeftOverflowSize,
     chordHighlightPairs,
-    originalChordNotes,
-    modifiedChordNotes,
+    originalIndices,
+    modifiedIndices,
     slashBassNoteIndex,
   ])
 

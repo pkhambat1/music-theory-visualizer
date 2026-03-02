@@ -1,4 +1,4 @@
-import type { Extension, ExtensionOption, NoteIndex } from "../lib/music"
+import type { Extension, ExtensionOption, NoteRef } from "../lib/music"
 import type { Note } from "../models"
 import { buildSlashChordVoicing, CHORD_CELL_SIDE } from "../lib/music"
 import { playChord, arpeggiateChord } from "../lib/audio"
@@ -14,12 +14,12 @@ const HOVER_COLOR = "#000000"
 export type ChordDegreeCellProps = {
   chordNumeralIdx: number,
   chordNumeral: string,
-  originalNotes: NoteIndex[],
-  chordNotesArr: NoteIndex[],
+  originalNotes: NoteRef[],
+  chordNotesArr: NoteRef[],
   chordDescriptor: string,
   activeExtensions: Extension[],
   slashBass: number | null,
-  modeNotes: NoteIndex[],
+  modeNotes: NoteRef[],
   notes: Note[],
   arpeggiate: boolean,
   hoveredIndex: number | null,
@@ -29,7 +29,7 @@ export type ChordDegreeCellProps = {
   extensionOptions: ExtensionOption[],
   onExtensionChange?: (degreeIdx: number, value: string[]) => void,
   onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
-  onHover: (idx: number, original: NoteIndex[], modified: NoteIndex[]) => void,
+  onHover: (idx: number, original: NoteRef[], modified: NoteRef[]) => void,
   onHoverClear: () => void,
 }
 
@@ -84,15 +84,18 @@ export default function ChordDegreeCell({
         onMouseEnter={() => onHover(chordNumeralIdx, originalNotes, chordNotesArr)}
         onMouseLeave={() => onHoverClear()}
         onClick={() => {
+          const chordIndices = chordNotesArr.map((r) => r.index)
+          const modeIndices = modeNotes.map((r) => r.index)
           const voicing =
             slashBass !== null
-              ? buildSlashChordVoicing(chordNotesArr, modeNotes, chordNumeralIdx, slashBass)
-              : chordNotesArr
-          const chordNotes = voicing.map((idx) => notes[idx]!)
+              ? buildSlashChordVoicing(chordIndices, modeIndices, chordNumeralIdx, slashBass)
+              : chordIndices
+          const chordNoteObjs = voicing.map((idx) => notes[idx]!)
+          console.log("hoveredNotes", chordNoteObjs)
           if (arpeggiate) {
-            arpeggiateChord(chordNotes)
+            arpeggiateChord(chordNoteObjs)
           } else {
-            playChord(chordNotes)
+            playChord(chordNoteObjs)
           }
         }}
       >

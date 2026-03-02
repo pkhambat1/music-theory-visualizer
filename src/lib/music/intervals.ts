@@ -23,6 +23,14 @@ const INTERVAL_DEGREE_LABELS: Record<number, string> = {
   21: "♯13",
 }
 
+/**
+ * Normalize negative semitones to 0–11 before lookup. Negative values occur when a
+ * chord tone (e.g. in a slash chord voicing) appears in a lower octave than the
+ * chord root. We display the pitch-class interval (e.g. -6 → ♭5) rather than "-6".
+ * Non-negative values are passed through to preserve compound intervals (♭9, 13, etc.).
+ */
 export function getIntervalLabel(semitones: number): string {
-  return INTERVAL_DEGREE_LABELS[semitones] ?? `${semitones}`
+  const normalized =
+    semitones < 0 ? ((semitones % 12) + 12) % 12 : semitones
+  return INTERVAL_DEGREE_LABELS[normalized] ?? String(normalized)
 }

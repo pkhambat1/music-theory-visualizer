@@ -1,26 +1,37 @@
 import { useCallback, useMemo, useState } from "react"
-import type { NoteIndex } from "../lib/music"
+import type { NoteIndex, NoteRef } from "../lib/music"
 import type { ChordHighlightPair } from "../lib/geometry"
 import type { ChordHoverData } from "../components/DiatonicScaleDegreesRow"
-import { getSlashBassNote, buildSlashChordVoicing, leftTrimOverflowNotes } from "../lib/music"
+import type { Note } from "../models"
+import { getSlashBassNote, buildSlashChordVoicing, toNoteRef, toNoteRefs } from "../lib/music"
 
 type HoverState = {
   index: number | null,
-  original: NoteIndex[],
-  modified: NoteIndex[],
+  original: NoteRef[],
+  modified: NoteRef[],
 }
 
 export function useChordHover(
-  modeNotesWithOverflow: NoteIndex[],
+  modeNotesWithOverflow: NoteRef[],
   modeLeftOverflowSize: number,
   slashBasses: (number | null)[],
-  notesLength: number,
+  notes: Note[],
 ) {
   const [hoverState, setHoverState] = useState<HoverState>({
     index: null,
     original: [],
     modified: [],
   })
+
+  const modeIndices = useMemo(
+    () => modeNotesWithOverflow.map((r) => r.index),
+    [modeNotesWithOverflow],
+  )
+
+  const modeNoteIndices = useMemo(
+    () => modeIndices.slice(modeLeftOverflowSize),
+    [modeIndices, modeLeftOverflowSize],
+  )
 
   const hoveredTriadIndex = hoverState.index
   const modifiedHoverNotes = hoverState.modified
@@ -53,9 +64,8 @@ export function useChordHover(
     if (hoveredTriadIndex === null) return null
     const slashBass = slashBasses[hoveredTriadIndex]
     if (slashBass === null || slashBass === undefined) return null
-    const modeNotes = leftTrimOverflowNotes(modeNotesWithOverflow, modeLeftOverflowSize)
-    return getSlashBassNote(modeNotes, hoveredTriadIndex, slashBass)
-  }, [hoveredTriadIndex, slashBasses, modeNotesWithOverflow, modeLeftOverflowSize])
+    return getSlashBassNote(modeNoteIndices, hoveredTriadIndex, slashBass)
+  }, [hoveredTriadIndex, slashBasses, modeNoteIndices])
 
   const hoveredSlashBass = useMemo(() => {
     if (hoveredTriadIndex === null) return null
@@ -63,13 +73,14 @@ export function useChordHover(
   }, [hoveredTriadIndex, slashBasses])
 
   const voiceForSlash = useCallback(
-    (chordNotes: NoteIndex[]): NoteIndex[] => {
+    (chordNotes: NoteRef[]): NoteRef[] => {
       if (hoveredSlashBass === null || hoveredTriadIndex === null || chordNotes.length === 0)
         return chordNotes
-      const mn = leftTrimOverflowNotes(modeNotesWithOverflow, modeLeftOverflowSize)
-      return buildSlashChordVoicing(chordNotes, mn, hoveredTriadIndex, hoveredSlashBass).slice(1)
+      const chordIndices = chordNotes.map((r) => r.index)
+      const voicedIndices = buildSlashChordVoicing(chordIndices, modeNoteIndices, hoveredTriadIndex, hoveredSlashBass).slice(1)
+      return toNoteRefs(voicedIndices, notes)
     },
-    [hoveredSlashBass, hoveredTriadIndex, modeNotesWithOverflow, modeLeftOverflowSize],
+    [hoveredSlashBass, hoveredTriadIndex, modeNoteIndices, notes],
   )
 
   const voicedOriginal = useMemo(
@@ -81,22 +92,26 @@ export function useChordHover(
     [modifiedHoverNotes, voiceForSlash],
   )
 
+  const fullVoicedModified = useMemo<NoteRef[]>(() => {
+    if (slashBassNoteIndex === null) return voicedModified
+    return [toNoteRef(slashBassNoteIndex, notes), ...voicedModified]
+  }, [voicedModified, slashBassNoteIndex, notes])
+
   const chordHighlightPairs = useMemo<ChordHighlightPair[]>(() => {
     if (!voicedModified.length) return []
 
-    const originalSet = new Set(voicedOriginal)
+    const originalSet = new Set(voicedOriginal.map((r) => r.index))
     const notesToHighlight =
-      originalSet.size > 0 ? voicedModified.filter((n) => originalSet.has(n)) : voicedModified
+      originalSet.size > 0 ? voicedModified.filter((r) => originalSet.has(r.index)) : voicedModified
 
     return notesToHighlight
-      .map((noteIdx) => {
-        if (typeof noteIdx !== "number") return null
-        const modeIdx = modeNotesWithOverflow.indexOf(noteIdx)
+      .map((ref) => {
+        const modeIdx = modeIndices.indexOf(ref.index)
         if (modeIdx < 0) return null
-        return { modeIdx, baseIdx: noteIdx } as ChordHighlightPair
+        return { modeIdx, baseIdx: ref.index } as ChordHighlightPair
       })
       .filter((p): p is ChordHighlightPair => p !== null)
-  }, [voicedModified, modeNotesWithOverflow, voicedOriginal])
+  }, [voicedModified, modeIndices, voicedOriginal])
 
   const highlightedModeIdxs = useMemo(
     () => new Set(chordHighlightPairs.map((p) => p.modeIdx)),
@@ -105,23 +120,26 @@ export function useChordHover(
 
   const highlightedBaseIdxs = useMemo(() => {
     const idxs = new Set(
-      voicedModified.filter(
-        (idx): idx is NoteIndex => typeof idx === "number" && idx >= 0 && idx < notesLength,
-      ),
+      voicedModified
+        .map((r) => r.index)
+        .filter((idx): idx is NoteIndex => idx >= 0 && idx < notes.length),
     )
     if (
       slashBassNoteIndex !== null &&
       slashBassNoteIndex >= 0 &&
-      slashBassNoteIndex < notesLength
+      slashBassNoteIndex < notes.length
     ) {
       idxs.add(slashBassNoteIndex)
     }
     return idxs
-  }, [voicedModified, slashBassNoteIndex, notesLength])
+  }, [voicedModified, slashBassNoteIndex, notes.length])
+
+  const chordRootIndex = modifiedHoverNotes.length > 0 ? modifiedHoverNotes[0]!.index : null
 
   return {
     hoveredTriadIndex,
-    modifiedHoverNotes,
+    fullVoicedModified,
+    chordRootIndex,
     voicedOriginal,
     voicedModified,
     slashBassNoteIndex,
