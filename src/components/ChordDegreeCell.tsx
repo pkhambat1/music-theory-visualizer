@@ -123,7 +123,7 @@ export default function ChordDegreeCell({
 
         {/* Controls */}
         <div
-          className="absolute right-1 bottom-1 z-10 opacity-30 transition-opacity pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+          className={`absolute right-1 bottom-1 z-10 transition-opacity ${isPopoverOpen ? "opacity-100 pointer-events-auto" : "opacity-30 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"}`}
           onClick={(e) => e.stopPropagation()}
           onMouseEnter={(e) => {
             e.stopPropagation()

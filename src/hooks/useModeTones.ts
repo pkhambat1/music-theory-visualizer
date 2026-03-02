@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import type { Interval, NoteIndex } from "../lib/music"
+import { useMemo } from "react"
+import type { Interval } from "../lib/music"
 import type { CellLink } from "../lib/geometry"
 import type { Note } from "../models"
 import {
-  addOverflowToModeIntervals,
   buildModeNotesWithOverflow,
   getModeLeftOverflowSize,
-  modeIntervalsToMode,
   spellModeNotes,
   toNoteRefs,
 } from "../lib/music"
@@ -16,18 +14,11 @@ export function useModeTones(
   rootNote: Note,
   notes: Note[],
 ) {
-  const modeWithOverflowIntervalsRef = useRef(addOverflowToModeIntervals(modeIntervals))
   const modeLeftOverflowSize = getModeLeftOverflowSize(modeIntervals)
 
-  useEffect(() => {
-    modeWithOverflowIntervalsRef.current = addOverflowToModeIntervals(modeIntervals)
-    setModeIndicesWithOverflow(
-      modeIntervalsToMode(rootNote, modeWithOverflowIntervalsRef.current, notes),
-    )
-  }, [rootNote, modeIntervals, notes])
-
-  const [modeIndicesWithOverflow, setModeIndicesWithOverflow] = useState<NoteIndex[]>(() =>
-    buildModeNotesWithOverflow(rootNote, modeIntervals, notes),
+  const modeIndicesWithOverflow = useMemo(
+    () => buildModeNotesWithOverflow(rootNote, modeIntervals, notes),
+    [rootNote, modeIntervals, notes],
   )
 
   const modeNotesWithOverflow = useMemo(
