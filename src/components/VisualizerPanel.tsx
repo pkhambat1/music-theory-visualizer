@@ -47,7 +47,7 @@ export default function VisualizerPanel() {
 
   const modeIntervals = useMemo((): Interval[] => selectedMode.intervals, [selectedMode])
 
-  const { modeNotesWithOverflow, modeLeftOverflowSize, spelledModeNotes, modeConnections } =
+  const { modeNotesWithOverflow, modeLeftOverflowSize, visibleModeNotes, spelledModeNotes, modeConnections } =
     useModeTones(modeIntervals, rootNote, notes)
 
   const {
@@ -71,7 +71,7 @@ export default function VisualizerPanel() {
     highlightedBaseIdxs,
     setHoveredTriadIndex,
     handleChordHoverChange,
-  } = useChordHover(modeNotesWithOverflow, modeLeftOverflowSize, slashBasses, notes)
+  } = useChordHover(modeNotesWithOverflow, visibleModeNotes, slashBasses, notes)
 
   const handlePlayNote = useCallback((note: Note) => playNote(note), [])
 
@@ -135,7 +135,7 @@ export default function VisualizerPanel() {
         />
 
         {/* Chord root's major scale — content appears on chord hover */}
-        <ChordMajorScaleRow chordNotes={fullVoicedModified} chordRootIndex={chordRootIndex} notes={notes} />
+        <ChordMajorScaleRow chordNotes={fullVoicedModified} chordRootIndex={chordRootIndex} />
 
         <ChromaticScaleRow
           sliderRef={sliderRef}
@@ -159,15 +159,13 @@ export default function VisualizerPanel() {
 
         {/* Diatonic chord degrees */}
         <DiatonicScaleDegreesRow
-          modeNotesWithOverflow={modeNotesWithOverflow}
+          visibleModeNotes={visibleModeNotes}
           setHoveredChordIndex={setHoveredTriadIndex}
-          notes={notes}
           selectedExtensions={selectedExtensions}
           extensionOptions={EXTENSION_OPTIONS}
           onExtensionChange={handleExtensionChange}
           slashBasses={slashBasses}
           onSlashBassChange={handleSlashBassChange}
-          modeLeftOverflowSize={modeLeftOverflowSize}
           modeLength={modeIntervals.length}
           onChordHoverChange={handleChordHoverChange}
           arpeggiate={arpeggiate}

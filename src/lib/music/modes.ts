@@ -17,7 +17,10 @@ export const MODES: Mode[] = [
 ]
 
 /** The Ionian (major) intervals, used as the reference for chord construction. */
-export const IONIAN = MODES.find(m => m.name === "Ionian (major)")!.intervals
+export const IONIAN = [0, 2, 4, 5, 7, 9, 11, 12] as const
 
 /** Number of semitones in an octave (also chromaticScale.length - 1). */
 export const OCTAVE = 12
+
+/** Roman numerals for the 7 diatonic scale degrees. */
+export const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII"] as const

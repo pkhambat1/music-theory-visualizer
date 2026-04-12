@@ -9,11 +9,8 @@ export function useChordExtensions(modeIntervalsLength: number) {
   )
 
   useEffect(() => {
-    setChordDegreeStates((prev) =>
-      Array.from(
-        { length: modeIntervalsLength },
-        (_, idx) => prev[idx] ?? { ...EMPTY_DEGREE_STATE },
-      ),
+    setChordDegreeStates(
+      Array.from({ length: modeIntervalsLength }, () => ({ ...EMPTY_DEGREE_STATE })),
     )
   }, [modeIntervalsLength])
 
@@ -32,10 +29,10 @@ export function useChordExtensions(modeIntervalsLength: number) {
     [chordDegreeStates],
   )
 
-  const handleExtensionChange = useCallback((degreeIdx: number, value: string[]) => {
+  const handleExtensionChange = useCallback((degreeIdx: number, value: Extension[]) => {
     setChordDegreeStates((prev) => {
       const next = [...prev]
-      next[degreeIdx] = { ...next[degreeIdx]!, extensions: value as Extension[] }
+      next[degreeIdx] = { ...next[degreeIdx]!, extensions: value }
       return next
     })
   }, [])

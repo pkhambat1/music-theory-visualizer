@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
-import type { Extension, ExtensionOption, ModeDataProps, NoteRef } from "../lib/music"
-import type { Note } from "../models"
-import { getChordDescriptor, getChordNotes, applyExtensions, toNoteRefs, CHORD_CELL_SIDE } from "../lib/music"
+import type { Extension, ExtensionOption, NoteRef } from "../lib/music"
+import { getChordDescriptor, getChordNotes, applyExtensions, toNoteRefs, CHORD_CELL_SIDE, ROMAN_NUMERALS } from "../lib/music"
+import { notes } from "../lib/notes"
 import NotesArray from "./NotesArray"
 import ChordDegreeCell from "./ChordDegreeCell"
 
@@ -10,12 +10,12 @@ export type ChordHoverData = {
   modified: NoteRef[],
 }
 
-export type DiatonicScaleDegreesRowProps = ModeDataProps & {
+export type DiatonicScaleDegreesRowProps = {
+  visibleModeNotes: NoteRef[],
   setHoveredChordIndex: (idx: number | null) => void,
-  notes: Note[],
   selectedExtensions: Extension[][],
   extensionOptions: ExtensionOption[],
-  onExtensionChange?: (degreeIdx: number, value: string[]) => void,
+  onExtensionChange?: (degreeIdx: number, value: Extension[]) => void,
   slashBasses: (number | null)[],
   onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
   modeLength: number,
@@ -25,40 +25,32 @@ export type DiatonicScaleDegreesRowProps = ModeDataProps & {
   hoveredIndex: number | null,
 }
 
-const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
 const CAPTION = "Diatonic Chords"
 const CAPTION_SUBTITLE = "Chords built from the mode"
 
 export default function DiatonicScaleDegreesRow({
-  modeNotesWithOverflow,
+  visibleModeNotes,
   setHoveredChordIndex,
-  notes,
   selectedExtensions,
   extensionOptions,
   onExtensionChange,
   slashBasses,
   onSlashBassChange,
-  modeLeftOverflowSize,
   modeLength,
   onChordHoverChange,
   captionRight,
   arpeggiate,
   hoveredIndex,
 }: DiatonicScaleDegreesRowProps) {
-  const degreeCount = modeLength > 0 ? modeLength : ROMAN_BASE.length + 1
+  const degreeCount = modeLength > 0 ? modeLength : ROMAN_NUMERALS.length + 1
   const chordNumerals = Array.from({ length: degreeCount }, (_, idx) =>
-    idx === degreeCount - 1 ? "I" : (ROMAN_BASE[idx] ?? "I"),
+    idx === degreeCount - 1 ? "I" : (ROMAN_NUMERALS[idx] ?? "I"),
   )
   const [openIdx, setOpenIdx] = useState<number | null>(null)
 
-  const modeNotes = useMemo(
-    () => modeNotesWithOverflow.slice(modeLeftOverflowSize),
-    [modeNotesWithOverflow, modeLeftOverflowSize],
-  )
-
   const modeIndices = useMemo(
-    () => modeNotes.map((r) => r.index),
-    [modeNotes],
+    () => visibleModeNotes.map((r) => r.index),
+    [visibleModeNotes],
   )
 
   const chordData = useMemo(
@@ -73,7 +65,7 @@ export default function DiatonicScaleDegreesRow({
         const chordNotesArr = toNoteRefs(chordIndices, notes)
         return { originalNotes, chordNotesArr, chordDescriptor, activeExtensions, slashBass }
       }),
-    [chordNumerals, modeIndices, selectedExtensions, slashBasses, notes],
+    [chordNumerals, modeIndices, selectedExtensions, slashBasses],
   )
 
   const emitHover = (
@@ -113,8 +105,7 @@ export default function DiatonicScaleDegreesRow({
             chordDescriptor={chordDescriptor}
             activeExtensions={activeExtensions}
             slashBass={slashBass}
-            modeNotes={modeNotes}
-            notes={notes}
+            modeNotes={visibleModeNotes}
             arpeggiate={arpeggiate}
             hoveredIndex={hoveredIndex}
             isPopoverOpen={openIdx === chordNumeralIdx}

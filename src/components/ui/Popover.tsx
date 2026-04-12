@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
+import { useClickOutside } from "../../hooks"
 
 export type PopoverPosition = "top" | "bottom"
 
@@ -24,24 +25,16 @@ export default function Popover({
 }: PopoverProps) {
   const ref = useRef<HTMLDivElement>(null)
 
+  const close = useCallback(() => onOpenChange(false), [onOpenChange])
+  useClickOutside(ref, close, open)
+
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        onOpenChange(false)
-      }
-    }
+    if (!open) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onOpenChange(false)
     }
-
-    if (open) {
-      document.addEventListener("mousedown", handleClick)
-      document.addEventListener("keydown", handleKeyDown)
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClick)
-      document.removeEventListener("keydown", handleKeyDown)
-    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
   }, [open, onOpenChange])
 
   return (

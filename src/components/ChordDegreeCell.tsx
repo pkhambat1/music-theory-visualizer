@@ -1,14 +1,15 @@
 import type { Extension, ExtensionOption, NoteRef } from "../lib/music"
-import type { Note } from "../models"
-import { buildSlashChordVoicing, CHORD_CELL_SIDE } from "../lib/music"
+import { buildSlashChordVoicing, CHORD_CELL_SIDE, ROMAN_NUMERALS } from "../lib/music"
+import { notes } from "../lib/notes"
 import { playChord, arpeggiateChord } from "../lib/audio"
 import { degreeColor } from "../lib/theme"
 import NoteCell from "./NoteCell"
 import ExtensionPanel from "./ExtensionPanel"
 import { Popover, PopoverTrigger, Pill } from "./ui"
 
-const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
-const DATA_ROW = "diatonic-row"
+import type { RowId } from "../lib/geometry"
+
+const DATA_ROW: RowId = "diatonic-row"
 const HOVER_COLOR = "#000000"
 
 export type ChordDegreeCellProps = {
@@ -20,14 +21,13 @@ export type ChordDegreeCellProps = {
   activeExtensions: Extension[],
   slashBass: number | null,
   modeNotes: NoteRef[],
-  notes: Note[],
   arpeggiate: boolean,
   hoveredIndex: number | null,
   isPopoverOpen: boolean,
   onPopoverOpenChange: (open: boolean) => void,
   selectedExtensions: Extension[],
   extensionOptions: ExtensionOption[],
-  onExtensionChange?: (degreeIdx: number, value: string[]) => void,
+  onExtensionChange?: (degreeIdx: number, value: Extension[]) => void,
   onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
   onHover: (idx: number, original: NoteRef[], modified: NoteRef[]) => void,
   onHoverClear: () => void,
@@ -42,7 +42,6 @@ export default function ChordDegreeCell({
   activeExtensions,
   slashBass,
   modeNotes,
-  notes,
   arpeggiate,
   hoveredIndex,
   isPopoverOpen,
@@ -73,7 +72,7 @@ export default function ChordDegreeCell({
         dataRow={DATA_ROW}
         dataIdx={chordNumeralIdx}
         optBackground={degreeBg}
-        className="group cursor-pointer hover:bg-black/[0.08] transition-colors"
+        className="group cursor-pointer transition-colors"
         style={{
           width: `${CHORD_CELL_SIDE}px`,
           height: `${CHORD_CELL_SIDE}px`,
@@ -91,7 +90,6 @@ export default function ChordDegreeCell({
               ? buildSlashChordVoicing(chordIndices, modeIndices, chordNumeralIdx, slashBass)
               : chordIndices
           const chordNoteObjs = voicing.map((idx) => notes[idx]!)
-          console.log("hoveredNotes", chordNoteObjs)
           if (arpeggiate) {
             arpeggiateChord(chordNoteObjs)
           } else {
@@ -106,7 +104,7 @@ export default function ChordDegreeCell({
           {chordNumeral}
           {chordDescriptor}
           {slashBass !== null && (
-            <span className="text-[9px]">/{ROMAN_BASE[slashBass] ?? ""}</span>
+            <span className="text-[9px]">/{ROMAN_NUMERALS[slashBass] ?? ""}</span>
           )}
         </span>
 
@@ -116,7 +114,7 @@ export default function ChordDegreeCell({
               <Pill key={ext} label={ext} />
             ))}
             {slashBass !== null && (
-              <Pill label={`/${ROMAN_BASE[slashBass]}`} />
+              <Pill label={`/${ROMAN_NUMERALS[slashBass]}`} />
             )}
           </div>
         )}

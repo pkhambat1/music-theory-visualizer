@@ -59,7 +59,7 @@ export default function ModeScaleRow({
             key={idx}
             idx={idx}
             dataIdx={idx}
-            noteString={noteObj}
+            originalNote={noteObj}
             newValue={spelledModeNotes[idx] ?? null}
             onPlay={onPlayNote}
             isHighlighted={isHighlighted}

@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { cn } from "../../lib/cn"
+import { useClickOutside } from "../../hooks"
 import Button from "./Button"
 
 export type DropdownItem = {
@@ -21,15 +22,8 @@ export default function Dropdown({
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [])
+  const close = useCallback(() => setOpen(false), [])
+  useClickOutside(ref, close, true)
 
   return (
     <div className="relative inline-block" ref={ref}>

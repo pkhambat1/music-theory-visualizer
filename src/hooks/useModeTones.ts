@@ -26,6 +26,11 @@ export function useModeTones(
     [modeIndicesWithOverflow, notes],
   )
 
+  const visibleModeNotes = useMemo(
+    () => modeNotesWithOverflow.slice(modeLeftOverflowSize),
+    [modeNotesWithOverflow, modeLeftOverflowSize],
+  )
+
   const spelledModeNotes = useMemo(
     () => spellModeNotes(modeIndicesWithOverflow, modeLeftOverflowSize, notes),
     [modeIndicesWithOverflow, modeLeftOverflowSize, notes],
@@ -34,9 +39,9 @@ export function useModeTones(
   const modeConnections = useMemo<CellLink[]>(
     () =>
       modeIntervals.map((interval, idx) => ({
-        fromRow: "chromatic-row",
+        fromRow: "chromatic-row" as const,
         fromIdx: interval as number,
-        toRow: "mode-row",
+        toRow: "mode-row" as const,
         toIdx: modeLeftOverflowSize + idx,
       })),
     [modeIntervals, modeLeftOverflowSize],
@@ -45,6 +50,7 @@ export function useModeTones(
   return {
     modeNotesWithOverflow,
     modeLeftOverflowSize,
+    visibleModeNotes,
     spelledModeNotes,
     modeConnections,
   }

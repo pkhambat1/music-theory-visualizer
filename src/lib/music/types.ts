@@ -35,8 +35,6 @@ export type Extension =
 
 export type ChordQuality = "" | "m" | "°" | "+" | "sus2" | "sus4" | "?"
 
-export type ChordType = "triads" | "seventhChords"
-
 export type ExtensionOption = {
   value: Extension,
   label: string,
