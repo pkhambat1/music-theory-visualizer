@@ -81,7 +81,7 @@ export default function ChromaticScaleRow({
             idx={idx}
             dataRow="base-row"
             dataIdx={idx}
-            className="keen-slider__slide cursor-pointer hover:bg-black/[0.08]"
+            className="keen-slider__slide cursor-pointer"
             style={
               highlightedBaseIdxs.has(idx)
                 ? HIGHLIGHTED_BASE_STYLE("#000000")

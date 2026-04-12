@@ -13,7 +13,7 @@ type HoverState = {
 
 export function useChordHover(
   modeNotesWithOverflow: NoteRef[],
-  modeLeftOverflowSize: number,
+  visibleModeNotes: NoteRef[],
   slashBasses: (number | null)[],
   notes: Note[],
 ) {
@@ -29,8 +29,8 @@ export function useChordHover(
   )
 
   const modeNoteIndices = useMemo(
-    () => modeIndices.slice(modeLeftOverflowSize),
-    [modeIndices, modeLeftOverflowSize],
+    () => visibleModeNotes.map((r) => r.index),
+    [visibleModeNotes],
   )
 
   const hoveredTriadIndex = hoverState.index

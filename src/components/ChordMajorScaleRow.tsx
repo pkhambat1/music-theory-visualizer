@@ -1,6 +1,6 @@
 import type { NoteIndex, NoteRef } from "../lib/music"
-import type { Note } from "../models"
 import { IONIAN, SQUARE_SIDE } from "../lib/music"
+import { notes } from "../lib/notes"
 import { renderNote } from "./NoteLabel"
 import Strikethrough from "./Strikethrough"
 import { scaleToneBand, MUTED_TEXT } from "../lib/theme"
@@ -128,7 +128,6 @@ function buildMajorScale(root: NoteIndex, minDegreeIdx: number, maxDegreeIdx: nu
 export type ChordMajorScaleRowProps = {
   chordNotes: NoteRef[],
   chordRootIndex: NoteIndex | null,
-  notes: Note[],
 }
 
 /**
@@ -138,7 +137,7 @@ export type ChordMajorScaleRowProps = {
  * - Altered chord tones: major scale note struck-through, actual note below
  * - Non-chord-tone degrees: dimmed
  */
-export default function ChordMajorScaleRow({ chordNotes, chordRootIndex, notes }: ChordMajorScaleRowProps) {
+export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: ChordMajorScaleRowProps) {
   const isEmpty = chordNotes.length === 0
 
   const chordIndices = isEmpty ? [] : chordNotes.map((r) => r.index)

@@ -1,8 +1,6 @@
 import type { Extension, ExtensionOption } from "../lib/music"
-import { getDisabledExtensions } from "../lib/music"
+import { getDisabledExtensions, ROMAN_NUMERALS } from "../lib/music"
 import { MultiSelect } from "./ui"
-
-const ROMAN_BASE = ["I", "II", "III", "IV", "V", "VI", "VII"]
 
 export type ExtensionPanelProps = {
   chordNumeralIdx: number,
@@ -10,7 +8,7 @@ export type ExtensionPanelProps = {
   selectedExtensions: Extension[],
   activeExtensions: Extension[],
   slashBass: number | null,
-  onExtensionChange?: (degreeIdx: number, value: string[]) => void,
+  onExtensionChange?: (degreeIdx: number, value: Extension[]) => void,
   onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
 }
 
@@ -33,7 +31,7 @@ export default function ExtensionPanel({
         header="Extensions"
         options={extensionOptions}
         value={selectedExtensions}
-        onChange={(value) => onExtensionChange?.(chordNumeralIdx, value)}
+        onChange={(value) => onExtensionChange?.(chordNumeralIdx, value as Extension[])}
         placeholder="Select"
         disabledValues={getDisabledExtensions(activeExtensions)}
       />
@@ -52,7 +50,7 @@ export default function ExtensionPanel({
           )}
         </div>
         <div className="flex gap-1">
-          {ROMAN_BASE.map((numeral, degIdx) => {
+          {ROMAN_NUMERALS.map((numeral, degIdx) => {
             const isOwn = degIdx === chordNumeralIdx
             const isSelected = slashBass === degIdx
             return (

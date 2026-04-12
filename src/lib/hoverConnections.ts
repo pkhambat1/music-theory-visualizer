@@ -1,17 +1,17 @@
 import type { NoteIndex } from "./music"
-import type { ChordHighlightPair } from "./geometry"
+import type { ChordHighlightPair, RowId } from "./geometry"
 import {
   type Point, Connection, StaticConnection, IntervalConnection,
   DiatonicConnection, RemovedConnection, AddedConnection, BassConnection,
 } from "../models"
 import { leftTrimOverflowNotes, getChordNotes } from "./music"
 
-export type ElementPosition = { cx: number, top: number, bottom: number }
+type ElementPosition = { cx: number, top: number, bottom: number }
 
 export function resolveElement(
   container: HTMLElement,
   containerRect: DOMRect,
-  row: string,
+  row: RowId,
   idx: number,
 ): ElementPosition | null {
   const el = container.querySelector(`[data-row="${row}"][data-idx="${idx}"]`)
@@ -163,7 +163,7 @@ export function buildBassLine(
   return new StaticConnection(source, to)
 }
 
-export type HoverConnectionsInput = {
+type HoverConnectionsInput = {
   container: HTMLElement,
   hoveredIndex: number,
   modeNotesWithOverflow: NoteIndex[],

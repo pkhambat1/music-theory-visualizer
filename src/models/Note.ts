@@ -19,11 +19,6 @@ export class Note {
     return `${this.letter}${this.accidental.displaySymbol}`
   }
 
-  /** Full display string with unicode flat, e.g. "C#4", "E♭3" */
-  toDisplay(): string {
-    return `${this.label()}${this.octave}`
-  }
-
   /** ASCII string for Tone.js, e.g. "C#4", "Eb3" */
   toToneString(): string {
     return `${this.letter}${this.accidental.toneSymbol}${this.octave}`

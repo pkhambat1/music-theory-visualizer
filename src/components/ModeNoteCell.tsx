@@ -8,7 +8,7 @@ import { MUTED_TEXT } from "../lib/theme"
 export type ModeNoteCellProps = {
   idx: number,
   dataIdx: number,
-  noteString: Note | null,
+  originalNote: Note | null,
   newValue: Note | null,
   onPlay: (note: Note) => void,
   isHighlighted: boolean,
@@ -20,15 +20,15 @@ const HIGHLIGHT_COLOR = "#000000"
 const ModeNoteCell = React.memo(function ModeNoteCell({
   idx,
   dataIdx,
-  noteString,
+  originalNote,
   newValue,
   onPlay,
   isHighlighted,
   optCaption,
 }: ModeNoteCellProps) {
   const noteLabel = useMemo(
-    () => noteString?.label() ?? "",
-    [noteString],
+    () => originalNote?.label() ?? "",
+    [originalNote],
   )
   const newLabel = useMemo(
     () => newValue?.label() ?? "",
@@ -37,13 +37,13 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
 
   const isSimple =
     noteLabel === newLabel &&
-    noteString?.isC() === true
+    originalNote?.isC() === true
 
   const isDifferent = noteLabel !== newLabel && newLabel !== ""
 
   const handleClick = useCallback(() => {
-    if (noteString) onPlay(noteString)
-  }, [noteString, onPlay])
+    if (originalNote) onPlay(originalNote)
+  }, [originalNote, onPlay])
 
   return (
     <NoteCell
@@ -51,7 +51,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
       dataRow="mode-row"
       dataIdx={dataIdx}
       onClick={handleClick}
-      className="cursor-pointer hover:bg-black/[0.08]"
+      className="cursor-pointer"
       optCaption={optCaption}
       style={
         isHighlighted
@@ -63,8 +63,8 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
             }
       }
     >
-      {isSimple && noteString ? (
-        renderNote(noteString)
+      {isSimple && originalNote ? (
+        renderNote(originalNote)
       ) : isDifferent && newValue ? (
         <div className="flex flex-col items-center gap-0 leading-none">
           <span className={`relative text-sm font-normal ${MUTED_TEXT}`}>
@@ -76,7 +76,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
           </span>
         </div>
       ) : (
-        <span>{(newValue ?? noteString) ? renderNote((newValue ?? noteString)!) : ""}</span>
+        <span>{(newValue ?? originalNote) ? renderNote((newValue ?? originalNote)!) : ""}</span>
       )}
     </NoteCell>
   )

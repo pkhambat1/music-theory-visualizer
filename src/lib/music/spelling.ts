@@ -7,7 +7,7 @@ const LETTER_TO_PC: Record<Letter, number> = {
   C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11,
 }
 
-export function noteNameToPitchClass(
+function noteNameToPitchClass(
   note: Note | null | undefined,
 ): PitchClass | null {
   if (!note) return null
@@ -15,7 +15,7 @@ export function noteNameToPitchClass(
   return (basePc + note.accidental.semitoneOffset + 12) % 12
 }
 
-export type SpellingCandidate = {
+type SpellingCandidate = {
   spelled: (Note | null)[],
   maxAbs: number,
   totalAbs: number,
