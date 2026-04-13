@@ -1,4 +1,4 @@
-import type { Interval, NoteIndex, NoteRef } from "./types"
+import type { Interval, NoteInMode, NoteIndex, NoteRef } from "./types"
 import { Note } from "../../models"
 import { CHROMATIC_SCALE } from "../notes"
 import { OCTAVE } from "./modes"
@@ -71,4 +71,19 @@ export function toNoteRef(index: NoteIndex, notes: Note[]): NoteRef {
 /** Wrap an array of NoteIndex values into NoteRef[] by looking up Note objects. */
 export function toNoteRefs(indices: NoteIndex[], notes: Note[]): NoteRef[] {
   return indices.map((index) => toNoteRef(index, notes))
+}
+
+/** Zip mode indices + spelled notes + degree into NoteInMode[]. */
+export function toNoteInModeArray(
+  modeIndices: NoteIndex[],
+  spelledNotes: Note[],
+  modeLeftOverflowSize: number,
+  notes: Note[],
+): NoteInMode[] {
+  return modeIndices.map((index, i) => ({
+    index,
+    note: notes[index]!,
+    spelled: spelledNotes[i]!,
+    degree: i - modeLeftOverflowSize,
+  }))
 }

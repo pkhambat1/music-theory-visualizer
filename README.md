@@ -24,7 +24,7 @@ The visualization has three connected rows, top to bottom:
 Hover over any chord in the bottom row to see:
 
 - **Lines** connecting the chord to its component notes in the mode row, with **interval labels** (1, 3, 5, etc.) on each line
-- **A chord scale context row** above the chromatic row, showing how the chord tones relate to the chord root's major scale — altered tones display the direction of alteration (e.g. `E♭ ← E` for a flattened note)
+- **A chord scale context row** above the chromatic row, showing how the chord tones relate to the chord root's major scale — altered tones display the direction of alteration (e.g. `Eb ← E` for a flattened note)
 - **Highlighted cells** in the chromatic row showing the chord tones in context of all 12 notes
 
 ### Play audio
@@ -92,8 +92,8 @@ A musical note: letter (`Letter` type: `A`–`G`), accidental (`Accidental` clas
 
 | Method | Returns | Example |
 |---|---|---|
-| `label()` | Note name without octave | `"C#"`, `"E♭"` |
-| `toDisplay()` | Full name with octave (unicode) | `"C#4"`, `"E♭3"` |
+| `label()` | Note name without octave | `"C#"`, `"Eb"` |
+| `toDisplay()` | Full name with octave (unicode) | `"C#4"`, `"Eb3"` |
 | `toToneString()` | ASCII for Tone.js playback | `"C#4"`, `"Eb3"` |
 | `equals(other)` | Structural equality | — |
 

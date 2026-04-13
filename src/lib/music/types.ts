@@ -9,6 +9,12 @@ export type NoteIndex = number
 /** A note index paired with the resolved Note object, for use at hook/component boundaries. */
 export type NoteRef = { index: NoteIndex, note: Note }
 
+/** A mode note: NoteRef + enharmonic spelling + 0-indexed scale degree. */
+export type NoteInMode = NoteRef & {
+  spelled: Note,
+  degree: number,
+}
+
 /** Semitone offset from a root (e.g. mode intervals like 0, 2, 4, 5 …). */
 export type Interval = number
 
@@ -32,6 +38,13 @@ export type Extension =
   | "maj9"
   | "11"
   | "13"
+
+export const EXTENSION_ORDER: Extension[] = [
+  "maj", "m", "dim", "aug", "sus2", "sus4",
+  "6", "7", "maj7",
+  "add2", "add4", "add9",
+  "9", "maj9", "11", "13",
+]
 
 export type ChordQuality = "" | "m" | "°" | "+" | "sus2" | "sus4" | "?"
 

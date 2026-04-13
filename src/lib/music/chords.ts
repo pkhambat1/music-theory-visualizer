@@ -152,7 +152,7 @@ export function applyExtensions(
     }
   })
 
-  return [...base, ...added]
+  return [...base, ...added].sort((a, b) => a - b)
 }
 
 /**

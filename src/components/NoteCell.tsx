@@ -27,7 +27,7 @@ export default function NoteCell({
       data-row={dataRow}
       data-idx={dataIdx}
       className={cn(
-        "flex items-center justify-center text-sm font-semibold box-border relative select-none transition-colors duration-0 text-gray-800 hover:bg-black/[0.08]",
+        "flex items-center justify-center text-sm font-semibold box-border relative select-none text-black hover:bg-black/[0.08]",
         className ?? "",
       )}
       style={{
@@ -43,7 +43,7 @@ export default function NoteCell({
     >
       {children}
       {optCaption != null && (
-        <div className="absolute -bottom-5 text-[10px] font-normal text-gray-400">
+        <div className="absolute -bottom-5 text-[10px] font-normal text-black">
           {optCaption}
         </div>
       )}

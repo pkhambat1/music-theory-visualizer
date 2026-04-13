@@ -57,7 +57,7 @@ export default function ChordDegreeCell({
 
   return (
     <div
-      className="relative"
+      className="relative group"
       style={{
         width: `${CHORD_CELL_SIDE}px`,
         height: `${CHORD_CELL_SIDE}px`,
@@ -72,7 +72,7 @@ export default function ChordDegreeCell({
         dataRow={DATA_ROW}
         dataIdx={chordNumeralIdx}
         optBackground={degreeBg}
-        className="group cursor-pointer transition-colors"
+        className="cursor-pointer"
         style={{
           width: `${CHORD_CELL_SIDE}px`,
           height: `${CHORD_CELL_SIDE}px`,
@@ -119,39 +119,40 @@ export default function ChordDegreeCell({
           </div>
         )}
 
-        {/* Controls */}
-        <div
-          className={`absolute right-1 bottom-1 z-10 transition-opacity ${isPopoverOpen ? "opacity-100 pointer-events-auto" : "opacity-30 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"}`}
-          onClick={(e) => e.stopPropagation()}
-          onMouseEnter={(e) => {
-            e.stopPropagation()
-            onHoverClear()
-          }}
-          onMouseLeave={(e) => {
-            e.stopPropagation()
-            const related = e.relatedTarget as Element | null
-            if (related?.closest?.("[data-popover-panel]")) return
-            onHover(chordNumeralIdx, originalNotes, chordNotesArr)
-          }}
-        >
-          <Popover
-            open={isPopoverOpen}
-            onOpenChange={onPopoverOpenChange}
-            trigger={<PopoverTrigger />}
-            position="top"
-          >
-            <ExtensionPanel
-              chordNumeralIdx={chordNumeralIdx}
-              extensionOptions={extensionOptions}
-              selectedExtensions={selectedExtensions}
-              activeExtensions={activeExtensions}
-              slashBass={slashBass}
-              onExtensionChange={onExtensionChange}
-              onSlashBassChange={onSlashBassChange}
-            />
-          </Popover>
-        </div>
       </NoteCell>
+
+      {/* Extensions button — below the cell */}
+      <div
+        className="absolute -bottom-7 inset-x-0 flex justify-center z-10"
+        onClick={(e) => e.stopPropagation()}
+        onMouseEnter={(e) => {
+          if (isPopoverOpen) return
+          e.stopPropagation()
+          onHoverClear()
+        }}
+        onMouseLeave={(e) => {
+          if (isPopoverOpen) return
+          e.stopPropagation()
+          onHover(chordNumeralIdx, originalNotes, chordNotesArr)
+        }}
+      >
+        <Popover
+          open={isPopoverOpen}
+          onOpenChange={onPopoverOpenChange}
+          trigger={<PopoverTrigger />}
+          position="top"
+        >
+          <ExtensionPanel
+            chordNumeralIdx={chordNumeralIdx}
+            extensionOptions={extensionOptions}
+            selectedExtensions={selectedExtensions}
+            activeExtensions={activeExtensions}
+            slashBass={slashBass}
+            onExtensionChange={onExtensionChange}
+            onSlashBassChange={onSlashBassChange}
+          />
+        </Popover>
+      </div>
     </div>
   )
 }

@@ -38,7 +38,7 @@ Connection (abstract)             — a directed line between two screen-space p
 Styling and label rendering branch on `instanceof` — no string discriminants. `FixedLines` uses `StaticConnection[]`; `HoverLines` uses the full hierarchy.
 
 ### Type Aliases (`src/lib/music/types.ts`)
-Domain type aliases (`PitchClass`, `NoteIndex`, `Interval`, `Letter`) are plain `number` or string-union aliases for readability — they don't use TypeScript branded types but serve as documentation of intent. Also defines `Extension`, `ChordQuality`, `ExtensionOption`, and `ChordDegreeState`.
+Domain type aliases (`PitchClass`, `NoteIndex`, `Interval`, `Letter`) are plain `number` or string-union aliases for readability — they don't use TypeScript branded types but serve as documentation of intent. Also defines `NoteRef`, `NoteInMode` (extends `NoteRef` with `spelled` and `degree`), `Extension`, `ChordQuality`, `ExtensionOption`, and `ChordDegreeState`. `NoteInMode` is structurally assignable to `NoteRef`, so downstream consumers that only need index/note accept it without changes.
 
 ### Overflow System
 Mode note arrays are extended with extra notes before and after the visible range (`BASE_SCALE_LEFT_OVERFLOW = 5`). This allows SVG connection lines to draw smooth curves to off-screen notes. Overflow is trimmed for display but preserved for line calculations.
@@ -67,7 +67,8 @@ Hover state is consolidated into a single `HoverState` object (`{ index, origina
 2. `addOverflowToModeIntervals()` → extend intervals for line drawing
 3. `modeIntervalsToMode()` → convert root + intervals to absolute `NoteIndex[]`
 4. `spellModeNotes()` → choose enharmonic spelling minimizing accidentals
-5. Render with overflow trimmed from display
+5. `toNoteInModeArray()` → zip indices + spelled notes + degree into `NoteInMode[]`
+6. Render with overflow trimmed from display
 
 ### Chord Extension System
 - Base triads are computed from mode intervals using stacked thirds
@@ -80,7 +81,7 @@ Hover state is consolidated into a single `HoverState` object (`{ index, origina
 
 ### Altered Note Display (ChordScaleContext)
 Altered chord tones show directional notation:
-- Flattened: `E♭ ← E` (actual note bold, arrow, natural note struck-through)
+- Flattened: `Eb ← E` (actual note bold, arrow, natural note struck-through)
 - Sharpened: `F# → G` (natural note struck-through, arrow, actual note bold)
 
 ### Mode Descriptions

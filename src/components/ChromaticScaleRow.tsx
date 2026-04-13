@@ -37,7 +37,7 @@ export default function ChromaticScaleRow({
       clipContent
       zIndex={1}
       caption="Chromatic Scale"
-      captionSubtitle="All 12 notes — drag to change key"
+      captionSubtitle="All notes in sequential order"
     >
       <div
         className="absolute z-10 flex"
@@ -97,7 +97,7 @@ export default function ChromaticScaleRow({
       {/* Arrow buttons */}
       <button
         onClick={onPrev}
-        className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--app-border)]"
+        className="absolute left-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-black border border-[var(--app-border)]"
         aria-label="Scroll left"
       >
         <svg
@@ -115,7 +115,7 @@ export default function ChromaticScaleRow({
       </button>
       <button
         onClick={onNext}
-        className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors border border-[var(--app-border)]"
+        className="absolute right-1 top-1/2 z-40 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-full bg-white hover:bg-gray-100 text-black border border-[var(--app-border)]"
         aria-label="Scroll right"
       >
         <svg

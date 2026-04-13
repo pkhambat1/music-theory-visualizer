@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import type { ChordDegreeState, Extension } from "../lib/music"
+import { EXTENSION_ORDER } from "../lib/music"
 
 const EMPTY_DEGREE_STATE: ChordDegreeState = { extensions: [], slashBass: null }
 
@@ -30,9 +31,12 @@ export function useChordExtensions(modeIntervalsLength: number) {
   )
 
   const handleExtensionChange = useCallback((degreeIdx: number, value: Extension[]) => {
+    const sorted = [...value].sort(
+      (a, b) => EXTENSION_ORDER.indexOf(a) - EXTENSION_ORDER.indexOf(b),
+    )
     setChordDegreeStates((prev) => {
       const next = [...prev]
-      next[degreeIdx] = { ...next[degreeIdx]!, extensions: value }
+      next[degreeIdx] = { ...next[degreeIdx]!, extensions: sorted }
       return next
     })
   }, [])
