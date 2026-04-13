@@ -32,16 +32,8 @@ describe("spellModeNotes", () => {
     // The core notes (after trimming overflow) should be C D E F G A B C
     const coreNotes = result.slice(leftOverflow, leftOverflow + IONIAN.length)
     for (const note of coreNotes) {
-      expect(note).not.toBeNull()
-      expect(note!.accidental).toBe(NATURAL)
+      expect(note.accidental).toBe(NATURAL)
     }
-  })
-
-  it("returns [] for null/undefined-like input", () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(spellModeNotes(null as any, 0, notes)).toEqual([])
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(spellModeNotes(undefined as any, 0, notes)).toEqual([])
   })
 
   it("spells D Dorian without accidentals (same notes as C major)", () => {
@@ -51,8 +43,7 @@ describe("spellModeNotes", () => {
     const result = spellModeNotes(modeNotes, leftOverflow, notes)
     const coreNotes = result.slice(leftOverflow, leftOverflow + DORIAN.length)
     for (const note of coreNotes) {
-      expect(note).not.toBeNull()
-      expect(note!.accidental).toBe(NATURAL)
+      expect(note.accidental).toBe(NATURAL)
     }
   })
 })

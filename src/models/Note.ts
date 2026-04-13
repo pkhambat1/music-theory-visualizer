@@ -14,7 +14,7 @@ export class Note {
     this.octave = octave
   }
 
-  /** Note label without octave, e.g. "C#", "E♭", "D" */
+  /** Note label without octave, e.g. "C#", "Eb", "D" */
   label(): string {
     return `${this.letter}${this.accidental.displaySymbol}`
   }

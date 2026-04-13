@@ -30,7 +30,7 @@ export default function ControlsBar({
     <>
       <div className="flex flex-wrap items-center gap-5">
         <div className="flex items-center gap-2.5">
-          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Key</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-black">Key</span>
           <div
             className="relative cursor-pointer"
             onClick={() => {
@@ -47,7 +47,7 @@ export default function ControlsBar({
           </div>
         </div>
         <div className="flex items-center gap-2.5">
-          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Mode</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-black">Mode</span>
           <Dropdown
             label={selectedMode.name}
             items={MODE_ITEMS}
@@ -58,19 +58,23 @@ export default function ControlsBar({
           />
         </div>
         <button
-          className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${
-            arpeggiate
-              ? "border-[var(--app-primary)] bg-[var(--app-primaryFill)] text-[var(--app-primary)]"
-              : "border-[var(--app-border)] bg-white text-gray-500 hover:text-gray-700"
-          }`}
+          className="flex items-center gap-2 cursor-pointer"
           onClick={onArpeggiateToggle}
         >
-          Arpeggiate
+          <span className="text-xs font-medium uppercase tracking-wider text-black">Arpeggiate</span>
+          <div
+            className={`relative h-5 w-9 rounded-full ${
+              arpeggiate ? "bg-[var(--app-primary)]" : "bg-[var(--app-border)]"
+            }`}
+          >
+            <div
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm ${
+                arpeggiate ? "translate-x-[18px]" : "translate-x-0.5"
+              }`}
+            />
+          </div>
         </button>
       </div>
-      {selectedMode.description && (
-        <p className="text-sm text-gray-500">{selectedMode.description}</p>
-      )}
     </>
   )
 }

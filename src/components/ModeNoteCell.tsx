@@ -9,7 +9,7 @@ export type ModeNoteCellProps = {
   idx: number,
   dataIdx: number,
   originalNote: Note | null,
-  newValue: Note | null,
+  newValue: Note,
   onPlay: (note: Note) => void,
   isHighlighted: boolean,
   optCaption?: string | number | null,
@@ -31,7 +31,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
     [originalNote],
   )
   const newLabel = useMemo(
-    () => newValue?.label() ?? "",
+    () => newValue.label(),
     [newValue],
   )
 
@@ -39,7 +39,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
     noteLabel === newLabel &&
     originalNote?.isC() === true
 
-  const isDifferent = noteLabel !== newLabel && newLabel !== ""
+  const isDifferent = noteLabel !== newLabel
 
   const handleClick = useCallback(() => {
     if (originalNote) onPlay(originalNote)
@@ -65,18 +65,18 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
     >
       {isSimple && originalNote ? (
         renderNote(originalNote)
-      ) : isDifferent && newValue ? (
+      ) : isDifferent ? (
         <div className="flex flex-col items-center gap-0 leading-none">
+          <span className="text-[13px] font-semibold text-black">
+            {newLabel}
+          </span>
           <span className={`relative text-sm font-normal ${MUTED_TEXT}`}>
             {noteLabel}
             <Strikethrough />
           </span>
-          <span className="text-[13px] font-semibold text-black">
-            {newLabel}
-          </span>
         </div>
       ) : (
-        <span>{(newValue ?? originalNote) ? renderNote((newValue ?? originalNote)!) : ""}</span>
+        <span>{renderNote(newValue)}</span>
       )}
     </NoteCell>
   )

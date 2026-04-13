@@ -6,7 +6,7 @@ import {
   buildModeNotesWithOverflow,
   getModeLeftOverflowSize,
   spellModeNotes,
-  toNoteRefs,
+  toNoteInModeArray,
 } from "../lib/music"
 
 export function useModeTones(
@@ -21,9 +21,14 @@ export function useModeTones(
     [rootNote, modeIntervals, notes],
   )
 
+  const spelledModeNotes = useMemo(
+    () => spellModeNotes(modeIndicesWithOverflow, modeLeftOverflowSize, notes),
+    [modeIndicesWithOverflow, modeLeftOverflowSize, notes],
+  )
+
   const modeNotesWithOverflow = useMemo(
-    () => toNoteRefs(modeIndicesWithOverflow, notes),
-    [modeIndicesWithOverflow, notes],
+    () => toNoteInModeArray(modeIndicesWithOverflow, spelledModeNotes, modeLeftOverflowSize, notes),
+    [modeIndicesWithOverflow, spelledModeNotes, modeLeftOverflowSize, notes],
   )
 
   const visibleModeNotes = useMemo(
@@ -31,17 +36,12 @@ export function useModeTones(
     [modeNotesWithOverflow, modeLeftOverflowSize],
   )
 
-  const spelledModeNotes = useMemo(
-    () => spellModeNotes(modeIndicesWithOverflow, modeLeftOverflowSize, notes),
-    [modeIndicesWithOverflow, modeLeftOverflowSize, notes],
-  )
-
   const modeConnections = useMemo<CellLink[]>(
     () =>
       modeIntervals.map((interval, idx) => ({
-        fromRow: "chromatic-row" as const,
-        fromIdx: interval as number,
-        toRow: "mode-row" as const,
+        fromRow: "chromatic-row",
+        fromIdx: interval,
+        toRow: "mode-row",
         toIdx: modeLeftOverflowSize + idx,
       })),
     [modeIntervals, modeLeftOverflowSize],
@@ -51,7 +51,6 @@ export function useModeTones(
     modeNotesWithOverflow,
     modeLeftOverflowSize,
     visibleModeNotes,
-    spelledModeNotes,
     modeConnections,
   }
 }

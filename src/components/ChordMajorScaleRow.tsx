@@ -1,5 +1,5 @@
 import type { NoteIndex, NoteRef } from "../lib/music"
-import { IONIAN, SQUARE_SIDE } from "../lib/music"
+import { FLAT, IONIAN, SQUARE_SIDE, spellNoteSequence, spellNote } from "../lib/music"
 import { notes } from "../lib/notes"
 import { renderNote } from "./NoteLabel"
 import Strikethrough from "./Strikethrough"
@@ -63,11 +63,11 @@ function baseDegreeLabel(degreeIdx: number): string {
 type DegreeChordTone = {
   /** Absolute index into the global `notes` array for the sounding pitch. */
   actualNote: NoteIndex,
-  /** True when the chord tone differs from the natural major-scale interval (e.g. ♭3 in a minor chord). */
+  /** True when the chord tone differs from the natural major-scale interval (e.g. b3 in a minor chord). */
   isAltered: boolean,
-  /** When altered, true if the tone is lowered (♭), false if raised (♯). */
+  /** When altered, true if the tone is lowered (b), false if raised (#). */
   isFlat: boolean,
-  /** Human-readable label with accidental prefix when altered. e.g. "1", "♭3", "♯5", "9". */
+  /** Human-readable label with accidental prefix when altered. e.g. "1", "b3", "#5", "9". */
   degreeLabel: string,
 }
 
@@ -105,7 +105,7 @@ function buildDegreeMap(chordNotes: NoteIndex[], root: NoteIndex): DegreeMapResu
 
     let degreeLabel = baseDegreeLabel(degreeIdx)
     if (isAltered) {
-      const prefix = isFlat ? "♭" : "♯"
+      const prefix = isFlat ? FLAT.displaySymbol : "♯"
       degreeLabel = `${prefix}${degreeLabel}`
     }
 
@@ -148,10 +148,12 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: Chord
 
   // Build scale from lowest needed degree to highest (extends left for bass, right for 9ths, etc.)
   const majorScale = buildMajorScale(root, minDegreeIdx, maxDegreeIdx)
+  const rootPosition = -minDegreeIdx
+  const spelledScale = isEmpty ? [] : spellNoteSequence(majorScale, rootPosition, 7, notes)
 
   // Caption: e.g. "D Major Scale", or a static placeholder when idle
-  const rootNote = isEmpty ? undefined : notes[root]
-  const caption = rootNote ? `${rootNote.label()} Major Scale` : "Root Major Scale"
+  const spelledRoot = spelledScale[rootPosition]
+  const caption = spelledRoot ? `${spelledRoot.label()} Major Scale` : "Root Major Scale"
 
   // Generate a subtle gradient band for chord tone cells
   const chordToneCount = degreeMap.size
@@ -163,21 +165,16 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: Chord
   }
 
   return (
-    <div
-      style={{
-        opacity: isEmpty ? 0.4 : 1,
-      }}
+    <NotesArray
+      size={majorScale.length}
+      cellWidth={SQUARE_SIDE}
+      caption={caption}
+      captionSubtitle={isEmpty ? "Notes in the selected chord in its major scale" : undefined}
+      clipContent={false}
     >
-      <NotesArray
-        size={majorScale.length}
-        cellWidth={SQUARE_SIDE}
-        caption={caption}
-        captionSubtitle={isEmpty ? "Hover a chord to see its scale context" : undefined}
-        clipContent={false}
-      >
-        {majorScale.map((scaleNoteIdx, idx) => {
+      {majorScale.map((_, idx) => {
           const degreeIdx = minDegreeIdx + idx
-          const scaleNote = notes[scaleNoteIdx]
+          const scaleNote = spelledScale[idx]
           const info = degreeMap.get(degreeIdx)
 
           if (isEmpty) {
@@ -206,7 +203,7 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: Chord
               <NoteCell
                 key={idx}
                 idx={idx}
-                className="text-gray-900 font-semibold"
+                className="text-black font-semibold"
                 optBackground={chordToneBg(degreeIdx)}
                 optCaption={info.degreeLabel}
               >
@@ -215,9 +212,9 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: Chord
             )
           }
 
-          const alteredNote = notes[info.actualNote]
+          const alteredNote = scaleNote ? spellNote(info.actualNote, scaleNote.letter, notes) : notes[info.actualNote]
           const arrow = info.isFlat ? "←" : "→"
-          const actual = <span className="text-sm font-semibold text-gray-900">{alteredNote?.label()}</span>
+          const actual = <span className="text-sm font-semibold text-black">{alteredNote?.label()}</span>
           const natural = (
             <span className={`relative inline-block text-sm ${MUTED_TEXT} font-normal`}>
               {scaleNote?.label()}
@@ -233,7 +230,6 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: Chord
             </NoteCell>
           )
         })}
-      </NotesArray>
-    </div>
+    </NotesArray>
   )
 }

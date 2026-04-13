@@ -1,4 +1,4 @@
-import type { Letter, NoteIndex, PitchClass } from "./types"
+import type { Letter, NoteIndex } from "./types"
 import { SHARP, FLAT, NATURAL } from "./accidentals"
 import { Note } from "../../models"
 
@@ -7,111 +7,99 @@ const LETTER_TO_PC: Record<Letter, number> = {
   C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11,
 }
 
-function noteNameToPitchClass(
-  note: Note | null | undefined,
-): PitchClass | null {
-  if (!note) return null
-  const basePc = LETTER_TO_PC[note.letter]
-  return (basePc + note.accidental.semitoneOffset + 12) % 12
+function pitchClass(noteIdx: NoteIndex, notes: Note[]): number {
+  const n = notes[noteIdx]!
+  return (LETTER_TO_PC[n.letter] + n.accidental.semitoneOffset + 12) % 12
 }
 
-type SpellingCandidate = {
-  spelled: (Note | null)[],
-  maxAbs: number,
-  totalAbs: number,
+function accidentalFromDiff(diff: number) {
+  return diff > 0 ? SHARP : diff < 0 ? FLAT : NATURAL
 }
 
 /**
- * Choose an enharmonic spelling for every note in the mode that
- * minimises accidentals and avoids double-sharps / double-flats.
+ * Try spelling every note starting from a given letter index.
+ * Returns null if any note would need a double accidental (|diff| > 1).
+ */
+function spellWithStartLetter(
+  startIdx: number,
+  noteIndices: NoteIndex[],
+  rootPosition: number,
+  degreesPerOctave: number,
+  notes: Note[],
+): Note[] | null {
+  const result: Note[] = []
+  for (let i = 0; i < noteIndices.length; i++) {
+    const noteIdx = noteIndices[i]!
+    const degreeInMode =
+      (((i - rootPosition) % degreesPerOctave) + degreesPerOctave) %
+      degreesPerOctave
+    const letterIndex = (startIdx + degreeInMode) % LETTER_ORDER.length
+    const letter = LETTER_ORDER[letterIndex]!
+    const naturalPc = LETTER_TO_PC[letter]
+    const desiredPc = pitchClass(noteIdx, notes)
+    const diff = ((desiredPc - naturalPc + 6) % 12) - 6
+    if (Math.abs(diff) > 1) return null
+    const noteOctave = Math.floor(noteIdx / 12) + 1
+    result.push(new Note(letter, accidentalFromDiff(diff), noteOctave))
+  }
+  return result
+}
+
+/**
+ * Spell a sequence of note indices by assigning one letter per degree.
+ * For sharp roots, tries the root letter first; if that produces a
+ * double accidental, falls back to the enharmonic flat letter
+ * (e.g. A# → try A-based, bail → use Bb-based).
+ */
+export function spellNoteSequence(
+  noteIndices: NoteIndex[],
+  rootPosition: number,
+  degreesPerOctave: number,
+  notes: Note[],
+): Note[] {
+  if (noteIndices.length === 0) return []
+
+  const rootNote = notes[noteIndices[rootPosition]!]!
+  const rootLetterIndex = LETTER_ORDER.indexOf(rootNote.letter)
+
+  const result = spellWithStartLetter(rootLetterIndex, noteIndices, rootPosition, degreesPerOctave, notes)
+  if (result !== null) return result
+
+  if (rootNote.isSharp()) {
+    const fallback = spellWithStartLetter(
+      (rootLetterIndex + 1) % LETTER_ORDER.length, noteIndices, rootPosition, degreesPerOctave, notes,
+    )
+    if (fallback !== null) return fallback
+  }
+
+  throw new Error(`Cannot spell notes without double accidentals: root=${rootNote.label()}`)
+}
+
+/**
+ * Spell a single note index using a given letter, adding the
+ * appropriate accidental. Useful for altered chord tones that share
+ * a degree letter with their parent scale note.
+ */
+export function spellNote(noteIdx: NoteIndex, letter: Letter, notes: Note[]): Note {
+  const naturalPc = LETTER_TO_PC[letter]
+  const desiredPc = pitchClass(noteIdx, notes)
+  const diff = ((desiredPc - naturalPc + 6) % 12) - 6
+  const accidental = accidentalFromDiff(diff)
+  const noteOctave = Math.floor(noteIdx / 12) + 1
+  return new Note(letter, accidental, noteOctave)
+}
+
+/**
+ * Spell all notes in a mode (with overflow), assigning one letter per
+ * scale degree. Thin wrapper around spellNoteSequence.
  */
 export function spellModeNotes(
   modeNotesWithOverflow: NoteIndex[],
   modeLeftOverflowSize: number,
   notes: Note[],
-): (Note | null)[] {
-  if (
-    !Array.isArray(modeNotesWithOverflow) ||
-    modeNotesWithOverflow.length === 0 ||
-    !Array.isArray(notes)
-  ) {
-    return []
-  }
-
-  const actualPcs = modeNotesWithOverflow.map((noteIdx) =>
-    noteNameToPitchClass(notes[noteIdx]),
-  )
-
-  const rootIdx = modeLeftOverflowSize
-  const rootNote: Note | undefined = notes[modeNotesWithOverflow[rootIdx]!]
-  const rootLetter: Letter = rootNote?.letter ?? "C"
-  const rootLetterIndex = LETTER_ORDER.indexOf(rootLetter)
-
-  const candidateLetters = new Set<Letter>()
-  if (rootLetterIndex !== -1) candidateLetters.add(rootLetter)
-  if (rootNote?.isSharp()) {
-    const nextLetter = LETTER_ORDER[(rootLetterIndex + 1) % LETTER_ORDER.length]
-    if (nextLetter) candidateLetters.add(nextLetter)
-  } else if (rootNote?.isFlat()) {
-    const prevLetter = LETTER_ORDER[
-      (rootLetterIndex - 1 + LETTER_ORDER.length) % LETTER_ORDER.length
-    ]
-    if (prevLetter) candidateLetters.add(prevLetter)
-  }
-
-  // Number of unique scale degrees (e.g. 7 for diatonic, 6 for whole tone).
-  // Letters cycle at this rate so the octave note gets the root letter again.
-  const modeDegreesCount =
+): Note[] {
+  if (modeNotesWithOverflow.length === 0) return []
+  const degreesCount =
     modeNotesWithOverflow.length - 2 * modeLeftOverflowSize - 1
-
-  const candidates: SpellingCandidate[] = Array.from(candidateLetters).map(
-    (rootLetterCandidate) => {
-      const candidateRootIndex = LETTER_ORDER.indexOf(rootLetterCandidate)
-      const spelled: (Note | null)[] = []
-      let maxAbs = 0
-      let totalAbs = 0
-
-      for (let i = 0; i < modeNotesWithOverflow.length; i++) {
-        // Map each note to a letter by cycling through degrees at the mode's
-        // own period (6 for whole tone, 7 for diatonic, etc.)
-        const degreeInMode =
-          (((i - rootIdx) % modeDegreesCount) + modeDegreesCount) %
-          modeDegreesCount
-        const letterIndex =
-          (candidateRootIndex + degreeInMode) % LETTER_ORDER.length
-        const letter = LETTER_ORDER[letterIndex]!
-        const naturalPc = LETTER_TO_PC[letter]
-        const desiredPc = actualPcs[i]
-
-        if (desiredPc === null || desiredPc === undefined) {
-          spelled.push(null)
-          continue
-        }
-
-        const diff = ((desiredPc - naturalPc + 6) % 12) - 6
-        const absDiff = Math.abs(diff)
-        maxAbs = Math.max(maxAbs, absDiff)
-        totalAbs += absDiff
-
-        if (absDiff > 2) {
-          maxAbs = Math.max(maxAbs, 10)
-          totalAbs += 10
-        }
-
-        const accidental = diff > 0 ? SHARP : diff < 0 ? FLAT : NATURAL
-
-        const noteOctave = Math.floor(modeNotesWithOverflow[i]! / 12) + 1
-        spelled.push(new Note(letter, accidental, noteOctave))
-      }
-
-      return { spelled, maxAbs, totalAbs }
-    },
-  )
-
-  const sorted = candidates.sort((a, b) => {
-    if (a.maxAbs !== b.maxAbs) return a.maxAbs - b.maxAbs
-    return a.totalAbs - b.totalAbs
-  })
-
-  return sorted[0]?.spelled ?? []
+  return spellNoteSequence(modeNotesWithOverflow, modeLeftOverflowSize, degreesCount, notes)
 }

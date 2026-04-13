@@ -43,7 +43,7 @@ export default function NotesArray({
         >
           <div>
             {caption && (
-              <span className="pointer-events-none select-none whitespace-nowrap text-[13px] font-semibold tracking-wide text-gray-500">
+              <span className="pointer-events-none select-none whitespace-nowrap text-[13px] font-semibold tracking-wide text-black">
                 {caption}
               </span>
             )}

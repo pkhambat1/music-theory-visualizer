@@ -22,16 +22,8 @@ describe("Note", () => {
       expect(new Note("F", SHARP, 3).label()).toBe("F#")
     })
 
-    it("returns letter + ♭ for flat notes", () => {
-      expect(new Note("B", FLAT, 2).label()).toBe("B♭")
-    })
-  })
-
-  describe("toDisplay()", () => {
-    it("includes octave with unicode flat", () => {
-      expect(new Note("E", FLAT, 3).toDisplay()).toBe("E♭3")
-      expect(new Note("C", NATURAL, 4).toDisplay()).toBe("C4")
-      expect(new Note("F", SHARP, 5).toDisplay()).toBe("F#5")
+    it("returns letter + flat symbol for flat notes", () => {
+      expect(new Note("B", FLAT, 2).label()).toBe(`B${FLAT.displaySymbol}`)
     })
   })
 

@@ -1,4 +1,4 @@
-import { SHARP, NATURAL } from "./music"
+import { SHARP, NATURAL } from "./music/accidentals"
 import { Note } from "../models"
 
 const BASE_NOTES: Note[] = [
@@ -25,7 +25,7 @@ export const CHROMATIC_SCALE: Note[] = [
 /**
  * Generate Note objects across `octaveCount` octaves (starting at octave 1).
  */
-function generateOctaves(octaveCount: number): Note[] {
+export function generateOctaves(octaveCount: number): Note[] {
   return Array.from({ length: octaveCount }, (_, i) => i + 1).flatMap(
     (octave) => BASE_NOTES.map((n) => new Note(n.letter, n.accidental, octave)),
   )

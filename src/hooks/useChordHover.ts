@@ -108,7 +108,7 @@ export function useChordHover(
       .map((ref) => {
         const modeIdx = modeIndices.indexOf(ref.index)
         if (modeIdx < 0) return null
-        return { modeIdx, baseIdx: ref.index } as ChordHighlightPair
+        return { modeIdx, baseIdx: ref.index }
       })
       .filter((p): p is ChordHighlightPair => p !== null)
   }, [voicedModified, modeIndices, voicedOriginal])

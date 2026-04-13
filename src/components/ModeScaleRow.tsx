@@ -1,4 +1,4 @@
-import type { Interval, NoteRef } from "../lib/music"
+import type { Interval, NoteInMode } from "../lib/music"
 import { SQUARE_SIDE } from "../lib/music"
 import type { Note } from "../models"
 import { colors } from "../lib/theme"
@@ -8,10 +8,9 @@ import ModeNoteCell from "./ModeNoteCell"
 
 export type ModeScaleRowProps = {
   selectedModeName: string,
-  modeNotesWithOverflow: NoteRef[],
+  modeNotesWithOverflow: NoteInMode[],
   modeIntervals: Interval[],
   modeLeftOverflowSize: number,
-  spelledModeNotes: (Note | null)[],
   highlightedModeIdxs: Set<number>,
   onPlayNote: (note: Note) => void,
 }
@@ -21,7 +20,6 @@ export default function ModeScaleRow({
   modeNotesWithOverflow,
   modeIntervals,
   modeLeftOverflowSize,
-  spelledModeNotes,
   highlightedModeIdxs,
   onPlayNote,
 }: ModeScaleRowProps) {
@@ -33,7 +31,7 @@ export default function ModeScaleRow({
       zIndex={2}
       rowBackground={colors.rowBg}
       caption={`${selectedModeName} Scale`}
-      captionSubtitle="Notes in the selected mode"
+      captionSubtitle="Notes that fall within the selected mode"
     >
       <div
         className="absolute z-0 flex"
@@ -46,21 +44,19 @@ export default function ModeScaleRow({
         ))}
       </div>
 
-      {modeNotesWithOverflow.map((noteRef, idx) => {
-        const noteObj = noteRef.note
+      {modeNotesWithOverflow.map((noteInMode, idx) => {
         const isHighlighted = highlightedModeIdxs.has(idx)
-        const visibleDegree = idx - modeLeftOverflowSize
         const scaleDegreeCaption =
-          visibleDegree >= 0 && visibleDegree < modeIntervals.length - 1
-            ? visibleDegree + 1
+          noteInMode.degree >= 0 && noteInMode.degree < modeIntervals.length - 1
+            ? noteInMode.degree + 1
             : null
         return (
           <ModeNoteCell
             key={idx}
             idx={idx}
             dataIdx={idx}
-            originalNote={noteObj}
-            newValue={spelledModeNotes[idx] ?? null}
+            originalNote={noteInMode.note}
+            newValue={noteInMode.spelled}
             onPlay={onPlayNote}
             isHighlighted={isHighlighted}
             optCaption={scaleDegreeCaption}
