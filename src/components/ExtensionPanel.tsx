@@ -1,10 +1,11 @@
-import type { Extension, ExtensionOption } from "../lib/music"
-import { getDisabledExtensions, ROMAN_NUMERALS } from "../lib/music"
+import type { Extension } from "../lib/music"
+import { EXTENSION_ORDER, getDisabledExtensions, ROMAN_NUMERALS } from "../lib/music"
 import { MultiSelect } from "./ui"
+
+const EXTENSION_OPTIONS = EXTENSION_ORDER.map((e) => ({ value: e }))
 
 export type ExtensionPanelProps = {
   chordNumeralIdx: number,
-  extensionOptions: ExtensionOption[],
   selectedExtensions: Extension[],
   activeExtensions: Extension[],
   slashBass: number | null,
@@ -14,7 +15,6 @@ export type ExtensionPanelProps = {
 
 export default function ExtensionPanel({
   chordNumeralIdx,
-  extensionOptions,
   selectedExtensions,
   activeExtensions,
   slashBass,
@@ -29,7 +29,7 @@ export default function ExtensionPanel({
     >
       <MultiSelect
         header="Extensions"
-        options={extensionOptions}
+        options={EXTENSION_OPTIONS}
         value={selectedExtensions}
         onChange={(value) => onExtensionChange?.(chordNumeralIdx, value)}
         placeholder="Select"

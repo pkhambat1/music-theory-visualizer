@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react"
 import { useKeenSlider } from "keen-slider/react"
 import "keen-slider/keen-slider.min.css"
-import type { ExtensionOption, Interval } from "../lib/music"
+import type { Interval } from "../lib/music"
 import { Note } from "../models"
 import {
   NATURAL, MODES, Mode,
@@ -20,25 +20,6 @@ import ChromaticScaleRow from "./ChromaticScaleRow"
 import ModeScaleRow from "./ModeScaleRow"
 
 const DEFAULT_ROOT_NOTE = new Note("C", NATURAL, 3)
-
-const EXTENSION_OPTIONS: ExtensionOption[] = [
-  { value: "maj", label: "maj" },
-  { value: "m", label: "m" },
-  { value: "dim", label: "dim" },
-  { value: "aug", label: "aug" },
-  { value: "sus2", label: "sus2" },
-  { value: "sus4", label: "sus4" },
-  { value: "6", label: "6" },
-  { value: "7", label: "7" },
-  { value: "maj7", label: "maj7" },
-  { value: "add2", label: "add2" },
-  { value: "add4", label: "add4" },
-  { value: "add9", label: "add9" },
-  { value: "9", label: "9" },
-  { value: "maj9", label: "maj9" },
-  { value: "11", label: "11" },
-  { value: "13", label: "13" },
-]
 
 export default function VisualizerPanel() {
   const [selectedMode, setSelectedMode] = useState<Mode>(MODES[0]!)
@@ -100,8 +81,7 @@ export default function VisualizerPanel() {
           Music Theory Visualizer
         </h1>
         <p className="mt-1.5 text-sm text-black">
-          Pick a key and mode, then trace how scales produce chords and why each chord sounds the
-          way it does.
+          Explore the building blocks of music composition in this interactive visualization  
         </p>
       </div>
 
@@ -161,7 +141,6 @@ export default function VisualizerPanel() {
           visibleModeNotes={visibleModeNotes}
           setHoveredChordIndex={setHoveredTriadIndex}
           selectedExtensions={selectedExtensions}
-          extensionOptions={EXTENSION_OPTIONS}
           onExtensionChange={handleExtensionChange}
           slashBasses={slashBasses}
           onSlashBassChange={handleSlashBassChange}

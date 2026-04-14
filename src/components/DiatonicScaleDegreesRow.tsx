@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import type { Extension, ExtensionOption, NoteRef } from "../lib/music"
+import type { Extension, NoteRef } from "../lib/music"
 import { getChordDescriptor, getChordNotes, applyExtensions, toNoteRefs, CHORD_CELL_SIDE, ROMAN_NUMERALS } from "../lib/music"
 import { notes } from "../lib/notes"
 import NotesArray from "./NotesArray"
@@ -14,7 +14,6 @@ export type DiatonicScaleDegreesRowProps = {
   visibleModeNotes: NoteRef[],
   setHoveredChordIndex: (idx: number | null) => void,
   selectedExtensions: Extension[][],
-  extensionOptions: ExtensionOption[],
   onExtensionChange?: (degreeIdx: number, value: Extension[]) => void,
   slashBasses: (number | null)[],
   onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
@@ -32,7 +31,6 @@ export default function DiatonicScaleDegreesRow({
   visibleModeNotes,
   setHoveredChordIndex,
   selectedExtensions,
-  extensionOptions,
   onExtensionChange,
   slashBasses,
   onSlashBassChange,
@@ -111,7 +109,6 @@ export default function DiatonicScaleDegreesRow({
             isPopoverOpen={openIdx === chordNumeralIdx}
             onPopoverOpenChange={(open) => setOpenIdx(open ? chordNumeralIdx : null)}
             selectedExtensions={selectedExtensions[chordNumeralIdx] ?? []}
-            extensionOptions={extensionOptions}
             onExtensionChange={onExtensionChange}
             onSlashBassChange={onSlashBassChange}
             onHover={emitHover}
