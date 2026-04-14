@@ -84,7 +84,7 @@ React 18, TypeScript 5.6 (strict mode), Vite 5, Tailwind CSS 3, Tone.js (Salaman
 
 ### Data model
 
-Two class families in `src/lib/`.
+Two class families in `src/models/`.
 
 #### `Note` (`src/models/Note.ts`)
 
@@ -113,7 +113,11 @@ Lines drawn between UI elements in the SVG overlay. Rendering branches on `insta
 
 ### Architecture notes
 
-See [CLAUDE.md](./CLAUDE.md) for detailed architecture docs: overflow system, line drawing, hover state management, extension system, color system, and code conventions.
+- **State lives in `VisualizerPanel`** — root note, selected mode, arpeggiate toggle. Derived data flows down through hooks (`useModeTones`, `useChordExtensions`, `useChordHover`) and props.
+- **Overflow system** — mode notes are extended with extra notes before/after the visible range so SVG lines can draw smooth curves to off-screen targets. Overflow is trimmed for display but preserved for line calculations.
+- **Two SVG overlay layers** — `FixedLines` (static chromatic → mode connections) and `HoverLines` (dynamic chord hover connections using the full `Connection` hierarchy for extension diffs). DOM elements are located via `data-row` + `data-idx` attributes.
+- **Color system** — all colors derive from d3's `interpolateRainbow` and `schemeSet3`. Internally `RGBColor` objects; `.formatHex()` at DOM boundaries. CSS custom properties registered at startup as `--app-*` tokens.
+- **No external state library** — local `useState` + `useMemo` for derived data + `useCallback` for stable handlers.
 
 ## License
 
