@@ -38,7 +38,7 @@ Connection (abstract)             — a directed line between two screen-space p
 Styling and label rendering branch on `instanceof` — no string discriminants. `FixedLines` uses `StaticConnection[]`; `HoverLines` uses the full hierarchy.
 
 ### Type Aliases (`src/lib/music/types.ts`)
-Domain type aliases (`PitchClass`, `NoteIndex`, `Interval`, `Letter`) are plain `number` or string-union aliases for readability — they don't use TypeScript branded types but serve as documentation of intent. Also defines `NoteRef`, `NoteInMode` (extends `NoteRef` with `spelled` and `degree`), `Extension`, `ChordQuality`, `ExtensionOption`, and `ChordDegreeState`. `NoteInMode` is structurally assignable to `NoteRef`, so downstream consumers that only need index/note accept it without changes.
+Domain type aliases (`PitchClass`, `NoteIndex`, `Interval`, `Letter`) are plain `number` or string-union aliases for readability — they don't use TypeScript branded types but serve as documentation of intent. Also defines `NoteRef`, `NoteInMode` (extends `NoteRef` with `spelled` and `degree`), `Extension`, `ChordQuality`, and `ChordDegreeState`. `NoteInMode` is structurally assignable to `NoteRef`, so downstream consumers that only need index/note accept it without changes.
 
 ### Overflow System
 Mode note arrays are extended with extra notes before and after the visible range (`BASE_SCALE_LEFT_OVERFLOW = 5`). This allows SVG connection lines to draw smooth curves to off-screen notes. Overflow is trimmed for display but preserved for line calculations.

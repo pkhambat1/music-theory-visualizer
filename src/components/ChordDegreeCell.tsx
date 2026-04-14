@@ -1,4 +1,4 @@
-import type { Extension, ExtensionOption, NoteRef } from "../lib/music"
+import type { Extension, NoteRef } from "../lib/music"
 import { buildSlashChordVoicing, CHORD_CELL_SIDE, ROMAN_NUMERALS } from "../lib/music"
 import { notes } from "../lib/notes"
 import { playChord, arpeggiateChord } from "../lib/audio"
@@ -26,7 +26,6 @@ export type ChordDegreeCellProps = {
   isPopoverOpen: boolean,
   onPopoverOpenChange: (open: boolean) => void,
   selectedExtensions: Extension[],
-  extensionOptions: ExtensionOption[],
   onExtensionChange?: (degreeIdx: number, value: Extension[]) => void,
   onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
   onHover: (idx: number, original: NoteRef[], modified: NoteRef[]) => void,
@@ -47,7 +46,6 @@ export default function ChordDegreeCell({
   isPopoverOpen,
   onPopoverOpenChange,
   selectedExtensions,
-  extensionOptions,
   onExtensionChange,
   onSlashBassChange,
   onHover,
@@ -144,7 +142,6 @@ export default function ChordDegreeCell({
         >
           <ExtensionPanel
             chordNumeralIdx={chordNumeralIdx}
-            extensionOptions={extensionOptions}
             selectedExtensions={selectedExtensions}
             activeExtensions={activeExtensions}
             slashBass={slashBass}

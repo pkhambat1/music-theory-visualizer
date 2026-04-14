@@ -48,11 +48,6 @@ export const EXTENSION_ORDER: Extension[] = [
 
 export type ChordQuality = "" | "m" | "°" | "+" | "sus2" | "sus4" | "?"
 
-export type ExtensionOption = {
-  value: Extension,
-  label: string,
-}
-
 export type ChordDegreeState = {
   extensions: Extension[],
   slashBass: number | null,
