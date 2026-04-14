@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Interactive React app for visualizing music theory — modes, diatonic chords, note relationships, and chord extensions. Users select a root note and mode, then explore how chromatic, mode, and chord tones relate through connected visual rows with SVG line overlays. Audio playback is powered by Tone.js with an eagerly-instantiated piano sampler (supports arpeggiated playback). Designed for **beginners** with contextual labels, mode descriptions, and interval labels on hover lines.
+React app for visualizing music theory — modes, diatonic chords, note relationships, and chord extensions. Users pick a root note and mode, then see how chromatic, mode, and chord tones connect across visual rows with SVG line overlays. Audio uses Tone.js with a Salamander piano sampler (supports arpeggiated playback). Aimed at **beginners** — contextual labels, mode descriptions, and interval labels on hover lines.
 
 ## Code Structure
 

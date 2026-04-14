@@ -1,13 +1,13 @@
 # Music Theory Visualizer
 
-Ever wonder how scales, modes, and chords actually relate to each other? This app makes it click — literally. Pick a key, pick a mode, and watch the connections light up across the chromatic scale. Hover a chord to see exactly which notes build it. Click to hear it on a piano.
+Interactive tool for seeing how scales, modes, and chords connect. Pick a key and mode, hover chords to see their notes highlighted across the chromatic scale with interval labels, and click to hear them on piano.
 
 
 ## Using the app
 
 ### Pick your key and mode
 
-Use the **Key** tag and **Mode** dropdown in the header. The whole visualization updates instantly. A short description below the dropdown explains the character of each mode (e.g. "Minor with a raised 6th — jazzy and warm" for Dorian).
+Use the **Key** tag and **Mode** dropdown in the header. A short description below the dropdown explains the character of each mode (e.g. "Minor with a raised 6th — jazzy and warm" for Dorian).
 
 ### Explore the rows
 
