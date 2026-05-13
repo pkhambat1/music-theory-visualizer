@@ -131,7 +131,7 @@ export default function ChordDegreeCell({
         onMouseLeave={(e) => {
           if (isPopoverOpen) return
           e.stopPropagation()
-          onHover(chordNumeralIdx, originalNotes, chordNotesArr)
+          onHoverClear()
         }}
       >
         <Popover
