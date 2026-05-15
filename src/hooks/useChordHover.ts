@@ -11,6 +11,112 @@ type HoverState = {
   modified: NoteRef[],
 }
 
+export type ChordHoverLayerComputed = {
+  voicedOriginal: NoteRef[],
+  voicedModified: NoteRef[],
+  fullVoicedModified: NoteRef[],
+  slashBassNoteIndex: NoteIndex | null,
+  chordHighlightPairs: ChordHighlightPair[],
+  highlightedModeIdxs: Set<number>,
+  highlightedBaseIdxs: Set<number>,
+  chordRootIndex: NoteIndex | null,
+}
+
+export function computeChordHoverLayer(
+  triadIndex: number | null,
+  original: NoteRef[],
+  modified: NoteRef[],
+  modeNotesWithOverflow: NoteRef[],
+  visibleModeNotes: NoteRef[],
+  slashBasses: (number | null)[],
+  notes: Note[],
+): ChordHoverLayerComputed {
+  const modeIndices = modeNotesWithOverflow.map((r) => r.index)
+  const modeNoteIndices = visibleModeNotes.map((r) => r.index)
+  const modifiedHoverNotes = modified
+
+  if (triadIndex === null || modified.length === 0) {
+    return {
+      voicedOriginal: [],
+      voicedModified: [],
+      fullVoicedModified: [],
+      slashBassNoteIndex: null,
+      chordHighlightPairs: [],
+      highlightedModeIdxs: new Set(),
+      highlightedBaseIdxs: new Set(),
+      chordRootIndex: null,
+    }
+  }
+
+  const slashBass = slashBasses[triadIndex]
+  const slashBassNoteIndex =
+    slashBass === null || slashBass === undefined
+      ? null
+      : getSlashBassNote(modeNoteIndices, triadIndex, slashBass)
+
+  const voiceChord = (chordNotes: NoteRef[]): NoteRef[] => {
+    if (slashBass === null || slashBass === undefined || chordNotes.length === 0) {
+      return chordNotes
+    }
+    const chordIndices = chordNotes.map((r) => r.index)
+    const voicedIndices = buildSlashChordVoicing(
+      chordIndices,
+      modeNoteIndices,
+      triadIndex,
+      slashBass,
+    ).slice(1)
+    return toNoteRefs(voicedIndices, notes)
+  }
+
+  const voicedOriginal = voiceChord(original)
+  const voicedModified = voiceChord(modifiedHoverNotes)
+
+  const fullVoicedModified: NoteRef[] =
+    slashBassNoteIndex === null
+      ? voicedModified
+      : [toNoteRef(slashBassNoteIndex, notes), ...voicedModified]
+
+  const originalSet = new Set(voicedOriginal.map((r) => r.index))
+  const notesToHighlight =
+    originalSet.size > 0 ? voicedModified.filter((r) => originalSet.has(r.index)) : voicedModified
+
+  const chordHighlightPairs: ChordHighlightPair[] = notesToHighlight
+    .map((ref) => {
+      const modeIdx = modeIndices.indexOf(ref.index)
+      if (modeIdx < 0) return null
+      return { modeIdx, baseIdx: ref.index }
+    })
+    .filter((p): p is ChordHighlightPair => p !== null)
+
+  const highlightedModeIdxs = new Set(chordHighlightPairs.map((p) => p.modeIdx))
+
+  const highlightedBaseIdxs = new Set(
+    voicedModified
+      .map((r) => r.index)
+      .filter((idx): idx is NoteIndex => idx >= 0 && idx < notes.length),
+  )
+  if (
+    slashBassNoteIndex !== null &&
+    slashBassNoteIndex >= 0 &&
+    slashBassNoteIndex < notes.length
+  ) {
+    highlightedBaseIdxs.add(slashBassNoteIndex)
+  }
+
+  const chordRootIndex = modifiedHoverNotes.length > 0 ? modifiedHoverNotes[0]!.index : null
+
+  return {
+    voicedOriginal,
+    voicedModified,
+    fullVoicedModified,
+    slashBassNoteIndex,
+    chordHighlightPairs,
+    highlightedModeIdxs,
+    highlightedBaseIdxs,
+    chordRootIndex,
+  }
+}
+
 export function useChordHover(
   modeNotesWithOverflow: NoteRef[],
   visibleModeNotes: NoteRef[],
@@ -23,18 +129,7 @@ export function useChordHover(
     modified: [],
   })
 
-  const modeIndices = useMemo(
-    () => modeNotesWithOverflow.map((r) => r.index),
-    [modeNotesWithOverflow],
-  )
-
-  const modeNoteIndices = useMemo(
-    () => visibleModeNotes.map((r) => r.index),
-    [visibleModeNotes],
-  )
-
   const hoveredTriadIndex = hoverState.index
-  const modifiedHoverNotes = hoverState.modified
 
   const setHoveredTriadIndex = useCallback((idx: number | null) => {
     if (idx === null) {
@@ -60,92 +155,30 @@ export function useChordHover(
     }
   }, [])
 
-  const slashBassNoteIndex = useMemo<NoteIndex | null>(() => {
-    if (hoveredTriadIndex === null) return null
-    const slashBass = slashBasses[hoveredTriadIndex]
-    if (slashBass === null || slashBass === undefined) return null
-    return getSlashBassNote(modeNoteIndices, hoveredTriadIndex, slashBass)
-  }, [hoveredTriadIndex, slashBasses, modeNoteIndices])
-
-  const hoveredSlashBass = useMemo(() => {
-    if (hoveredTriadIndex === null) return null
-    return slashBasses[hoveredTriadIndex] ?? null
-  }, [hoveredTriadIndex, slashBasses])
-
-  const voiceForSlash = useCallback(
-    (chordNotes: NoteRef[]): NoteRef[] => {
-      if (hoveredSlashBass === null || hoveredTriadIndex === null || chordNotes.length === 0)
-        return chordNotes
-      const chordIndices = chordNotes.map((r) => r.index)
-      const voicedIndices = buildSlashChordVoicing(chordIndices, modeNoteIndices, hoveredTriadIndex, hoveredSlashBass).slice(1)
-      return toNoteRefs(voicedIndices, notes)
-    },
-    [hoveredSlashBass, hoveredTriadIndex, modeNoteIndices, notes],
+  const layer = useMemo(
+    () =>
+      computeChordHoverLayer(
+        hoverState.index,
+        hoverState.original,
+        hoverState.modified,
+        modeNotesWithOverflow,
+        visibleModeNotes,
+        slashBasses,
+        notes,
+      ),
+    [hoverState, modeNotesWithOverflow, visibleModeNotes, slashBasses, notes],
   )
-
-  const voicedOriginal = useMemo(
-    () => voiceForSlash(hoverState.original),
-    [hoverState.original, voiceForSlash],
-  )
-  const voicedModified = useMemo(
-    () => voiceForSlash(modifiedHoverNotes),
-    [modifiedHoverNotes, voiceForSlash],
-  )
-
-  const fullVoicedModified = useMemo<NoteRef[]>(() => {
-    if (slashBassNoteIndex === null) return voicedModified
-    return [toNoteRef(slashBassNoteIndex, notes), ...voicedModified]
-  }, [voicedModified, slashBassNoteIndex, notes])
-
-  const chordHighlightPairs = useMemo<ChordHighlightPair[]>(() => {
-    if (!voicedModified.length) return []
-
-    const originalSet = new Set(voicedOriginal.map((r) => r.index))
-    const notesToHighlight =
-      originalSet.size > 0 ? voicedModified.filter((r) => originalSet.has(r.index)) : voicedModified
-
-    return notesToHighlight
-      .map((ref) => {
-        const modeIdx = modeIndices.indexOf(ref.index)
-        if (modeIdx < 0) return null
-        return { modeIdx, baseIdx: ref.index }
-      })
-      .filter((p): p is ChordHighlightPair => p !== null)
-  }, [voicedModified, modeIndices, voicedOriginal])
-
-  const highlightedModeIdxs = useMemo(
-    () => new Set(chordHighlightPairs.map((p) => p.modeIdx)),
-    [chordHighlightPairs],
-  )
-
-  const highlightedBaseIdxs = useMemo(() => {
-    const idxs = new Set(
-      voicedModified
-        .map((r) => r.index)
-        .filter((idx): idx is NoteIndex => idx >= 0 && idx < notes.length),
-    )
-    if (
-      slashBassNoteIndex !== null &&
-      slashBassNoteIndex >= 0 &&
-      slashBassNoteIndex < notes.length
-    ) {
-      idxs.add(slashBassNoteIndex)
-    }
-    return idxs
-  }, [voicedModified, slashBassNoteIndex, notes.length])
-
-  const chordRootIndex = modifiedHoverNotes.length > 0 ? modifiedHoverNotes[0]!.index : null
 
   return {
     hoveredTriadIndex,
-    fullVoicedModified,
-    chordRootIndex,
-    voicedOriginal,
-    voicedModified,
-    slashBassNoteIndex,
-    chordHighlightPairs,
-    highlightedModeIdxs,
-    highlightedBaseIdxs,
+    fullVoicedModified: layer.fullVoicedModified,
+    chordRootIndex: layer.chordRootIndex,
+    voicedOriginal: layer.voicedOriginal,
+    voicedModified: layer.voicedModified,
+    slashBassNoteIndex: layer.slashBassNoteIndex,
+    chordHighlightPairs: layer.chordHighlightPairs,
+    highlightedModeIdxs: layer.highlightedModeIdxs,
+    highlightedBaseIdxs: layer.highlightedBaseIdxs,
     setHoveredTriadIndex,
     handleChordHoverChange,
   }

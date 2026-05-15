@@ -3,7 +3,7 @@ import type { Note } from "../models"
 import { renderNote } from "./NoteLabel"
 import Strikethrough from "./Strikethrough"
 import NoteCell from "./NoteCell"
-import { MUTED_TEXT } from "../lib/theme"
+import { MUTED_TEXT, neonHoverCellOutline } from "../lib/theme"
 
 export type ModeNoteCellProps = {
   idx: number,
@@ -12,10 +12,11 @@ export type ModeNoteCellProps = {
   newValue: Note,
   onPlay: (note: Note) => void,
   isHighlighted: boolean,
+  highlightBackground: string | null,
   optCaption?: string | number | null,
 }
 
-const HIGHLIGHT_COLOR = "#000000"
+const HIGHLIGHT_STYLE = neonHoverCellOutline
 
 const ModeNoteCell = React.memo(function ModeNoteCell({
   idx,
@@ -24,6 +25,7 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
   newValue,
   onPlay,
   isHighlighted,
+  highlightBackground,
   optCaption,
 }: ModeNoteCellProps) {
   const noteLabel = useMemo(
@@ -52,14 +54,13 @@ const ModeNoteCell = React.memo(function ModeNoteCell({
       dataIdx={dataIdx}
       onClick={handleClick}
       className="cursor-pointer"
+      optBackground={isHighlighted ? highlightBackground : null}
       optCaption={optCaption}
       style={
         isHighlighted
-          ? {
-              border: `2px solid ${HIGHLIGHT_COLOR}`,
-            }
+          ? HIGHLIGHT_STYLE
           : {
-              border: "2px solid transparent",
+              border: "none",
             }
       }
     >

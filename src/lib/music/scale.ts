@@ -3,7 +3,7 @@ import { Note } from "../../models"
 import { CHROMATIC_SCALE } from "../notes"
 import { OCTAVE } from "./modes"
 
-export const BASE_SCALE_LEFT_OVERFLOW = 5
+export const BASE_SCALE_LEFT_OVERFLOW = 8
 export const BASE_SCALE_WITH_OVERFLOW_SIZE =
   CHROMATIC_SCALE.length + 2 * BASE_SCALE_LEFT_OVERFLOW
 

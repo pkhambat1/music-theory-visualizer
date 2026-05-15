@@ -2,7 +2,7 @@ import { useCallback, useState } from "react"
 import type { CellLink } from "../lib/geometry"
 import { StaticConnection } from "../models"
 import { bezierPath } from "../lib/bezier"
-import { colors } from "../lib/theme"
+import { BLACK } from "../lib/theme"
 import { useContainerMeasure } from "../hooks"
 
 export type FixedLinesProps = {
@@ -23,20 +23,34 @@ export default function FixedLines({ containerRef, connections }: FixedLinesProp
     const scrollLeft = container.scrollLeft
     const scrollTop = container.scrollTop
 
+    // Measure the root chromatic cell (index 0) to extrapolate overflow positions.
+    const rootEl = container.querySelector(`[data-row="chromatic-row"][data-idx="0"]`)
+    const rootRect = rootEl?.getBoundingClientRect() ?? null
+    const cellWidth = rootRect?.width ?? 0
+
     const nextLines = connections
       .map(({ fromRow, fromIdx, toRow, toIdx }) => {
-        const fromEl = container.querySelector(`[data-row="${fromRow}"][data-idx="${fromIdx}"]`)
         const toEl = container.querySelector(`[data-row="${toRow}"][data-idx="${toIdx}"]`)
-        if (!fromEl || !toEl) return null
+        if (!toEl) return null
 
-        const fromRect = fromEl.getBoundingClientRect()
+        const fromEl = container.querySelector(`[data-row="${fromRow}"][data-idx="${fromIdx}"]`)
+        let fromX: number
+        let fromY: number
+        if (fromEl) {
+          const fromRect = fromEl.getBoundingClientRect()
+          fromX = fromRect.left - containerRect.left + fromRect.width / 2 + scrollLeft
+          fromY = fromRect.bottom - containerRect.top + scrollTop
+        } else if (rootRect) {
+          fromX = rootRect.left - containerRect.left + rootRect.width / 2 + fromIdx * cellWidth + scrollLeft
+          fromY = rootRect.bottom - containerRect.top + scrollTop
+        } else {
+          return null
+        }
+
         const toRect = toEl.getBoundingClientRect()
 
         return new StaticConnection(
-          {
-            x: fromRect.left - containerRect.left + fromRect.width / 2 + scrollLeft,
-            y: fromRect.bottom - containerRect.top + scrollTop,
-          },
+          { x: fromX, y: fromY },
           {
             x: toRect.left - containerRect.left + toRect.width / 2 + scrollLeft,
             y: toRect.top - containerRect.top + scrollTop,
@@ -69,8 +83,8 @@ export default function FixedLines({ containerRef, connections }: FixedLinesProp
         <path
           key={idx}
           d={bezierPath(conn.from, conn.to)}
-          stroke={colors.border}
-          strokeWidth="1.5"
+          stroke="darkgray"
+          strokeWidth="2"
           fill="none"
         />
       ))}

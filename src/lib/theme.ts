@@ -1,53 +1,48 @@
-import { schemeSet3, interpolateRainbow } from "d3-scale-chromatic"
+import { schemeSet3, interpolateRainbow, interpolateWarm } from "d3-scale-chromatic"
 import { rgb } from "d3-color"
 import type { RGBColor } from "d3-color"
-import { tint, shade, hueBand } from "./colors"
+import { tint, shade } from "./colors"
 
-const RAINBOW_ROOT = 0.68 // teal green
-const RAINBOW_SCALE = 0.40 // yellow ochre
-const RAINBOW_UI = 0.85 // blue (UI buttons / focus rings)
-const RAINBOW_RESPELLING = 0.70 // teal
+const RAINBOW_UI = 0.85 // blue
 
 const LGRAY = rgb(schemeSet3[8]!) // #d9d9d9
 
-/**
- * Central color tokens — derived from `interpolateRainbow`.
- *
- * Use `colors.*` in inline styles, SVG attributes, and component props.
- * Use `var(--app-tokenName)` in Tailwind classes (e.g. `bg-[var(--app-primary)]`).
- */
+export const neonHoverCellOutline = {
+  boxShadow:
+    "inset 0 0 0 1px black, 0 0 0 1px black",
+} as const
+
+export const BLACK = "black"
+
 export const colors = {
   primary: shade(rgb(interpolateRainbow(RAINBOW_UI)), 0.20).formatHex(),
   primaryHover: shade(rgb(interpolateRainbow(RAINBOW_UI)), 0.35).formatHex(),
   primaryFill: tint(rgb(interpolateRainbow(RAINBOW_UI)), 0.75).formatHex(),
-  scaleFill: tint(rgb(interpolateRainbow(RAINBOW_SCALE)), 0.45).formatHex(),
-  scaleBorder: shade(rgb(interpolateRainbow(RAINBOW_SCALE)), 0.25).formatHex(),
-  scaleText: shade(rgb(interpolateRainbow(RAINBOW_SCALE)), 0.35).formatHex(),
-  rootFill: tint(rgb(interpolateRainbow(RAINBOW_ROOT)), 0.45).formatHex(),
-  rootBorder: shade(rgb(interpolateRainbow(RAINBOW_ROOT)), 0.25).formatHex(),
   grayText: shade(LGRAY, 0.55).formatHex(),
-  respelling: shade(rgb(interpolateRainbow(RAINBOW_RESPELLING)), 0.40).formatHex(),
-  rowBg: tint(LGRAY, 0.55).formatHex(),
   border: tint(LGRAY, 0.30).formatHex(),
   muted: LGRAY.formatHex(),
+  mutedDark: shade(LGRAY, 0.15).formatHex(),
 } as const
 
 /** Tailwind text color class for de-emphasized notes (non-chord-tones, struck-through naturals, arrows). */
 export const MUTED_TEXT = "text-gray-500"
 
-/** 8 rainbow colors (7 degrees + octave), tinted to pastel for cell backgrounds. */
+/** 8 warm-spectrum colors (7 degrees + octave) for cell backgrounds. */
 export const DEGREE_COLORS: RGBColor[] = Array.from({ length: 8 }, (_, i) =>
-  tint(rgb(interpolateRainbow(i / 8)), 0.45)
+  rgb(interpolateWarm(i / 7))
 )
 
-/** Return the pastel background hex color for a given scale degree index. */
+/** Return the background hex color for a given scale degree index. */
 export function degreeColor(index: number): string {
   return DEGREE_COLORS[index % DEGREE_COLORS.length]!.formatHex()
 }
 
-/** Generate `count` scale-tone background hex colors as a subtle hue-varied band. */
+/** Generate `count` scale-tone background hex colors sampled from the warm spectrum. */
 export function scaleToneBand(count: number): string[] {
-  return hueBand(RAINBOW_SCALE, count, 0.10, 0.45).map((c) => c.formatHex())
+  if (count <= 1) return [rgb(interpolateWarm(0.5)).formatHex()]
+  return Array.from({ length: count }, (_, i) =>
+    rgb(interpolateWarm(i / (count - 1))).formatHex()
+  )
 }
 
 /** Register `--app-*` CSS custom properties on `:root`. Call once at startup before React renders. */
