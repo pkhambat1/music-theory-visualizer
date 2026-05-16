@@ -1,10 +1,13 @@
-import { schemeSet3, interpolateRainbow, interpolateWarm } from "d3-scale-chromatic"
+import { schemeSet3, interpolateRainbow } from "d3-scale-chromatic"
 import { quantize } from "d3-interpolate"
 import { scaleOrdinal } from "d3-scale"
 import { rgb } from "d3-color"
-import { tint, shade } from "./colors"
+import { tint, shade, hueBand } from "./colors"
 
-const RAINBOW_UI = 0.85 // blue
+const RAINBOW_ROOT = 0.68 // teal green
+const RAINBOW_SCALE = 0.40 // yellow ochre
+const RAINBOW_UI = 0.85 // blue (UI buttons / focus rings)
+const RAINBOW_RESPELLING = 0.70 // teal
 
 /** Slots for diatonic degree cells (7 degrees + octave / wrap). Observable-style: `scaleOrdinal(quantize(interpolateRainbow, n))`. */
 const DEGREE_SLOT_COUNT = 8
@@ -41,14 +44,21 @@ export const BLACK = "black"
  * Use `colors.*` in inline styles, SVG attributes, and component props.
  * Use `var(--app-tokenName)` in Tailwind classes (e.g. `bg-[var(--app-primary)]`).
  *
- * Note: UI tokens below use `tint` / `shade` in `src/lib/colors.ts`.
+ * Note: UI / scale / root tokens below use `tint` / `shade` in `src/lib/colors.ts`.
  * Only diatonic degree fills (`DEGREE_COLORS`, `degreeColor`) use rainbow + `RAINBOW_DEGREE_FILL_OPACITY` only.
  */
 export const colors = {
   primary: shade(rgb(interpolateRainbow(RAINBOW_UI)), 0.20).formatHex(),
   primaryHover: shade(rgb(interpolateRainbow(RAINBOW_UI)), 0.35).formatHex(),
   primaryFill: tint(rgb(interpolateRainbow(RAINBOW_UI)), 0.75).formatHex(),
+  scaleFill: tint(rgb(interpolateRainbow(RAINBOW_SCALE)), 0.45).formatHex(),
+  scaleBorder: shade(rgb(interpolateRainbow(RAINBOW_SCALE)), 0.25).formatHex(),
+  scaleText: shade(rgb(interpolateRainbow(RAINBOW_SCALE)), 0.35).formatHex(),
+  rootFill: tint(rgb(interpolateRainbow(RAINBOW_ROOT)), 0.45).formatHex(),
+  rootBorder: shade(rgb(interpolateRainbow(RAINBOW_ROOT)), 0.25).formatHex(),
   grayText: shade(LGRAY, 0.55).formatHex(),
+  respelling: shade(rgb(interpolateRainbow(RAINBOW_RESPELLING)), 0.40).formatHex(),
+  rowBg: tint(LGRAY, 0.55).formatHex(),
   border: tint(LGRAY, 0.30).formatHex(),
   muted: LGRAY.formatHex(),
   mutedDark: shade(LGRAY, 0.15).formatHex(),
@@ -67,12 +77,9 @@ export function degreeColor(index: number): string {
   return DEGREE_COLORS[index % DEGREE_COLORS.length]!
 }
 
-/** Generate `count` scale-tone background hex colors sampled from the warm spectrum. */
+/** Generate `count` scale-tone background hex colors as a subtle hue-varied band. */
 export function scaleToneBand(count: number): string[] {
-  if (count <= 1) return [rgb(interpolateWarm(0.5)).formatHex()]
-  return Array.from({ length: count }, (_, i) =>
-    rgb(interpolateWarm(i / (count - 1))).formatHex()
-  )
+  return hueBand(RAINBOW_SCALE, count, 0.10).map((c) => tint(c, 0.45).formatHex())
 }
 
 /** Register `--app-*` CSS custom properties on `:root`. Call once at startup before React renders. */
