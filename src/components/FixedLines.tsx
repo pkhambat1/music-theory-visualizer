@@ -2,7 +2,6 @@ import { useCallback, useState } from "react"
 import type { CellLink } from "../lib/geometry"
 import { StaticConnection } from "../models"
 import { bezierPath } from "../lib/bezier"
-import { BLACK } from "../lib/theme"
 import { useContainerMeasure } from "../hooks"
 
 export type FixedLinesProps = {
