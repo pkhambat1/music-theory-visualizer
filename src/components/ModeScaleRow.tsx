@@ -1,7 +1,7 @@
 import type { Interval, NoteInMode } from "../lib/music"
 import { SQUARE_SIDE } from "../lib/music"
 import type { Note } from "../models"
-import { colors } from "../lib/theme"
+import { BLACK } from "../lib/theme"
 import NotesArray from "./NotesArray"
 import NoteCell from "./NoteCell"
 import ModeNoteCell from "./ModeNoteCell"
@@ -12,6 +12,7 @@ export type ModeScaleRowProps = {
   modeIntervals: Interval[],
   modeLeftOverflowSize: number,
   highlightedModeIdxs: Set<number>,
+  highlightedModeBackgrounds: Map<number, string> | null,
   onPlayNote: (note: Note) => void,
 }
 
@@ -21,6 +22,7 @@ export default function ModeScaleRow({
   modeIntervals,
   modeLeftOverflowSize,
   highlightedModeIdxs,
+  highlightedModeBackgrounds,
   onPlayNote,
 }: ModeScaleRowProps) {
   return (
@@ -29,7 +31,8 @@ export default function ModeScaleRow({
       cellWidth={SQUARE_SIDE}
       clipContent
       zIndex={2}
-      rowBackground={colors.rowBg}
+      rowBackground="white"
+      rowStrokeColor={BLACK}
       caption={`${selectedModeName} Scale`}
       captionSubtitle="Notes that fall within the selected mode"
     >
@@ -59,6 +62,7 @@ export default function ModeScaleRow({
             newValue={noteInMode.spelled}
             onPlay={onPlayNote}
             isHighlighted={isHighlighted}
+            highlightBackground={highlightedModeBackgrounds?.get(noteInMode.index) ?? null}
             optCaption={scaleDegreeCaption}
           />
         )

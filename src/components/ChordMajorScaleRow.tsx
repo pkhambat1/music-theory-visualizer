@@ -3,7 +3,7 @@ import { FLAT, IONIAN, SQUARE_SIDE, spellNoteSequence, spellNote } from "../lib/
 import { notes } from "../lib/notes"
 import { renderNote } from "./NoteLabel"
 import Strikethrough from "./Strikethrough"
-import { scaleToneBand, MUTED_TEXT } from "../lib/theme"
+import { BLACK, neonHoverCellOutline, scaleToneBand, MUTED_TEXT } from "../lib/theme"
 import NoteCell from "./NoteCell"
 import NotesArray from "./NotesArray"
 
@@ -171,6 +171,7 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: Chord
       caption={caption}
       captionSubtitle={isEmpty ? "Notes in the selected chord in its major scale" : undefined}
       clipContent={false}
+      rowStrokeColor={BLACK}
     >
       {majorScale.map((_, idx) => {
           const degreeIdx = minDegreeIdx + idx
@@ -206,6 +207,7 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: Chord
                 className="text-black font-semibold"
                 optBackground={chordToneBg(degreeIdx)}
                 optCaption={info.degreeLabel}
+                style={neonHoverCellOutline}
               >
                 {scaleNote && renderNote(scaleNote)}
               </NoteCell>
@@ -223,7 +225,7 @@ export default function ChordMajorScaleRow({ chordNotes, chordRootIndex }: Chord
           )
           const sep = <span className={`text-[9px] ${MUTED_TEXT}`}>{arrow}</span>
           return (
-            <NoteCell key={idx} idx={idx} optBackground={chordToneBg(degreeIdx)} optCaption={info.degreeLabel}>
+            <NoteCell key={idx} idx={idx} optBackground={chordToneBg(degreeIdx)} optCaption={info.degreeLabel} style={neonHoverCellOutline}>
               <div className="flex items-center gap-[2px] leading-none">
                 {info.isFlat ? <>{actual}{sep}{natural}</> : <>{natural}{sep}{actual}</>}
               </div>

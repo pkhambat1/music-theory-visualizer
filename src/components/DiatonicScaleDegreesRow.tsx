@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import type { Extension, NoteRef } from "../lib/music"
 import { getChordDescriptor, getChordNotes, applyExtensions, toNoteRefs, CHORD_CELL_SIDE, ROMAN_NUMERALS } from "../lib/music"
 import { notes } from "../lib/notes"
+import { BLACK } from "../lib/theme"
 import NotesArray from "./NotesArray"
 import ChordDegreeCell from "./ChordDegreeCell"
 
@@ -22,6 +23,8 @@ export type DiatonicScaleDegreesRowProps = {
   captionRight?: React.ReactNode,
   arpeggiate: boolean,
   hoveredIndex: number | null,
+  pinnedChordIndex: number | null,
+  onPinnedChordChange: (index: number | null) => void,
 }
 
 const CAPTION = "Diatonic Chords"
@@ -39,6 +42,8 @@ export default function DiatonicScaleDegreesRow({
   captionRight,
   arpeggiate,
   hoveredIndex,
+  pinnedChordIndex,
+  onPinnedChordChange,
 }: DiatonicScaleDegreesRowProps) {
   const degreeCount = modeLength > 0 ? modeLength : ROMAN_NUMERALS.length + 1
   const chordNumerals = Array.from({ length: degreeCount }, (_, idx) =>
@@ -88,6 +93,7 @@ export default function DiatonicScaleDegreesRow({
       captionSubtitle={CAPTION_SUBTITLE}
       captionRight={captionRight}
       clipContent={false}
+      rowStrokeColor={BLACK}
       zIndex={openIdx !== null ? 4 : undefined}
     >
       {chordNumerals.map((chordNumeral, chordNumeralIdx) => {
@@ -106,6 +112,7 @@ export default function DiatonicScaleDegreesRow({
             modeNotes={visibleModeNotes}
             arpeggiate={arpeggiate}
             hoveredIndex={hoveredIndex}
+            pinnedChordIndex={pinnedChordIndex}
             isPopoverOpen={openIdx === chordNumeralIdx}
             onPopoverOpenChange={(open) => setOpenIdx(open ? chordNumeralIdx : null)}
             selectedExtensions={selectedExtensions[chordNumeralIdx] ?? []}
@@ -113,6 +120,8 @@ export default function DiatonicScaleDegreesRow({
             onSlashBassChange={onSlashBassChange}
             onHover={emitHover}
             onHoverClear={clearHover}
+            isPinned={pinnedChordIndex === chordNumeralIdx}
+            onPinnedChordChange={onPinnedChordChange}
           />
         )
       })}

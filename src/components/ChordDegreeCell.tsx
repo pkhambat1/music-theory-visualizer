@@ -1,8 +1,10 @@
+import { useRef, type MouseEvent } from "react"
 import type { Extension, NoteRef } from "../lib/music"
 import { buildSlashChordVoicing, CHORD_CELL_SIDE, ROMAN_NUMERALS } from "../lib/music"
 import { notes } from "../lib/notes"
 import { playChord, arpeggiateChord } from "../lib/audio"
-import { degreeColor } from "../lib/theme"
+import { degreeColor, neonHoverCellOutline } from "../lib/theme"
+import { Pin } from "lucide-react"
 import NoteCell from "./NoteCell"
 import ExtensionPanel from "./ExtensionPanel"
 import { Popover, PopoverTrigger, Pill } from "./ui"
@@ -10,7 +12,6 @@ import { Popover, PopoverTrigger, Pill } from "./ui"
 import type { RowId } from "../lib/geometry"
 
 const DATA_ROW: RowId = "diatonic-row"
-const HOVER_COLOR = "#000000"
 
 export type ChordDegreeCellProps = {
   chordNumeralIdx: number,
@@ -23,6 +24,7 @@ export type ChordDegreeCellProps = {
   modeNotes: NoteRef[],
   arpeggiate: boolean,
   hoveredIndex: number | null,
+  pinnedChordIndex: number | null,
   isPopoverOpen: boolean,
   onPopoverOpenChange: (open: boolean) => void,
   selectedExtensions: Extension[],
@@ -30,6 +32,8 @@ export type ChordDegreeCellProps = {
   onSlashBassChange?: (degreeIdx: number, bassDegree: number | null) => void,
   onHover: (idx: number, original: NoteRef[], modified: NoteRef[]) => void,
   onHoverClear: () => void,
+  isPinned: boolean,
+  onPinnedChordChange: (index: number | null) => void,
 }
 
 export default function ChordDegreeCell({
@@ -43,6 +47,7 @@ export default function ChordDegreeCell({
   modeNotes,
   arpeggiate,
   hoveredIndex,
+  pinnedChordIndex,
   isPopoverOpen,
   onPopoverOpenChange,
   selectedExtensions,
@@ -50,11 +55,36 @@ export default function ChordDegreeCell({
   onSlashBassChange,
   onHover,
   onHoverClear,
+  isPinned,
+  onPinnedChordChange,
 }: ChordDegreeCellProps) {
-  const degreeBg = degreeColor(chordNumeralIdx)
+  const cellGroupRef = useRef<HTMLDivElement>(null)
+
+  const handlePinClick = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    e.preventDefault()
+    if (isPinned) {
+      onPinnedChordChange(null)
+      onHoverClear()
+      requestAnimationFrame(() => {
+        if (cellGroupRef.current?.matches(":hover")) {
+          onHover(chordNumeralIdx, originalNotes, chordNotesArr)
+        }
+      })
+    } else {
+      onPinnedChordChange(chordNumeralIdx)
+      onHover(chordNumeralIdx, originalNotes, chordNotesArr)
+    }
+  }
+
+  const isHoverOrPinBorder =
+    hoveredIndex === chordNumeralIdx || pinnedChordIndex === chordNumeralIdx
+
+  const degreeBg = isHoverOrPinBorder ? degreeColor(chordNumeralIdx) : null
 
   return (
     <div
+      ref={cellGroupRef}
       className="relative group"
       style={{
         width: `${CHORD_CELL_SIDE}px`,
@@ -74,9 +104,7 @@ export default function ChordDegreeCell({
         style={{
           width: `${CHORD_CELL_SIDE}px`,
           height: `${CHORD_CELL_SIDE}px`,
-          ...(hoveredIndex === chordNumeralIdx
-            ? { border: `2px solid ${HOVER_COLOR}` }
-            : {}),
+          ...(isHoverOrPinBorder ? { ...neonHoverCellOutline } : {}),
         }}
         onMouseEnter={() => onHover(chordNumeralIdx, originalNotes, chordNotesArr)}
         onMouseLeave={() => onHoverClear()}
@@ -119,9 +147,9 @@ export default function ChordDegreeCell({
 
       </NoteCell>
 
-      {/* Extensions button — below the cell */}
+      {/* Pin + Extensions — below the cell */}
       <div
-        className="absolute -bottom-7 inset-x-0 flex justify-center z-10"
+        className="absolute -bottom-7 inset-x-0 z-10 flex justify-center items-center gap-1"
         onClick={(e) => e.stopPropagation()}
         onMouseEnter={(e) => {
           if (isPopoverOpen) return
@@ -134,6 +162,19 @@ export default function ChordDegreeCell({
           onHoverClear()
         }}
       >
+        <button
+          type="button"
+          className={
+            isPinned
+              ? "inline-flex h-6 min-w-[2.25rem] shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] bg-[var(--app-primaryFill)] px-2 text-[10px] font-medium text-[var(--app-primary)]"
+              : "inline-flex h-6 min-w-[2.25rem] shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] bg-white px-2 text-[10px] font-medium text-black hover:bg-black/[0.08]"
+          }
+          aria-label={isPinned ? "Unpin chord" : "Pin chord"}
+          aria-pressed={isPinned}
+          onClick={handlePinClick}
+        >
+          <Pin className="h-3 w-3" strokeWidth={2} />
+        </button>
         <Popover
           open={isPopoverOpen}
           onOpenChange={onPopoverOpenChange}

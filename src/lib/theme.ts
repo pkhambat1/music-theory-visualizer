@@ -31,13 +31,20 @@ function degreeSlotToRgba(slot: number): string {
   return `rgba(${c.r}, ${c.g}, ${c.b}, ${RAINBOW_DEGREE_FILL_OPACITY})`
 }
 
+export const neonHoverCellOutline = {
+  boxShadow:
+    "inset 0 0 0 1px black, 0 0 0 1px black",
+} as const
+
+export const BLACK = "black"
+
 /**
  * Central color tokens — derived from `interpolateRainbow`.
  *
  * Use `colors.*` in inline styles, SVG attributes, and component props.
  * Use `var(--app-tokenName)` in Tailwind classes (e.g. `bg-[var(--app-primary)]`).
  *
- * Note: UI / scale / root tokens below still use `tint` / `shade` in `src/lib/colors.ts`.
+ * Note: UI / scale / root tokens below use `tint` / `shade` in `src/lib/colors.ts`.
  * Only diatonic degree fills (`DEGREE_COLORS`, `degreeColor`) use rainbow + `RAINBOW_DEGREE_FILL_OPACITY` only.
  */
 export const colors = {
@@ -54,6 +61,7 @@ export const colors = {
   rowBg: tint(LGRAY, 0.55).formatHex(),
   border: tint(LGRAY, 0.30).formatHex(),
   muted: LGRAY.formatHex(),
+  mutedDark: shade(LGRAY, 0.15).formatHex(),
 } as const
 
 /** Tailwind text color class for de-emphasized notes (non-chord-tones, struck-through naturals, arrows). */
@@ -71,7 +79,7 @@ export function degreeColor(index: number): string {
 
 /** Generate `count` scale-tone background hex colors as a subtle hue-varied band. */
 export function scaleToneBand(count: number): string[] {
-  return hueBand(RAINBOW_SCALE, count, 0.10, 0.45).map((c) => c.formatHex())
+  return hueBand(RAINBOW_SCALE, count, 0.10).map((c) => tint(c, 0.45).formatHex())
 }
 
 /** Register `--app-*` CSS custom properties on `:root`. Call once at startup before React renders. */

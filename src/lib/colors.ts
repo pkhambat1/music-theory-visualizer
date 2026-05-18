@@ -19,11 +19,11 @@ export function shade(color: RGBColor, t: number): RGBColor {
  * with subtle hue variation. `spread` controls how wide the band is (0.06 = ±3%).
  * Each color is tinted to pastel. Returns `RGBColor[]` — call `.formatHex()` at DOM boundaries.
  */
-export function hueBand(center: number, count: number, spread: number, tintAmt: number): RGBColor[] {
-  if (count <= 1) return [tint(rgb(interpolateRainbow(center)), tintAmt)]
+export function hueBand(center: number, count: number, spread: number): RGBColor[] {
+  if (count <= 1) return [rgb(interpolateRainbow(center))]
   const start = center - spread / 2
   return Array.from({ length: count }, (_, i) => {
     const t = start + (spread * i) / (count - 1)
-    return tint(rgb(interpolateRainbow(t)), tintAmt)
+    return rgb(interpolateRainbow(t))
   })
 }

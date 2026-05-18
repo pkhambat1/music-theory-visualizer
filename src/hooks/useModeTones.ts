@@ -37,14 +37,23 @@ export function useModeTones(
   )
 
   const modeConnections = useMemo<CellLink[]>(
-    () =>
-      modeIntervals.map((interval, idx) => ({
-        fromRow: "chromatic-row",
-        fromIdx: interval,
-        toRow: "mode-row",
-        toIdx: modeLeftOverflowSize + idx,
-      })),
-    [modeIntervals, modeLeftOverflowSize],
+    () => {
+      if (modeIndicesWithOverflow.length === 0) return []
+      const rootAbsIdx = modeIndicesWithOverflow[modeLeftOverflowSize]
+      if (rootAbsIdx === undefined) return []
+      return modeIndicesWithOverflow.flatMap((absNoteIdx, toIdx) => {
+        if (absNoteIdx < 0 || absNoteIdx >= notes.length) return []
+        const chromaticIdx = absNoteIdx - rootAbsIdx
+        const link: CellLink = {
+          fromRow: "chromatic-row",
+          fromIdx: chromaticIdx,
+          toRow: "mode-row",
+          toIdx,
+        }
+        return [link]
+      })
+    },
+    [modeIndicesWithOverflow, modeLeftOverflowSize, notes.length],
   )
 
   return {

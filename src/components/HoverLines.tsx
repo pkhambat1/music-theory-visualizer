@@ -1,75 +1,71 @@
 import { useCallback, useMemo, useState } from "react"
-import type { ModeDataProps, NoteIndex, NoteRef } from "../lib/music"
+import type { NoteIndex, NoteRef } from "../lib/music"
 import type { ChordHighlightPair } from "../lib/geometry"
-import { Connection, IntervalConnection, RemovedConnection, AddedConnection, BassConnection } from "../models"
-import { bezierPath, bezierPointAt } from "../lib/bezier"
 import { buildHoverConnections } from "../lib/hoverConnections"
+import { bezierPath, bezierPointAt } from "../lib/bezier"
+import { Connection, IntervalConnection, RemovedConnection, AddedConnection, BassConnection } from "../models"
 import { getIntervalLabel } from "../lib/music"
+import { BLACK } from "../lib/theme"
 import { useContainerMeasure } from "../hooks"
 import IntervalLabel from "./IntervalLabel"
+import type { ModeDataProps } from "../lib/music"
 
-export type HoverLinesProps = ModeDataProps & {
-  containerRef: React.RefObject<HTMLDivElement | null>,
-  hoveredIndex: number | null,
+export type HoverLinesLayer = {
+  hoveredIndex: number,
   chordHighlightPairs: ChordHighlightPair[],
   originalChordNotes: NoteRef[],
   modifiedChordNotes: NoteRef[],
   slashBassNoteIndex: NoteIndex | null,
 }
 
+export type HoverLinesProps = ModeDataProps & {
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  layers: HoverLinesLayer[],
+  freeze: boolean,
+}
+
 export default function HoverLines({
   containerRef,
-  hoveredIndex,
+  layers,
+  freeze,
   modeNotesWithOverflow,
   modeLeftOverflowSize,
-  chordHighlightPairs,
-  originalChordNotes,
-  modifiedChordNotes,
-  slashBassNoteIndex,
 }: HoverLinesProps) {
-  const [lines, setLines] = useState<Connection[]>([])
+  const [lines, setLines] = useState<{ layerIdx: number, conn: Connection }[]>([])
 
   const modeIndices = useMemo(
     () => modeNotesWithOverflow.map((r) => r.index),
     [modeNotesWithOverflow],
   )
-  const originalIndices = useMemo(
-    () => originalChordNotes.map((r) => r.index),
-    [originalChordNotes],
-  )
-  const modifiedIndices = useMemo(
-    () => modifiedChordNotes.map((r) => r.index),
-    [modifiedChordNotes],
-  )
 
   const measure = useCallback(() => {
+    if (freeze) return
     const container = containerRef?.current
-    if (!container || hoveredIndex === null) {
+    if (!container || layers.length === 0) {
       setLines([])
       return
     }
-    setLines(
-      buildHoverConnections({
+    const built: { layerIdx: number, conn: Connection }[] = []
+    for (let layerIdx = 0; layerIdx < layers.length; layerIdx++) {
+      const layer = layers[layerIdx]!
+      const originalIndices = layer.originalChordNotes.map((r) => r.index)
+      const modifiedIndices = layer.modifiedChordNotes.map((r) => r.index)
+      const conns = buildHoverConnections({
         container,
-        hoveredIndex,
+        hoveredIndex: layer.hoveredIndex,
         modeNotesWithOverflow: modeIndices,
         modeLeftOverflowSize,
-        chordHighlightPairs,
+        chordHighlightPairs: layer.chordHighlightPairs,
         originalChordNotes: originalIndices,
         modifiedChordNotes: modifiedIndices,
-        slashBassNoteIndex,
-      }),
-    )
-  }, [
-    containerRef,
-    hoveredIndex,
-    modeIndices,
-    modeLeftOverflowSize,
-    chordHighlightPairs,
-    originalIndices,
-    modifiedIndices,
-    slashBassNoteIndex,
-  ])
+        slashBassNoteIndex: layer.slashBassNoteIndex,
+      })
+      for (const conn of conns) {
+        built.push({ layerIdx, conn })
+      }
+    }
+    setLines(built)
+  }, [containerRef, freeze, layers, modeIndices, modeLeftOverflowSize])
 
   useContainerMeasure(containerRef, measure)
 
@@ -87,29 +83,27 @@ export default function HoverLines({
         zIndex: 3,
       }}
     >
-      {/* Render all paths first */}
-      {lines.map((conn, idx) => {
+      {lines.map(({ layerIdx, conn }, idx) => {
         const isRemoved = conn instanceof RemovedConnection
         return (
           <path
-            key={`p${idx}`}
+            key={`p-${layerIdx}-${idx}`}
             d={bezierPath(conn.from, conn.to)}
-            stroke="#000000"
-            strokeWidth="1.5"
+            stroke={BLACK}
+            strokeWidth="2"
             strokeLinecap="round"
             strokeDasharray={isRemoved ? "4 3" : undefined}
             fill="none"
           />
         )
       })}
-      {/* Render all labels on top */}
-      {lines.map((conn, idx) => {
+      {lines.map(({ layerIdx, conn }, idx) => {
         if (!(conn instanceof IntervalConnection)) return null
         if (conn instanceof RemovedConnection) return null
         const t = conn instanceof AddedConnection || conn instanceof BassConnection ? 0.85 : 0.5
         const labelPos = bezierPointAt(conn.from, conn.to, t)
         return (
-          <IntervalLabel key={`l${idx}`} x={labelPos.x} y={labelPos.y}>
+          <IntervalLabel key={`l-${layerIdx}-${idx}`} x={labelPos.x} y={labelPos.y}>
             {getIntervalLabel(conn.intervalSemitones)}
           </IntervalLabel>
         )

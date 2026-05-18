@@ -1,5 +1,3 @@
-import { colors } from "../lib/theme"
-
 export type NotesArrayProps = {
   size: number,
   cellWidth: number,
@@ -10,6 +8,7 @@ export type NotesArrayProps = {
   clipContent: boolean,
   zIndex?: number,
   rowBackground?: string,
+  rowStrokeColor?: string,
 }
 
 export default function NotesArray({
@@ -22,6 +21,7 @@ export default function NotesArray({
   clipContent,
   zIndex,
   rowBackground,
+  rowStrokeColor,
 }: NotesArrayProps) {
   return (
     <div
@@ -61,12 +61,16 @@ export default function NotesArray({
           width: `${cellWidth * size}px`,
           height: `${cellWidth}px`,
           position: "relative",
-          boxSizing: "content-box",
-          background: rowBackground ?? colors.rowBg,
-          border: "2px solid transparent",
+          boxSizing: "border-box",
+          background: rowBackground ?? "transparent",
+          border: "none",
+          borderRadius: 0,
+          boxShadow:
+            rowStrokeColor === undefined
+              ? undefined
+              : `0 0 0 2px ${rowStrokeColor}`,
           display: "flex",
           alignItems: "center",
-          borderRadius: "8px",
           overflow: clipContent ? "hidden" : undefined,
         }}
       >
